@@ -21,6 +21,7 @@ require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/src/Api.php';
 
 use JsonRPC\Server;
+
 $server = new Server();
 $server->getProcedureHandler()->withObject(new Api());
 echo $server->execute();

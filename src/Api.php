@@ -17,8 +17,10 @@
  */
 namespace Riichi;
 
-class Api {
-    public function generateSortition() {
+class Api
+{
+    public function generateSortition()
+    {
         return 'test data!';
     }
 }

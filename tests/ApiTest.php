@@ -15,14 +15,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/../src/Api.php';
 
-class ApiTest extends PHPUnit_Framework_TestCase
+class ApiTest extends \PHPUnit_Framework_TestCase
 {
-    public function testDummy() {
-        $api = new Riichi\Api();
+    public function testDummy()
+    {
+        $api = new Api();
         $result = $api->generateSortition();
         $this->assertEquals('test data!', $result);
     }
