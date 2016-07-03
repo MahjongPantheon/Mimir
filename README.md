@@ -3,6 +3,8 @@ Riichi mahjong game server: API
 
 A backend part for riichi mahjong games and tournaments assistance system.
 
+[![Build Status](https://travis-ci.org/Furiten/riichi-api.svg?branch=master)](https://travis-ci.org/Furiten/riichi-api)
+
 What is it for?
 ---------------
 
@@ -30,3 +32,5 @@ To start developing the project, make sure you have installed PHP v5.5 or higher
 - Run `php bin/composer.phar install` to install dependencies.
 - Run php dev server: `php -S localhost:8000`
 - Use `php bin/rpc.php METHOD_NAME [space-separated method args]` to test API methods. Port for the API is hardcoded inside, change it if you run dev server on different port.
+- Use `php bin/unit.php` to run unit tests.
+- Remember to use PSR2 coding standards when adding php code. See `.travis.yml` config to know how to check code style manually.

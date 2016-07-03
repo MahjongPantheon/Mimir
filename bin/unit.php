@@ -15,12 +15,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-namespace Riichi;
 
-class Api
-{
-    public function generateSortition()
-    {
-        return 'test data!';
-    }
+require __DIR__ . '/../vendor/autoload.php';
+
+if (!ini_get('date.timezone')) {
+    ini_set('date.timezone', 'UTC');
 }
+PHPUnit_TextUI_Command::main();

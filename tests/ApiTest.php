@@ -17,10 +17,14 @@
  */
 namespace Riichi;
 
-class Api
+require_once __DIR__.'/../src/Api.php';
+
+class ApiTest extends \PHPUnit_Framework_TestCase
 {
-    public function generateSortition()
+    public function testDummy()
     {
-        return 'test data!';
+        $api = new Api();
+        $result = $api->generateSortition();
+        $this->assertEquals('test data!', $result);
     }
 }
