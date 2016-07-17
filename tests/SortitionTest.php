@@ -17,14 +17,22 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/Api.php';
+require_once __DIR__.'/../src/controllers/Sortition.php';
 
 class ApiTest extends \PHPUnit_Framework_TestCase
 {
+    protected $_db;
+    protected $_log;
+    public function setUp()
+    {
+        $this->_db = $this->getMock('Riichi\\Db');
+        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
+    }
+
     public function testDummy()
     {
-        $api = new Api();
-        $result = $api->generateSortition();
+        $controller = new Sortition($this->_db, $this->_log);
+        $result = $controller->generate();
         $this->assertEquals('test data!', $result);
     }
 }
