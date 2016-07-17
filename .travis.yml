@@ -4,7 +4,7 @@ language: php
 notifications:
   slack: furiten:6fzHMN5l1JM8rgfv5PXg4dmU
 
-install: php bin/composer.phar install
+install: make deps
 
 # list any PHP version you want to test against
 php:
@@ -17,10 +17,5 @@ php:
   # aliased to a recent 7.x version
   - 7.0
 
-before_script:
-- php vendor/bin/phpcs --config-set default_standard PSR2
-- php vendor/bin/phpcs --config-set show_warnings 0
-
 script:
-- php vendor/bin/phpcs src tests index.php
-- php bin/unit.php
+- make check
