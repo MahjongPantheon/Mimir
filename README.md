@@ -33,5 +33,6 @@ You also will need standard `make` utility to use following shortcuts.
 - Run `make deps` to install dependencies.
 - Run php dev server on port 8000: `make dev`
 - Use `make req METHOD_NAME [space-separated method args]` to test API methods. Port for the API is hardcoded inside, change it if you run dev server on different port.
-- Use `make unit` to run unit tests.
-- Remember to use PSR2 coding standards when adding php code. See `.travis.yml` config to know how to check code style manually.
+- Use `make unit` to run unit tests and `make lint` to check code style.
+- Use `make autofix` to fix all codestyle problems, that can be fixed automatically.
+- Remember to use PSR2 coding standards when adding php code.

@@ -22,8 +22,6 @@ require_once __DIR__ . '/Db.php';
 
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
-use JsonRPC\Exception\ResponseException;
-use JsonRPC\Exception\ServerErrorException;
 
 class Api
 {
@@ -38,36 +36,50 @@ class Api
         $this->_syslog->pushHandler(new ErrorLogHandler());
     }
 
-    /**
-     * Magic facade method for all api method implementations
-     *
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     * @throws \JsonRPC\Exception\ServerErrorException
-     * @throws \JsonRPC\Exception\ResponseException
-     */
-    public function __call($name, $arguments)
+    public function getTimezone()
     {
-        $this->_syslog->info('Method called: ' . $name);
+        return 'Asia/Novosibirsk'; // TODO
+    }
 
-        $impl = $this->_config->getRouteImplementation($name);
-        if (!$impl) {
-            throw new ResponseException('No method found to process this request.');
-        }
+    public function registerImplAutoloading()
+    {
+        spl_autoload_register(function ($class) {
+            $class = strtolower($class);
+            $classFile = __DIR__ . '/controllers/' . $class . '.php';
+            if (is_file($classFile) && !class_exists($class)) {
+                include_once $classFile;
+            } else {
+                $this->_syslog->error('Couldn\'t find module ' . $classFile);
+            }
+        });
+    }
 
-        list($class, $method) = $impl;
-        if (file_exists(__DIR__ . "/controllers/$class.php")) {
-            require_once __DIR__ . "/controllers/$class.php";
-        }
+    public function getMethods()
+    {
+        $runtimeCache = [];
+        $routes = $this->_config->getValue('routes');
+        return array_map(function ($route) use (&$runtimeCache) {
+            // We should instantiate every controller here to enable proper reflection inspection in rpc-server
+            $ret = [
+                'instance' => null,
+                'method' => $route[1],
+                'className' => $route[0]
+            ];
 
-        $class = __NAMESPACE__ . '\\' . $class;
+            if (!empty($runtimeCache[$route[0]])) {
+                $ret['instance'] = $runtimeCache[$route[0]];
+            } else {
+                class_exists($route[0]); // this will ensure class existence
+                $className = __NAMESPACE__ . '\\' . $route[0];
+                $ret['instance'] = $runtimeCache[$route[0]] = new $className($this->_db, $this->_syslog);
+            }
 
-        if (!is_callable([$class, $method])) {
-            throw new ServerErrorException('Requested method is not implemented.');
-        }
+            return $ret;
+        }, $routes);
+    }
 
-        $instance = new $class($this->_db, $this->_syslog);
-        return $instance->$method($arguments);
+    public function log($message)
+    {
+        $this->_syslog->info($message);
     }
 }

@@ -67,15 +67,4 @@ class Config
     {
         return $this->getValue('db.credentials');
     }
-
-    /**
-     * Simple routing: get api method implementation info from config
-     *
-     * @param $methodName
-     * @return mixed
-     */
-    public function getRouteImplementation($methodName)
-    {
-        return $this->getValue('routes.' . $methodName);
-    }
 }

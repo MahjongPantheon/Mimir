@@ -17,11 +17,19 @@
  */
 namespace Riichi;
 
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/src/Api.php';
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../src/Api.php';
 
 use JsonRPC\Server;
 
 $server = new Server();
-$server->getProcedureHandler()->withObject(new Api());
+$api = new Api();
+$api->registerImplAutoloading();
+date_default_timezone_set($api->getTimezone());
+
+foreach ($api->getMethods() as $proc => $method) {
+    $api->log("Registered proc: $proc ({$method['className']}::{$method['method']})" . PHP_EOL);
+    $server->getProcedureHandler()->withClassAndMethod($proc, $method['instance'], $method['method']);
+}
+
 echo $server->execute();
