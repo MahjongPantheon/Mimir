@@ -29,8 +29,9 @@ Developer information
 We accept any help with developing, testing and improving our system, so please feel free to create issues or send pull requests for missing functionality.
 
 To start developing the project, make sure you have installed PHP v5.5 or higher and MySQL compatible database (MariaDB or Percona, latter one is preferred).
-- Run `php bin/composer.phar install` to install dependencies.
-- Run php dev server: `php -S localhost:8000`
-- Use `php bin/rpc.php METHOD_NAME [space-separated method args]` to test API methods. Port for the API is hardcoded inside, change it if you run dev server on different port.
-- Use `php bin/unit.php` to run unit tests.
+You also will need standard `make` utility to use following shortcuts.
+- Run `make deps` to install dependencies.
+- Run php dev server on port 8000: `make dev`
+- Use `make req METHOD_NAME [space-separated method args]` to test API methods. Port for the API is hardcoded inside, change it if you run dev server on different port.
+- Use `make unit` to run unit tests.
 - Remember to use PSR2 coding standards when adding php code. See `.travis.yml` config to know how to check code style manually.
