@@ -38,6 +38,15 @@ class Api
         $this->_syslog->pushHandler(new ErrorLogHandler());
     }
 
+    /**
+     * Magic facade method for all api method implementations
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \JsonRPC\Exception\ServerErrorException
+     * @throws \JsonRPC\Exception\ResponseException
+     */
     public function __call($name, $arguments)
     {
         $this->_syslog->info('Method called: ' . $name);

@@ -21,8 +21,17 @@ use \Idiorm\ORM;
 
 require __DIR__ . '/../vendor/heilage-nsk/idiorm/src/idiorm.php';
 
+/**
+ * Class Db
+ * @package Riichi
+ *
+ * Simple wrapper around IdiORM to encapsulate it's configuration
+ */
 class Db
 {
+    /**
+     * @var int instances counter
+     */
     static protected $_ctr = 0;
 
     public function __construct(Config $cfg)
@@ -30,9 +39,10 @@ class Db
         self::$_ctr++;
         if (self::$_ctr > 1) {
             trigger_error(
-                'Using more than single instance of DB is generally not recommended,
-                                           as it uses Idiorm inside, which has static configuration! Current
-                                           DB settings were applied to all instances - that may me not what you want!'
+                "Using more than single instance of DB is generally not recommended, " . PHP_EOL .
+                "as it uses IdiORM inside, which has static configuration! Current \n" . PHP_EOL .
+                "DB settings were applied to all instances - this may be not what you want!",
+                E_USER_WARNING
             );
         }
 

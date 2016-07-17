@@ -21,7 +21,14 @@ use Monolog\Logger;
 
 abstract class Controller
 {
+    /**
+     * @var Db
+     */
     protected $_db;
+
+    /**
+     * @var \Monolog\Logger
+     */
     protected $_log;
 
     public function __construct(Db $db, Logger $log)
