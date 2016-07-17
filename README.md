@@ -20,7 +20,7 @@ What's inside?
 --------------
 
 - API uses JSON-RPC to communicate with clients.
-- MySQL (Percona) is supported as a database backend to store all games and tournaments info and statistics.
+- Theoretically, all major RDBMS are supported as a database backend to store all games and tournaments info and statistics.
 - PHP v5.5+ is required to run the API on your own server.
 
 Developer information
@@ -28,7 +28,7 @@ Developer information
 
 We accept any help with developing, testing and improving our system, so please feel free to create issues or send pull requests for missing functionality.
 
-To start developing the project, make sure you have installed PHP v5.5 or higher and MySQL compatible database (MariaDB or Percona, latter one is preferred).
+To start developing the project, make sure you have installed a database server of your choice, PHP v5.5 or higher and appropriate PDO module.
 You also will need standard `make` utility to use following shortcuts.
 - Run `make deps` to install dependencies.
 - Run php dev server on port 8000: `make dev`
