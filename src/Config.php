@@ -17,28 +17,38 @@
  */
 namespace Riichi;
 
-require __DIR__ . '/Config.php';
-require __DIR__ . '/Db.php';
-
-use Monolog\Logger;
-use Monolog\Handler\ErrorLogHandler;
-
-class Api
+class Config
 {
-    protected $_db;
-    protected $_syslog;
+    protected $_data;
 
-    public function __construct()
+    public function __construct($baseFile)
     {
-        $this->_config = new Config(__DIR__ . '/../config/index.php');
-        $this->_db = new Db($this->_config);
-        $this->_syslog = new Logger('system');
-        $this->_syslog->pushHandler(new ErrorLogHandler());
+        $this->_data = require $baseFile;
     }
 
-    public function __call($name, $arguments)
+    public function getValue($path)
     {
-        $this->_syslog->info('Method called! ' . $name);
-        return 'test data!';
+        $parts = explode('.', $path);
+        $current = $this->_data;
+        while ($part = array_shift($parts)) {
+            $current = $current[$part];
+        }
+
+        return $current;
+    }
+
+    public function getDbConnectionString()
+    {
+        $value = $this->getValue('db.connectionString');
+        if (empty($value)) {
+            throw new \RuntimeException('DB connection string not found in configuration!');
+        }
+
+        return $value;
+    }
+
+    public function getDbConnectionCredentials()
+    {
+        return $this->getValue('db.credentials');
     }
 }
