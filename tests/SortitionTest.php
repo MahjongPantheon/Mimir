@@ -15,11 +15,24 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-return [
-    'connectionString' => 'sqlite:./data/db.sqlite',
-    'credentials' => [
-        'username' => '',
-        'password' => ''
-    ]
-];
+require_once __DIR__.'/../src/controllers/Sortition.php';
+
+class ApiTest extends \PHPUnit_Framework_TestCase
+{
+    protected $_db;
+    protected $_log;
+    public function setUp()
+    {
+        $this->_db = $this->getMock('Riichi\\Db');
+        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
+    }
+
+    public function testDummy()
+    {
+        $controller = new Sortition($this->_db, $this->_log);
+        $result = $controller->generate();
+        $this->assertEquals('test data!', $result);
+    }
+}

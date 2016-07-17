@@ -17,14 +17,19 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/Api.php';
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../src/Api.php';
 
-class ApiTest extends \PHPUnit_Framework_TestCase
-{
-    public function testDummy()
-    {
-        $api = new Api();
-        $result = $api->generateSortition();
-        $this->assertEquals('test data!', $result);
-    }
+use JsonRPC\Server;
+
+$server = new Server();
+$api = new Api();
+$api->registerImplAutoloading();
+date_default_timezone_set($api->getTimezone());
+
+foreach ($api->getMethods() as $proc => $method) {
+    $api->log("Registered proc: $proc ({$method['className']}::{$method['method']})" . PHP_EOL);
+    $server->getProcedureHandler()->withClassAndMethod($proc, $method['instance'], $method['method']);
 }
+
+echo $server->execute();

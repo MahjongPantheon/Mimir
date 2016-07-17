@@ -17,11 +17,23 @@
  */
 namespace Riichi;
 
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/src/Api.php';
+use Monolog\Logger;
 
-use JsonRPC\Server;
+abstract class Controller
+{
+    /**
+     * @var Db
+     */
+    protected $_db;
 
-$server = new Server();
-$server->getProcedureHandler()->withObject(new Api());
-echo $server->execute();
+    /**
+     * @var \Monolog\Logger
+     */
+    protected $_log;
+
+    public function __construct(Db $db, Logger $log)
+    {
+        $this->_db = $db;
+        $this->_log = $log;
+    }
+}

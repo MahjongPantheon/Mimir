@@ -17,8 +17,8 @@
  */
 namespace Riichi;
 
-require __DIR__ . '/Config.php';
-require __DIR__ . '/Db.php';
+require_once __DIR__ . '/Config.php';
+require_once __DIR__ . '/Db.php';
 
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
@@ -32,13 +32,54 @@ class Api
     {
         $this->_config = new Config(__DIR__ . '/../config/index.php');
         $this->_db = new Db($this->_config);
-        $this->_syslog = new Logger('system');
+        $this->_syslog = new Logger('RiichiApi');
         $this->_syslog->pushHandler(new ErrorLogHandler());
     }
 
-    public function __call($name, $arguments)
+    public function getTimezone()
     {
-        $this->_syslog->info('Method called! ' . $name);
-        return 'test data!';
+        return 'Asia/Novosibirsk'; // TODO
+    }
+
+    public function registerImplAutoloading()
+    {
+        spl_autoload_register(function ($class) {
+            $class = strtolower($class);
+            $classFile = __DIR__ . '/controllers/' . $class . '.php';
+            if (is_file($classFile) && !class_exists($class)) {
+                include_once $classFile;
+            } else {
+                $this->_syslog->error('Couldn\'t find module ' . $classFile);
+            }
+        });
+    }
+
+    public function getMethods()
+    {
+        $runtimeCache = [];
+        $routes = $this->_config->getValue('routes');
+        return array_map(function ($route) use (&$runtimeCache) {
+            // We should instantiate every controller here to enable proper reflection inspection in rpc-server
+            $ret = [
+                'instance' => null,
+                'method' => $route[1],
+                'className' => $route[0]
+            ];
+
+            if (!empty($runtimeCache[$route[0]])) {
+                $ret['instance'] = $runtimeCache[$route[0]];
+            } else {
+                class_exists($route[0]); // this will ensure class existence
+                $className = __NAMESPACE__ . '\\' . $route[0];
+                $ret['instance'] = $runtimeCache[$route[0]] = new $className($this->_db, $this->_syslog);
+            }
+
+            return $ret;
+        }, $routes);
+    }
+
+    public function log($message)
+    {
+        $this->_syslog->info($message);
     }
 }

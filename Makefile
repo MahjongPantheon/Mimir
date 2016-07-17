@@ -8,7 +8,7 @@ deps: hooks
 lint:
 	php vendor/bin/phpcs --config-set default_standard PSR2
 	php vendor/bin/phpcs --config-set show_warnings 0
-	php vendor/bin/phpcs src tests index.php
+	php vendor/bin/phpcs src tests www
 
 unit:
 	php bin/unit.php
@@ -18,11 +18,11 @@ check: lint unit
 autofix:
 	php vendor/bin/phpcbf --config-set default_standard PSR2
 	php vendor/bin/phpcbf --config-set show_warnings 0
-	php vendor/bin/phpcbf src tests index.php
+	php vendor/bin/phpcbf src tests www
 
 dev:
 	echo "Running dev server on port 8000..."
-	php -S localhost:8000
+	cd www && php -S localhost:8000
 
 req:
 	php bin/rpc.php $(filter-out $@,$(MAKECMDGOALS))

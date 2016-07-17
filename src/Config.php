@@ -21,11 +21,20 @@ class Config
 {
     protected $_data;
 
+    /**
+     * @param $baseFile config file location
+     */
     public function __construct($baseFile)
     {
         $this->_data = require $baseFile;
     }
 
+    /**
+     * Get config value by dot-separated path
+     *
+     * @param $path
+     * @return mixed
+     */
     public function getValue($path)
     {
         $parts = explode('.', $path);
@@ -37,6 +46,10 @@ class Config
         return $current;
     }
 
+    /**
+     * @return mixed  PDO connection string
+     * @throws \RuntimeException
+     */
     public function getDbConnectionString()
     {
         $value = $this->getValue('db.connectionString');
@@ -47,6 +60,9 @@ class Config
         return $value;
     }
 
+    /**
+     * @return array with username and password
+     */
     public function getDbConnectionCredentials()
     {
         return $this->getValue('db.credentials');
