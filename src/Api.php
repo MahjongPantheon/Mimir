@@ -17,11 +17,13 @@
  */
 namespace Riichi;
 
-require __DIR__ . '/Config.php';
-require __DIR__ . '/Db.php';
+require_once __DIR__ . '/Config.php';
+require_once __DIR__ . '/Db.php';
 
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
+use JsonRPC\Exception\ResponseException;
+use JsonRPC\Exception\ServerErrorException;
 
 class Api
 {
@@ -32,13 +34,31 @@ class Api
     {
         $this->_config = new Config(__DIR__ . '/../config/index.php');
         $this->_db = new Db($this->_config);
-        $this->_syslog = new Logger('system');
+        $this->_syslog = new Logger('RiichiApi');
         $this->_syslog->pushHandler(new ErrorLogHandler());
     }
 
     public function __call($name, $arguments)
     {
-        $this->_syslog->info('Method called! ' . $name);
-        return 'test data!';
+        $this->_syslog->info('Method called: ' . $name);
+
+        $impl = $this->_config->getRouteImplementation($name);
+        if (!$impl) {
+            throw new ResponseException('No method found to process this request.');
+        }
+
+        list($class, $method) = $impl;
+        if (file_exists(__DIR__ . "/controllers/$class.php")) {
+            require_once __DIR__ . "/controllers/$class.php";
+        }
+
+        $class = __NAMESPACE__ . '\\' . $class;
+
+        if (!is_callable([$class, $method])) {
+            throw new ServerErrorException('Requested method is not implemented.');
+        }
+
+        $instance = new $class($this->_db, $this->_syslog);
+        return $instance->$method($arguments);
     }
 }

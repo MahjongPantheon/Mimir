@@ -15,11 +15,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-return [
-    'connectionString' => 'sqlite:./data/db.sqlite',
-    'credentials' => [
-        'username' => '',
-        'password' => ''
-    ]
-];
+require_once __DIR__ . '/../Controller.php';
+
+class Sortition extends Controller
+{
+    public function generate()
+    {
+        return 'test data!';
+    }
+}

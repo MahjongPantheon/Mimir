@@ -16,10 +16,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Configure entry points for api methods.
+ *
+ * The following will cause execution of Implementation_class::someMethodAlias
+ * when user requests someMethod.
+ *
+ * [
+ *      'someMethod' => ['Implementation_class', 'someMethodAlias']
+ *      ...
+ * ]
+ *
+ */
 return [
-    'connectionString' => 'sqlite:./data/db.sqlite',
-    'credentials' => [
-        'username' => '',
-        'password' => ''
-    ]
+    'generateSortition' => ['Sortition', 'generate']
 ];

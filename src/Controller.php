@@ -15,11 +15,18 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-return [
-    'connectionString' => 'sqlite:./data/db.sqlite',
-    'credentials' => [
-        'username' => '',
-        'password' => ''
-    ]
-];
+use Monolog\Logger;
+
+abstract class Controller
+{
+    protected $_db;
+    protected $_log;
+
+    public function __construct(Db $db, Logger $log)
+    {
+        $this->_db = $db;
+        $this->_log = $log;
+    }
+}
