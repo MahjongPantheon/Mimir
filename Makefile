@@ -27,5 +27,29 @@ dev:
 req:
 	php bin/rpc.php $(filter-out $@,$(MAKECMDGOALS))
 
+init_sqlite_nointeractive:
+	echo '' > data/db.sqlite
+	cat src/fixtures/init/ansi.sql \
+		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
+		| grep -v 'primary key' \
+		| sed 's/integer,[ ]*--[ ]*serial/integer PRIMARY KEY AUTOINCREMENT,/g' \
+		| sqlite3 data/db.sqlite
+
 init_sqlite:
-	cat src/fixtures/init/sqlite.sql | sqlite3 data/db.sqlite
+	@echo "This will delete and recreate data/db.sqlite! Press Enter to confirm or Ctrl+C to abort"
+	@read
+	make init_sqlite_nointeractive
+
+init_mysql:
+	@echo "SET FOREIGN_KEY_CHECKS=0;"
+	@cat src/fixtures/init/ansi.sql \
+		| tr "\"" "\`" \
+		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
+		| sed 's/integer,[ ]*--[ ]*serial/integer AUTO_INCREMENT,/g' \
+		| sed 's/timestamp/datetime/g'
+	@echo "SET FOREIGN_KEY_CHECKS=1;"
+
+init_pgsql:
+	@cat src/fixtures/init/ansi.sql \
+		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
+		| sed 's/integer,[ ]*--[ ]*serial/serial,/g'

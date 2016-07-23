@@ -36,3 +36,7 @@ You also will need standard `make` utility to use following shortcuts.
 - Use `make unit` to run unit tests and `make lint` to check code style.
 - Use `make autofix` to fix all codestyle problems, that can be fixed automatically.
 - Remember to use PSR2 coding standards when adding php code.
+- The [DB schema](src/fixtures/init/ansi.sql) should be written in ANSI SQL92 and should pass any compliance tests. If any of DB-specific things are required, use post-processing tools (see Makefile sections for examples of generating sqlite/mysql/pgsql specific schemas).
+
+To generate or recreate sqlite db, run `make init_sqlite`.
+To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.
