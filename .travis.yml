@@ -4,6 +4,10 @@ language: php
 notifications:
   slack: furiten:6fzHMN5l1JM8rgfv5PXg4dmU
 
+services:
+  - mysql
+  - postgresql
+
 install: make deps
 
 # list any PHP version you want to test against
@@ -17,5 +21,12 @@ php:
   # aliased to a recent 7.x version
   - 7.0
 
+before_script:
+  - mysql -e 'create database api_test;'
+  - psql -c 'create database api_test;' -U postgres
+
 script:
+- make init_sqlite_nointeractive
+- make init_mysql | mysql -uroot api_test
+- make init_pgsql | psql -U postgres api_test
 - make check
