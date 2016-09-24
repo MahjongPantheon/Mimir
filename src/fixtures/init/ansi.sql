@@ -1,6 +1,7 @@
 -- README:
 -- Commented out "IF EXISTS" clauses are expected to be uncommented for every supporting DB
 -- Commented out "serial" clauses indicate fields that should be serial/auto_increment.
+-- Commented out "datewrap" clauses indicate lines to replace with date(...) for supporting DBs
 -- Corresponding modifications to resulting DB-specific dumps are expected.
 
 -- Players, orgs, etc
@@ -65,6 +66,20 @@ CREATE TABLE "event" (
   foreign key ("owner_user") references "user" ("id")
 );
 CREATE INDEX "event_lobby" ON "event"("lobby_id");
+-- Default dummy event
+INSERT INTO "event" (
+  "id",
+  "title", "description",
+  "start_time", "end_time",
+  "owner_formation", "owner_user", "type",
+  "lobby_id", "ruleset"
+) VALUES (
+  0,
+  'Dummy event', '',
+  now(), now(), -- datewrap: date('now'), date('now'),
+  NULL, NULL, 'online',
+  NULL, ''
+);
 
 -- Game session: tonpuusen, hanchan, either online or offline
 DROP TABLE
@@ -74,15 +89,17 @@ CREATE TABLE "session" (
   "id" integer, -- serial
   primary key ("id"),
   "event_id" integer not null,
+  "representational_hash" varchar(255), -- hash to find this game from client mobile app
   "replay_hash" varchar(255), -- tenhou game hash, for deduplication
   "orig_link" text, -- original tenhou game link, for access to replay
   "play_date" timestamp,
   "players" varchar(255), -- comma-separated ordered list of player ids, east to north.
-  "state" varchar(255), -- planned / in progress / finished
+  "state" varchar(255), -- planned / inprogress / finished
   foreign key ("event_id") references "event" ("id")
 );
 CREATE INDEX "session_replay" ON "session"("replay_hash");
 CREATE INDEX "session_state" ON "session"("state");
+CREATE INDEX "session_rephash" ON "session"("representational_hash");
 
 -- Session results, entry should exist only for finished sessions
 DROP TABLE

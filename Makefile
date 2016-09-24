@@ -25,13 +25,14 @@ dev:
 	cd www && php -S localhost:8000
 
 req:
-	php bin/rpc.php $(filter-out $@,$(MAKECMDGOALS))
+	php bin/rpc.php "$(filter-out $@,$(MAKECMDGOALS))"
 
 init_sqlite_nointeractive:
 	echo '' > data/db.sqlite
 	cat src/fixtures/init/ansi.sql \
 		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
 		| grep -v 'primary key' \
+		| sed 's/^.*-- datewrap://' \
 		| sed 's/integer,[ ]*--[ ]*serial/integer PRIMARY KEY AUTOINCREMENT,/g' \
 		| sqlite3 data/db.sqlite
 

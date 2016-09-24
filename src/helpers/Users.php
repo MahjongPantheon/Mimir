@@ -15,11 +15,26 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-return [
-    'connectionString' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
-    'credentials' => [
-        'username' => '',
-        'password' => ''
-    ]
-];
+class UsersHelper {
+    /**
+     * Check if ids are valid user ids
+     *
+     * @param Db $db
+     * @param $playersIdList
+     * @return string InvalidityReason
+     */
+    public static function valid(Db $db, $playersIdList) {
+        if (count($playersIdList) !== 4) {
+            return "Invalid players count";
+        }
+
+        $countInDb = $db->table('user')->whereIn('id', $playersIdList)->count();
+        if ($countInDb !== 4) {
+            return "Some of players are missing in DB, check ids";
+        }
+
+        return null;
+    }
+}

@@ -29,5 +29,11 @@
  *
  */
 return [
+    // client
+    'addRound' => ['Games', 'addRound'],
+
+    // admin
+    'startGame' => ['Games', 'start'],
+    'endGame' => ['Games', 'end'],
     'generateSortition' => ['Sortition', 'generate']
 ];
