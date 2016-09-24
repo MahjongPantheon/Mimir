@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../helpers/Users.php';
+require_once __DIR__ . '/../helpers/Rounds.php';
 require_once __DIR__ . '/../exceptions/InvalidUser.php';
 require_once __DIR__ . '/../exceptions/Database.php';
 require_once __DIR__ . '/../exceptions/BadAction.php';
@@ -35,21 +36,20 @@ class Games extends Controller
      */
     public function start($players)
     {
-//        return \Idiorm\ORM::getConfig();
-
         $invalid = UsersHelper::valid($this->_db, $players);
         if ($invalid) {
             throw new InvalidUserException($invalid);
         }
 
         $newGame = $this->_db->table('session')->create();
-        $newGame
-            ->set('event_id', 0)
-            ->set('replay_hash', null)
-            ->set('orig_link', null)
-            ->set('play_date', date('Y-m-d H:i:s'))
-            ->set('players', implode(',', array_map('intval', $players)))
-            ->set('state', 'inprogress');
+        $newGame->set([
+            'event_id' =>       0,
+            'replay_hash' =>    null,
+            'orig_link' =>      null,
+            'play_date' =>      date('Y-m-d H:i:s'),
+            'players' =>        implode(',', array_map('intval', $players)),
+            'state' =>          'inprogress'
+        ]);
         $gameHash = sha1($newGame->get('players') . $newGame->get('play_date'));
         $success = $newGame
             ->set('representational_hash', $gameHash)
@@ -69,6 +69,36 @@ class Games extends Controller
      */
     public function end($gameHashcode)
     {
+        $game = $this->_checkValidHashcode($gameHashcode);
+        return !!$game->set('state', 'finished')->save();
+    }
+
+    /**
+     * @param $gameHashcode string Hashcode of game
+     * @param $roundData array Structure of round data
+     * @throws DatabaseException
+     * @throws BadActionException
+     * @return bool Success?
+     */
+    public function addRound($gameHashcode, $roundData)
+    {
+        $game = $this->_checkValidHashcode($gameHashcode);
+        RoundsHelper::checkRound($this->_db, $game, $roundData);
+        $newRound = $this->_db->table('round')->create();
+        $newRound->set($roundData); // Just set it, as we already checked its perfect validity.
+        return $newRound->save();
+    }
+
+    /**
+     * Check that passed hashcode refers to valid existing game in progress
+     *
+     * @param $gameHashcode
+     * @throws BadActionException
+     * @throws DatabaseException
+     * @return mixed
+     */
+    protected function _checkValidHashcode($gameHashcode)
+    {
         $game = $this->_db->table('session')->where('representational_hash', $gameHashcode)->findOne();
         if (!$game) {
             throw new DatabaseException("Couldn't find session in DB");
@@ -78,16 +108,6 @@ class Games extends Controller
             throw new BadActionException("Attempted to end game that is not in progress");
         }
 
-        return !!$game->set('state', 'finished')->save();
-    }
-
-    /**
-     * @param $gameHashcode string Hashcode of game
-     * @param $roundData array Structure of round data
-     * @return bool Success?
-     */
-    public function addRound($gameHashcode, $roundData)
-    {
-
+        return $game;
     }
 }
