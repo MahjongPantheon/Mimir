@@ -16,4 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
-class BadActionException extends \Exception {}
+
+class BadActionException extends \Exception
+{
+}

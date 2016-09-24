@@ -16,10 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+
 use \Idiorm\ORM;
+
 require_once __DIR__ . '/../exceptions/MalformedPayload.php';
 
-class RoundsHelper {
+class RoundsHelper
+{
     /**
      * Check if round data is valid
      *
@@ -32,7 +35,7 @@ class RoundsHelper {
     {
         self::_checkOneOf($roundData, 'outcome', ['ron', 'tsumo', 'draw', 'abort'. 'chombo']);
         self::_checkOneOf($roundData, 'round', [1, 2, 3, 4, 5, 6, 7, 8]); // TODO: wests? Also, should depend on rules
-        switch($roundData['outcome']) {
+        switch ($roundData['outcome']) {
             case 'ron':
                 self::_checkRon($db, $game, $roundData);
                 break;
@@ -43,7 +46,7 @@ class RoundsHelper {
                 self::_checkDraw($game, $roundData);
                 break;
             case 'abort':
-                // Nothing to check here for abortive draw
+                self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $game->get('players'));
                 break;
             case 'chombo':
                 self::_checkChombo($game, $roundData);

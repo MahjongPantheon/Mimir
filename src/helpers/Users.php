@@ -17,7 +17,8 @@
  */
 namespace Riichi;
 
-class UsersHelper {
+class UsersHelper
+{
     /**
      * Check if ids are valid user ids
      *
@@ -25,7 +26,8 @@ class UsersHelper {
      * @param $playersIdList
      * @return string InvalidityReason
      */
-    public static function valid(Db $db, $playersIdList) {
+    public static function valid(Db $db, $playersIdList)
+    {
         if (count($playersIdList) !== 4) {
             return "Invalid players count";
         }

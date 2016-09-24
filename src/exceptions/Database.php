@@ -16,4 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
-class DatabaseException extends \Exception {}
+
+class DatabaseException extends \Exception
+{
+}
