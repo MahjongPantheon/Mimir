@@ -67,7 +67,7 @@ abstract class Model
             return [];
         }
 
-        return array_map(function($data) use ($db) {
+        return array_map(function ($data) use ($db) {
             return self::_recreateInstance($db, $data);
         }, $result);
     }

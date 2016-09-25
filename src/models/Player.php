@@ -16,7 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+
 use \Idiorm\ORM;
+
 require_once __DIR__ . '/../Model.php';
 
 class Player extends Model
