@@ -68,7 +68,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
 
     public function testNewGame()
     {
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
 
         $this->assertNotEmpty($hash, "Hash received");
@@ -81,7 +81,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
 
     public function testEndGame()
     {
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->end($hash);
 
@@ -107,7 +107,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
             'kanuradora' => 1,
             'yaku'      => ''
         ];
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->addRound($hash, $roundData);
 
@@ -134,7 +134,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
             'kanuradora' => 1,
             'yaku'      => ''
         ];
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->addRound($hash, $roundData);
 
@@ -153,7 +153,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
             'riichi'    => '',
             'tempai'    => ''
         ];
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->addRound($hash, $roundData);
 
@@ -171,7 +171,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
             'round'     => 1,
             'riichi'    => ''
         ];
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->addRound($hash, $roundData);
 
@@ -189,7 +189,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
             'round'     => 1,
             'loser_id'  => 2,
         ];
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->addRound($hash, $roundData);
 
@@ -207,7 +207,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
      */
     public function testNewGameBadUser()
     {
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $controller->start([2, 3, 4, 5]); // id 5 does not exist
     }
 
@@ -216,7 +216,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
      */
     public function testNewGameWrongUserCount()
     {
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $controller->start([2, 3, 4]);
     }
 
@@ -225,13 +225,13 @@ class GamesTest extends \PHPUnit_Framework_TestCase
      */
     public function testEndGameWrongHash()
     {
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $controller->end('some_inexisting_hash');
     }
 
     public function testEndGameButGameAlreadyFinished()
     {
-        $controller = new Games($this->_db, $this->_log);
+        $controller = new GamesController($this->_db, $this->_log);
         $hash = $controller->start([1, 2, 3, 4]);
         $controller->end($hash); // Really finish
 

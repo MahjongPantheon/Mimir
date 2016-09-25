@@ -19,7 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/../Controller.php';
 
-class Sortition extends Controller
+class SortitionController extends Controller
 {
     public function generate()
     {

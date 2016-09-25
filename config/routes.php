@@ -30,10 +30,10 @@
  */
 return [
     // client
-    'addRound' => ['Games', 'addRound'],
+    'addRound' => ['GamesController', 'addRound'],
 
     // admin
-    'startGame' => ['Games', 'start'],
-    'endGame' => ['Games', 'end'],
-    'generateSortition' => ['Sortition', 'generate']
+    'startGame' => ['GamesController', 'start'],
+    'endGame' => ['GamesController', 'end'],
+    'generateSortition' => ['SortitionController', 'generate']
 ];

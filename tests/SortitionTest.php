@@ -32,7 +32,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
     public function testDummy()
     {
-        $controller = new Sortition($this->_db, $this->_log);
+        $controller = new SortitionController($this->_db, $this->_log);
         $result = $controller->generate();
         $this->assertEquals('test data!', $result);
     }

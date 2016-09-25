@@ -24,7 +24,7 @@ require_once __DIR__ . '/../exceptions/Database.php';
 require_once __DIR__ . '/../exceptions/BadAction.php';
 require_once __DIR__ . '/../Controller.php';
 
-class Games extends Controller
+class GamesController extends Controller
 {
     /**
      * Start new game and return its hash
