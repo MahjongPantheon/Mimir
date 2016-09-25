@@ -27,7 +27,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
-        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
+        $this->_log = $this->getMock('Monolog\\Logger', [], ['RiichiApi']);
     }
 
     public function testDummy()

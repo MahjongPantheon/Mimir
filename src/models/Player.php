@@ -124,10 +124,12 @@ class Player extends Model
 
     /**
      * @param string $displayName
+     * @return $this
      */
     public function setDisplayName($displayName)
     {
         $this->_displayName = $displayName;
+        return $this;
     }
 
     /**
@@ -148,10 +150,12 @@ class Player extends Model
 
     /**
      * @param string $ident
+     * @return $this
      */
     public function setIdent($ident)
     {
         $this->_ident = $ident;
+        return $this;
     }
 
     /**
@@ -164,10 +168,12 @@ class Player extends Model
 
     /**
      * @param string $tenhouId
+     * @return $this
      */
     public function setTenhouId($tenhouId)
     {
         $this->_tenhouId = $tenhouId;
+        return $this;
     }
 
     /**

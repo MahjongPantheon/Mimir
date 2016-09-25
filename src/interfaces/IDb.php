@@ -25,4 +25,9 @@ interface IDb
      * @return \Idiorm\ORM
      */
     public function table($tableName);
+
+    /**
+     * @return int
+     */
+    public function lastInsertId();
 }

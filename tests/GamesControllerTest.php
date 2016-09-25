@@ -36,7 +36,7 @@ class GamesTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
-        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
+        $this->_log = $this->getMock('Monolog\\Logger', [], ['RiichiApi']);
 
         $this->_db->table('user')->create([
             'id'            => 1,

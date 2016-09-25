@@ -69,4 +69,13 @@ class Db implements IDb
     {
         return ORM::forTable($tableName);
     }
+
+    /**
+     * @return int|string
+     */
+    public function lastInsertId()
+    {
+        ORM::rawExecute('SELECT last_insert_rowid()');
+        return ORM::getLastStatement()->fetchColumn();
+    }
 }
