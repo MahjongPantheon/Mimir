@@ -90,7 +90,62 @@ class GamesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('finished', $game->get('state'), "Game status fine");
     }
 
-    public function testAddRound()
+    public function testAddRoundRon()
+    {
+        $roundData = [
+            'outcome'   => 'ron',
+            'round'     => 1,
+            'riichi'    => '',
+            'winner_id' => 2,
+            'loser_id'  => 3,
+            'han'       => 2,
+            'fu'        => 30,
+            'multi_ron' => null,
+            'dora'      => 0,
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 1,
+            'yaku'      => ''
+        ];
+        $controller = new Games($this->_db, $this->_log);
+        $hash = $controller->start([1, 2, 3, 4]);
+        $success = $controller->addRound($hash, $roundData);
+
+        $this->assertTrue($success, "Round added (ron)");
+        $game = $this->_db->table('session')->where('representational_hash', $hash)->findOne();
+        $roundsCount = $this->_db->table('round')->where('session_id', $game->get('id'))->count();
+
+        $this->assertEquals(1, $roundsCount, "Exactly one round added");
+    }
+
+    public function testAddRoundTsumo()
+    {
+        $roundData = [
+            'outcome'   => 'tsumo',
+            'round'     => 1,
+            'riichi'    => '',
+            'winner_id' => 2,
+            'han'       => 2,
+            'fu'        => 30,
+            'multi_ron' => null,
+            'dora'      => 0,
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 1,
+            'yaku'      => ''
+        ];
+        $controller = new Games($this->_db, $this->_log);
+        $hash = $controller->start([1, 2, 3, 4]);
+        $success = $controller->addRound($hash, $roundData);
+
+        $this->assertTrue($success, "Round added (tsumo)");
+        $game = $this->_db->table('session')->where('representational_hash', $hash)->findOne();
+        $roundsCount = $this->_db->table('round')->where('session_id', $game->get('id'))->count();
+
+        $this->assertEquals(1, $roundsCount, "Exactly one round added");
+    }
+
+    public function testAddRoundDraw()
     {
         $roundData = [
             'outcome'   => 'draw',
@@ -102,7 +157,43 @@ class GamesTest extends \PHPUnit_Framework_TestCase
         $hash = $controller->start([1, 2, 3, 4]);
         $success = $controller->addRound($hash, $roundData);
 
-        $this->assertTrue($success, "Round added");
+        $this->assertTrue($success, "Round added (draw)");
+        $game = $this->_db->table('session')->where('representational_hash', $hash)->findOne();
+        $roundsCount = $this->_db->table('round')->where('session_id', $game->get('id'))->count();
+
+        $this->assertEquals(1, $roundsCount, "Exactly one round added");
+    }
+
+    public function testAddRoundAbortiveDraw()
+    {
+        $roundData = [
+            'outcome'   => 'abort',
+            'round'     => 1,
+            'riichi'    => ''
+        ];
+        $controller = new Games($this->_db, $this->_log);
+        $hash = $controller->start([1, 2, 3, 4]);
+        $success = $controller->addRound($hash, $roundData);
+
+        $this->assertTrue($success, "Round added (abortive)");
+        $game = $this->_db->table('session')->where('representational_hash', $hash)->findOne();
+        $roundsCount = $this->_db->table('round')->where('session_id', $game->get('id'))->count();
+
+        $this->assertEquals(1, $roundsCount, "Exactly one round added");
+    }
+
+    public function testAddRoundChombo()
+    {
+        $roundData = [
+            'outcome'   => 'chombo',
+            'round'     => 1,
+            'loser_id'  => 2,
+        ];
+        $controller = new Games($this->_db, $this->_log);
+        $hash = $controller->start([1, 2, 3, 4]);
+        $success = $controller->addRound($hash, $roundData);
+
+        $this->assertTrue($success, "Round added (chombo)");
         $game = $this->_db->table('session')->where('representational_hash', $hash)->findOne();
         $roundsCount = $this->_db->table('round')->where('session_id', $game->get('id'))->count();
 

@@ -30,6 +30,8 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
     }
 
+    // Positive tests
+
     public function testCheckOneOf()
     {
         $checkOneOf = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkOneOf');
@@ -39,19 +41,6 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $possibleVals = ['okval3', 'okval', 'okval2'];
         $checkOneOf->invokeArgs(null, [$data, 'test', $possibleVals]);
         $this->assertTrue(true); // no exception == ok
-    }
-
-    /**
-     * @expectedException \Riichi\MalformedPayloadException
-     */
-    public function testCheckOneOfFail()
-    {
-        $checkOneOf = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkOneOf');
-        $checkOneOf->setAccessible(true);
-
-        $data = ['test' => 'notokval'];
-        $possibleVals = ['okval3', 'okval', 'okval2'];
-        $checkOneOf->invokeArgs(null, [$data, 'test', $possibleVals]);
     }
 
     public function testCheckZeroOrMoreOf()
@@ -88,6 +77,119 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
             'c,b,a,d'
         ]);
         $this->assertTrue(true); // no exception == ok
+
+        $checkOneOf->invokeArgs(null, [
+            ['test' => '2'], // single number ok
+            'test',
+            '1,2,3,4'
+        ]);
+        $this->assertTrue(true); // no exception == ok
+    }
+
+    public function testCheckRonValid()
+    {
+        $checkRon = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkRon');
+        $checkRon->setAccessible(true);
+
+        $checkRon->invokeArgs(null, [
+            '1,2,3,4',
+            [],
+            [
+                'round'     => 1,
+                'riichi'    => '1',
+                'winner_id' => 2,
+                'loser_id'  => 3,
+                'han'       => 2,
+                'fu'        => 20,
+                'multi_ron' => null,
+                'yaku'      => '',
+                'dora'      => 0,
+                'uradora'   => 0,
+                'kandora'   => 0,
+                'kanuradora' => 0
+            ]
+        ]); // no exception == ok
+    }
+
+    public function testCheckTsumoValid()
+    {
+        $checkTsumo = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkTsumo');
+        $checkTsumo->setAccessible(true);
+
+        $checkTsumo->invokeArgs(null, [
+            '1,2,3,4',
+            [],
+            [
+                'round'     => 1,
+                'riichi'    => '1',
+                'winner_id' => 2,
+                'han'       => 2,
+                'fu'        => 20,
+                'yaku'      => '',
+                'dora'      => 0,
+                'uradora'   => 0,
+                'kandora'   => 0,
+                'kanuradora' => 0
+            ]
+        ]); // no exception == ok
+    }
+
+    public function testCheckDrawValid()
+    {
+        $checkDraw = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkDraw');
+        $checkDraw->setAccessible(true);
+
+        $checkDraw->invokeArgs(null, [
+            '1,2,3,4',
+            [
+                'round'     => 1,
+                'riichi'    => '1',
+                'tempai'    => '1,2'
+            ]
+        ]); // no exception == ok
+    }
+
+    public function testCheckAbortiveDrawValid()
+    {
+        $checkAbort = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkAbortiveDraw');
+        $checkAbort->setAccessible(true);
+
+        $checkAbort->invokeArgs(null, [
+            '1,2,3,4',
+            [
+                'round'     => 1,
+                'riichi'    => '1'
+            ]
+        ]); // no exception == ok
+    }
+
+    public function testCheckChomboValid()
+    {
+        $checkChombo = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkChombo');
+        $checkChombo->setAccessible(true);
+
+        $checkChombo->invokeArgs(null, [
+            '1,2,3,4',
+            [
+                'round'     => 1,
+                'loser_id'  => 2
+            ]
+        ]); // no exception == ok
+    }
+
+    // Negative tests
+
+    /**
+     * @expectedException \Riichi\MalformedPayloadException
+     */
+    public function testCheckOneOfFail()
+    {
+        $checkOneOf = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkOneOf');
+        $checkOneOf->setAccessible(true);
+
+        $data = ['test' => 'notokval'];
+        $possibleVals = ['okval3', 'okval', 'okval2'];
+        $checkOneOf->invokeArgs(null, [$data, 'test', $possibleVals]);
     }
 
     public function testCheckZeroOrMoreOfFail()
