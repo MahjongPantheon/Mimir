@@ -85,7 +85,12 @@ class Games extends Controller
         $game = $this->_checkValidHashcode($gameHashcode);
         RoundsHelper::checkRound($this->_db, $game, $roundData);
         $newRound = $this->_db->table('round')->create();
-        $newRound->set($roundData); // Just set it, as we already checked its perfect validity.
+        $newRound->set( // Just set it, as we already checked its perfect validity.
+            array_merge($roundData, [
+                'session_id' => $game->get('id'),
+                'event_id' =>   $game->get('event_id')
+            ])
+        );
         return $newRound->save();
     }
 
@@ -95,7 +100,7 @@ class Games extends Controller
      * @param $gameHashcode
      * @throws BadActionException
      * @throws DatabaseException
-     * @return mixed
+     * @return bool|\Idiorm\ORM
      */
     protected function _checkValidHashcode($gameHashcode)
     {

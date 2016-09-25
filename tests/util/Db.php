@@ -35,16 +35,7 @@ class Db implements IDb
 {
     static protected $instance = null;
 
-    public static function getInstance()
-    {
-        if (self::$instance === null) {
-            self::$instance = new Db();
-        }
-
-        return self::$instance;
-    }
-
-    protected function __construct()
+    public static function getCleanInstance()
     {
         $db = __DIR__ . '/../data/db.sqlite';
         if (!is_dir(dirname($db))) {
@@ -60,6 +51,12 @@ class Db implements IDb
                 'password' => ''
             ]
         ]);
+
+        if (self::$instance === null) {
+            self::$instance = new Db();
+        }
+
+        return self::$instance;
     }
 
     /**

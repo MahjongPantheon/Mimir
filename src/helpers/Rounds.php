@@ -104,19 +104,23 @@ class RoundsHelper
     protected static function _checkOneOf($data, $key, $values)
     {
         if (!in_array($data[$key], $values)) {
-            throw new MalformedPayloadException('Field ' . $key . ' should be one of [' . implode(', ', $values) . ']');
+            throw new MalformedPayloadException('Field #' . $key . ' should be one of [' . implode(', ', $values) . ']');
         }
     }
 
     protected static function _csvCheckZeroOrMoreOf($data, $key, $csvValues)
     {
+        if (!is_string($csvValues) || !is_string($data[$key])) {
+            throw new MalformedPayloadException('Field #' . $key . ' should contain comma-separated string');
+        }
+
         $redundantVals = array_diff(
-            explode(',', $csvValues),
-            explode(',', $data[$key])
+            array_filter(explode(',', $data[$key])),
+            array_filter(explode(',', $csvValues))
         );
 
         if (count($redundantVals) > 0) {
-            throw new MalformedPayloadException('Field ' . $key . ' should contain zero or more of [' . $data[$key]
+            throw new MalformedPayloadException('Field #' . $key . ' should contain zero or more of [' . $data[$key]
                 . '], but also contains [' . implode(',', $redundantVals) . ']');
         }
     }
