@@ -17,7 +17,7 @@
  */
 
 return [
-    'connectionString' => 'sqlite:./data/db.sqlite',
+    'connection_string' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
     'credentials' => [
         'username' => '',
         'password' => ''

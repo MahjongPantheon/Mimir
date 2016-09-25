@@ -17,23 +17,26 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/controllers/Sortition.php';
-require_once __DIR__ . '/util/Db.php';
-
-class ApiTest extends \PHPUnit_Framework_TestCase
+class UsersHelper
 {
-    protected $_db;
-    protected $_log;
-    public function setUp()
+    /**
+     * Check if ids are valid user ids
+     *
+     * @param Db $db
+     * @param $playersIdList
+     * @return string InvalidityReason
+     */
+    public static function valid(Db $db, $playersIdList)
     {
-        $this->_db = Db::getCleanInstance();
-        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
-    }
+        if (count($playersIdList) !== 4) {
+            return "Invalid players count";
+        }
 
-    public function testDummy()
-    {
-        $controller = new Sortition($this->_db, $this->_log);
-        $result = $controller->generate();
-        $this->assertEquals('test data!', $result);
+        $countInDb = $db->table('user')->whereIn('id', $playersIdList)->count();
+        if ($countInDb !== 4) {
+            return "Some of players are missing in DB, check ids";
+        }
+
+        return null;
     }
 }

@@ -21,4 +21,19 @@ use JsonRPC\Client;
 
 $client = new Client('http://localhost:8000/');
 $client->getHttpClient()->withDebug();
-$client->execute($argv[1], array_slice($argv, 2));
+
+list($command, $args) = explode(' ', $argv[1], 2);
+$re = '#([a-z0-9_-]+|\[.*?\]|\{.*?\})#is';
+if (!preg_match_all($re, $args, $matches)) {
+    die("Couldn't parse cli parameters :(");
+}
+
+try {
+    $client->execute($command, $a = array_map(function ($arg) {
+        try {
+            return json_decode($arg);
+        } catch (Exception $e) {
+            return $arg;
+        }
+    }, $matches[0]));
+} catch (Exception $e) {}

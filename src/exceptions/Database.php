@@ -17,23 +17,6 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/controllers/Sortition.php';
-require_once __DIR__ . '/util/Db.php';
-
-class ApiTest extends \PHPUnit_Framework_TestCase
+class DatabaseException extends \Exception
 {
-    protected $_db;
-    protected $_log;
-    public function setUp()
-    {
-        $this->_db = Db::getCleanInstance();
-        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
-    }
-
-    public function testDummy()
-    {
-        $controller = new Sortition($this->_db, $this->_log);
-        $result = $controller->generate();
-        $this->assertEquals('test data!', $result);
-    }
 }
