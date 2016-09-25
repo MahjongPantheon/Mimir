@@ -31,7 +31,7 @@ abstract class Controller
      */
     protected $_log;
 
-    public function __construct(Db $db, Logger $log)
+    public function __construct(IDb $db, Logger $log)
     {
         $this->_db = $db;
         $this->_log = $log;

@@ -19,45 +19,47 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require __DIR__ . '/../vendor/heilage-nsk/idiorm/src/idiorm.php';
-require __DIR__ . '/../src/interfaces/IDb.php';
+require __DIR__ . '/../../vendor/heilage-nsk/idiorm/src/idiorm.php';
+require __DIR__ . '/../../src/interfaces/IDb.php';
 
 /**
  * Class Db
  * @package Riichi
  *
  * Simple wrapper around IdiORM to encapsulate it's configuration
+ * Test suite mock package, uses only sqlite w/ hardcoded path
+ *
+ * Class interface should be perfectly compatible with real Db class
  */
 class Db implements IDb
 {
-    /**
-     * @var int instances counter
-     */
-    static protected $_ctr = 0;
+    static protected $instance = null;
 
-    public function __construct(Config $cfg)
+    public static function getInstance()
     {
-        self::$_ctr++;
-        if (self::$_ctr > 1) {
-            trigger_error(
-                "Using more than single instance of DB is generally not recommended, " . PHP_EOL .
-                "as it uses IdiORM inside, which has static configuration! Current \n" . PHP_EOL .
-                "DB settings were applied to all instances - this may be not what you want!",
-                E_USER_WARNING
-            );
+        if (self::$instance === null) {
+            self::$instance = new Db();
         }
 
-        $connectionString = $cfg->getDbConnectionString();
-        $credentials = $cfg->getDbConnectionCredentials();
+        return self::$instance;
+    }
 
-        ORM::configure($connectionString);
-        if (!empty($credentials)) {
-            ORM::configure($credentials); // should pass username and password
+    protected function __construct()
+    {
+        $db = __DIR__ . '/../data/db.sqlite';
+        if (!is_dir(dirname($db))) {
+            mkdir(dirname($db));
         }
 
-        if (strpos($connectionString, 'mysql') === 0) { // force encoding for mysql
-            ORM::configure('driver_options', array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-        }
+        shell_exec('cd ' . __DIR__ . '/../../ && SQLITE_FILE=' . $db . ' make init_sqlite_nointeractive');
+
+        ORM::configure([
+            'connection_string' => 'sqlite:' . $db,
+            'credentials' => [
+                'username' => '',
+                'password' => ''
+            ]
+        ]);
     }
 
     /**

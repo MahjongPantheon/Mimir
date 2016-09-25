@@ -1,3 +1,5 @@
+SQLITE_FILE ?= data/db.sqlite
+
 hooks:
 	cp -pnrf bin/hooks/* .git/hooks
 	chmod a+x .git/hooks/*
@@ -28,16 +30,16 @@ req:
 	php bin/rpc.php "$(filter-out $@,$(MAKECMDGOALS))"
 
 init_sqlite_nointeractive:
-	echo '' > data/db.sqlite
+	echo '' > $(SQLITE_FILE)
 	cat src/fixtures/init/ansi.sql \
 		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
 		| grep -v 'primary key' \
 		| sed 's/^.*-- datewrap://' \
 		| sed 's/integer,[ ]*--[ ]*serial/integer PRIMARY KEY AUTOINCREMENT,/g' \
-		| sqlite3 data/db.sqlite
+		| sqlite3 $(SQLITE_FILE)
 
 init_sqlite:
-	@echo "This will delete and recreate data/db.sqlite! Press Enter to confirm or Ctrl+C to abort"
+	@echo "This will delete and recreate $(SQLITE_FILE)! Press Enter to confirm or Ctrl+C to abort"
 	@read
 	make init_sqlite_nointeractive
 

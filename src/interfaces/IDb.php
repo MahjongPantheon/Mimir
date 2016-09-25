@@ -16,10 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-return [
-    'connection_string' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
-    'credentials' => [
-        'username' => '',
-        'password' => ''
-    ]
-];
+namespace Riichi;
+
+interface IDb
+{
+    public function table($tableName);
+}

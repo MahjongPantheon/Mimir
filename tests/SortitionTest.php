@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__.'/../src/controllers/Sortition.php';
+require_once __DIR__ . '/util/Db.php';
 
 class ApiTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,7 +26,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
     protected $_log;
     public function setUp()
     {
-        $this->_db = $this->getMock('Riichi\\Db');
+        $this->_db = Db::getInstance();
         $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
     }
 
