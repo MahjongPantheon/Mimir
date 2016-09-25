@@ -20,7 +20,7 @@ What's inside?
 --------------
 
 - API uses JSON-RPC to communicate with clients.
-- Theoretically, all major RDBMS are supported as a database backend to store all games and tournaments info and statistics.
+- Supported RDBMS are sqlite, mysql and pgsql, others may work too because of PDO under hood, but only after some little coding (you'll see :) ). Anyway, other RDBMS are not tested at all, use them at your own risk.
 - PHP v5.5+ is required to run the API on your own server.
 
 Developer information

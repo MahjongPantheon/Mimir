@@ -36,6 +36,8 @@ class GamesController extends Controller
      */
     public function start($players)
     {
+        $this->_log->addInfo('Starting game with players id# ' . implode(',', $players));
+
         $invalid = UsersHelper::valid($this->_db, $players);
         if ($invalid) {
             throw new InvalidUserException($invalid);
@@ -58,6 +60,7 @@ class GamesController extends Controller
             throw new DatabaseException("Couldn't create session record in DB");
         }
 
+        $this->_log->addInfo('Successfully started game with players id# ' . implode(',', $players));
         return $gameHash;
     }
 
@@ -69,8 +72,11 @@ class GamesController extends Controller
      */
     public function end($gameHashcode)
     {
+        $this->_log->addInfo('Finishing game # ' . $gameHashcode);
         $game = $this->_checkValidHashcode($gameHashcode);
-        return !!$game->set('state', 'finished')->save();
+        $result = !!$game->set('state', 'finished')->save();
+        $this->_log->addInfo(($result ? 'Successfully finished' : 'Failed to finish') . ' game # ' . $gameHashcode);
+        return $result;
     }
 
     /**
@@ -82,6 +88,7 @@ class GamesController extends Controller
      */
     public function addRound($gameHashcode, $roundData)
     {
+        $this->_log->addInfo('Adding new round to game # ' . $gameHashcode);
         $game = $this->_checkValidHashcode($gameHashcode);
         RoundsHelper::checkRound($this->_db, $game, $roundData);
         $newRound = $this->_db->table('round')->create();
@@ -91,7 +98,9 @@ class GamesController extends Controller
                 'event_id' =>   $game->get('event_id')
             ])
         );
-        return $newRound->save();
+        $result = $newRound->save();
+        $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
+        return $result;
     }
 
     /**

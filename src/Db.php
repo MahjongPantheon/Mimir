@@ -35,6 +35,8 @@ class Db implements IDb
      */
     static protected $_ctr = 0;
 
+    protected $_connString;
+
     public function __construct(Config $cfg)
     {
         self::$_ctr++;
@@ -47,15 +49,15 @@ class Db implements IDb
             );
         }
 
-        $connectionString = $cfg->getDbConnectionString();
+        $this->_connString = $cfg->getDbConnectionString();
         $credentials = $cfg->getDbConnectionCredentials();
 
-        ORM::configure($connectionString);
+        ORM::configure($this->_connString);
         if (!empty($credentials)) {
             ORM::configure($credentials); // should pass username and password
         }
 
-        if (strpos($connectionString, 'mysql') === 0) { // force encoding for mysql
+        if (strpos($this->_connString, 'mysql') === 0) { // force encoding for mysql
             ORM::configure('driver_options', array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
         }
     }
@@ -69,5 +71,29 @@ class Db implements IDb
     public function table($tableName)
     {
         return ORM::forTable($tableName);
+    }
+
+    public function lastInsertId()
+    {
+        switch (0) {
+            case strpos($this->_connString, 'mysql'):
+                ORM::rawExecute('SELECT LAST_INSERT_ID()');
+                return ORM::getLastStatement()->fetchColumn();
+                break;
+            case strpos($this->_connString, 'pgsql'):
+                ORM::rawExecute('SELECT LASTVAL()');
+                return ORM::getLastStatement()->fetchColumn();
+                break;
+            case strpos($this->_connString, 'sqlite'):
+                ORM::rawExecute('SELECT last_insert_rowid()');
+                return ORM::getLastStatement()->fetchColumn();
+                break;
+            default:
+                throw new \Exception(
+                    'Sorry, your DBMS is not supported. You may want to try implementing ' .
+                    'last_insert_id function for your DB in place where this exception thrown from. ' .
+                    'Check it out, this might be enough to make it work!'
+                );
+        }
     }
 }
