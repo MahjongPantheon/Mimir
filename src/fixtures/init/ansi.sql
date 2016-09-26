@@ -66,20 +66,6 @@ CREATE TABLE "event" (
   foreign key ("owner_user") references "user" ("id")
 );
 CREATE INDEX "event_lobby" ON "event"("lobby_id");
--- Default dummy event
-INSERT INTO "event" (
-  "id",
-  "title", "description",
-  "start_time", "end_time",
-  "owner_formation", "owner_user", "type",
-  "lobby_id", "ruleset"
-) VALUES (
-  0,
-  'Dummy event', '',
-  now(), now(), -- datewrap: date('now'), date('now'),
-  NULL, NULL, 'online',
-  NULL, ''
-);
 
 -- Game session: tonpuusen, hanchan, either online or offline
 DROP TABLE

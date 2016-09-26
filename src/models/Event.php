@@ -114,9 +114,9 @@ class Event extends Model
      * @throws \Exception
      * @return Event[]
      */
-    public static function findByState(IDb $db, $lobbyList)
+    public static function findByLobby(IDb $db, $lobbyList)
     {
-        // TODO: Finished games are likely to be too much. Make pagination here.
+        // TODO: All games in lobby are likely to be too much. Make pagination here.
         return self::_findBy($db, 'lobby_id', $lobbyList);
     }
 
