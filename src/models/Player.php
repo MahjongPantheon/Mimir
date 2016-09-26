@@ -91,13 +91,13 @@ class Player extends Model
      */
     public function save()
     {
-        $user = $this->_db->table('user')->findOne($this->_id);
+        $user = $this->_db->table(self::$_table)->findOne($this->_id);
         return ($user ? $this->_save($user) : $this->_create());
     }
 
     protected function _create()
     {
-        $user = $this->_db->table('user')->create();
+        $user = $this->_db->table(self::$_table)->create();
         $success = $this->_save($user);
         if ($success) {
             $this->_id = $this->_db->lastInsertId();
