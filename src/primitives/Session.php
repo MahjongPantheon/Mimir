@@ -23,6 +23,12 @@ require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 require_once __DIR__ . '/../Primitive.php';
 
+/**
+ * Class SessionPrimitive
+ *
+ * Low-level model with basic CRUD operations and relations
+ * @package Riichi
+ */
 class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';

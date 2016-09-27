@@ -17,15 +17,23 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../helpers/Users.php';
-require_once __DIR__ . '/../helpers/Rounds.php';
-require_once __DIR__ . '/../exceptions/InvalidUser.php';
-require_once __DIR__ . '/../exceptions/Database.php';
-require_once __DIR__ . '/../exceptions/BadAction.php';
+use Monolog\Logger;
+
+require_once __DIR__ . '/../models/Session.php';
 require_once __DIR__ . '/../Controller.php';
 
 class GamesController extends Controller
 {
+    /**
+     * @var SessionModel
+     */
+    protected $_sessionModel;
+    public function __construct(Db $db, Logger $log)
+    {
+        parent::__construct($db, $log);
+        $this->_sessionModel = new SessionModel($this->_db);
+    }
+
     /**
      * Start new game and return its hash
      *
@@ -38,27 +46,8 @@ class GamesController extends Controller
     {
         $this->_log->addInfo('Starting game with players id# ' . implode(',', $players));
 
-        $invalid = UsersHelper::valid($this->_db, $players);
-        if ($invalid) {
-            throw new InvalidUserException($invalid);
-        }
-
-        $newGame = $this->_db->table('session')->create();
-        $newGame->set([
-            'event_id' =>       0,
-            'replay_hash' =>    null,
-            'orig_link' =>      null,
-            'play_date' =>      date('Y-m-d H:i:s'),
-            'players' =>        implode(',', array_map('intval', $players)),
-            'state' =>          'inprogress'
-        ]);
-        $gameHash = sha1($newGame->get('players') . $newGame->get('play_date'));
-        $success = $newGame
-            ->set('representational_hash', $gameHash)
-            ->save();
-        if (!$success) {
-            throw new DatabaseException("Couldn't create session record in DB");
-        }
+        // TODO: correct event id
+        $gameHash = $this->_sessionModel->startGame(0, $players);
 
         $this->_log->addInfo('Successfully started game with players id# ' . implode(',', $players));
         return $gameHash;
@@ -73,8 +62,7 @@ class GamesController extends Controller
     public function end($gameHashcode)
     {
         $this->_log->addInfo('Finishing game # ' . $gameHashcode);
-        $game = $this->_checkValidHashcode($gameHashcode);
-        $result = !!$game->set('state', 'finished')->save();
+        $result = $this->_sessionModel->endGame($gameHashcode);
         $this->_log->addInfo(($result ? 'Successfully finished' : 'Failed to finish') . ' game # ' . $gameHashcode);
         return $result;
     }
@@ -101,27 +89,5 @@ class GamesController extends Controller
         $result = $newRound->save();
         $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
         return $result;
-    }
-
-    /**
-     * Check that passed hashcode refers to valid existing game in progress
-     *
-     * @param $gameHashcode
-     * @throws BadActionException
-     * @throws DatabaseException
-     * @return bool|\Idiorm\ORM
-     */
-    protected function _checkValidHashcode($gameHashcode)
-    {
-        $game = $this->_db->table('session')->where('representational_hash', $gameHashcode)->findOne();
-        if (!$game) {
-            throw new DatabaseException("Couldn't find session in DB");
-        }
-
-        if ($game->get('state') !== 'inprogress') {
-            throw new BadActionException("Attempted to end game that is not in progress");
-        }
-
-        return $game;
     }
 }

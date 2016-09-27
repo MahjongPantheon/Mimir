@@ -39,7 +39,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setRuleset('');
         $this->_event->save();
 
-        $this->_players = array_map(function($i) {
+        $this->_players = array_map(function ($i) {
             $p = (new PlayerPrimitive($this->_db))
                 ->setDisplayName('player' . $i)
                 ->setIdent('oauth' . $i)

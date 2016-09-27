@@ -23,7 +23,9 @@ require_once __DIR__ . '/../Primitive.php';
 
 /**
  * Class FormationPrimitive
+ *
  * Represents any organisation, club, association of players, etc
+ * Low-level model with basic CRUD operations and relations
  * @package Riichi
  */
 class FormationPrimitive extends Primitive

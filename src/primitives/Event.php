@@ -21,6 +21,12 @@ use \Idiorm\ORM;
 
 require_once __DIR__ . '/../Primitive.php';
 
+/**
+ * Class EventPrimitive
+ *
+ * Low-level model with basic CRUD operations and relations
+ * @package Riichi
+ */
 class EventPrimitive extends Primitive
 {
     protected static $_table = 'event';
