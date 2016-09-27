@@ -93,8 +93,29 @@ class SessionModel extends Model
         return $game->setState('finished')->save();
     }
 
-    public function addRound($gameHash, $roundData)
+    /**
+     * @param $gameHashcode string Hashcode of game
+     * @param $roundData array Structure of round data
+     * @throws DatabaseException
+     * @throws BadActionException
+     * @return bool Success?
+     */
+    public function addRound($gameHashcode, $roundData)
     {
+        // TODO
+        /*
+        $game = $this->_checkValidHashcode($gameHashcode);
+        RoundsHelper::checkRound($this->_db, $game, $roundData);
+        $newRound = $this->_db->table('round')->create();
+        $newRound->set( // Just set it, as we already checked its perfect validity.
+            array_merge($roundData, [
+                    'session_id' => $game->get('id'),
+                    'event_id' =>   $game->get('event_id')
+                ])
+        );
+        $result = $newRound->save();
+        return $result;
+        */
     }
 
     protected function _findGame($gameHash, $withState)

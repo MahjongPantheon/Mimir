@@ -37,18 +37,16 @@ class GamesController extends Controller
     /**
      * Start new game and return its hash
      *
-     * @param $players array Player id list
+     * @param int $eventId Event this session belongs to
+     * @param array $players Player id list
      * @throws InvalidUserException
      * @throws DatabaseException
      * @return string Hashcode of started game
      */
-    public function start($players)
+    public function start($eventId, $players)
     {
         $this->_log->addInfo('Starting game with players id# ' . implode(',', $players));
-
-        // TODO: correct event id
-        $gameHash = $this->_sessionModel->startGame(0, $players);
-
+        $gameHash = $this->_sessionModel->startGame($eventId, $players);
         $this->_log->addInfo('Successfully started game with players id# ' . implode(',', $players));
         return $gameHash;
     }
@@ -77,16 +75,7 @@ class GamesController extends Controller
     public function addRound($gameHashcode, $roundData)
     {
         $this->_log->addInfo('Adding new round to game # ' . $gameHashcode);
-        $game = $this->_checkValidHashcode($gameHashcode);
-        RoundsHelper::checkRound($this->_db, $game, $roundData);
-        $newRound = $this->_db->table('round')->create();
-        $newRound->set( // Just set it, as we already checked its perfect validity.
-            array_merge($roundData, [
-                'session_id' => $game->get('id'),
-                'event_id' =>   $game->get('event_id')
-            ])
-        );
-        $result = $newRound->save();
+        $result = $this->_sessionModel->addRound($gameHashcode, $roundData);
         $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
         return $result;
     }
