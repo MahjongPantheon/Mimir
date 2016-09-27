@@ -17,8 +17,8 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/models/Event.php';
-require_once __DIR__ . '/util/Db.php';
+require_once __DIR__ . '/../../src/models/Event.php';
+require_once __DIR__ . '/../util/Db.php';
 
 class EventModelTest extends \PHPUnit_Framework_TestCase
 {

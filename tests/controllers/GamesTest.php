@@ -19,8 +19,8 @@ namespace Riichi;
 
 use Idiorm\ORM;
 
-require_once __DIR__ . '/../src/controllers/Games.php';
-require_once __DIR__ . '/util/Db.php';
+require_once __DIR__ . '/../../src/controllers/Games.php';
+require_once __DIR__ . '/../util/Db.php';
 
 /**
  * Class GamesTest: integration test suite

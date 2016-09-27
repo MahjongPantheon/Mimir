@@ -17,8 +17,8 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/models/Player.php';
-require_once __DIR__ . '/util/Db.php';
+require_once __DIR__ . '/../../src/models/Player.php';
+require_once __DIR__ . '/../util/Db.php';
 
 class PlayerModelTest extends \PHPUnit_Framework_TestCase
 {
