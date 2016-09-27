@@ -71,7 +71,7 @@ class Session extends Model
      * comma-separated ordered list of player ids, east to north.
      * @var string
      */
-    protected $_playersIds;
+    protected $_playersIds = [];
 
     /**
      * Ordered list of player entities
@@ -134,14 +134,14 @@ class Session extends Model
      * Find sessions by state (indexed search)
      *
      * @param IDb $db
-     * @param string $state
+     * @param string[] $stateList
      * @throws \Exception
      * @return Session[]
      */
-    public static function findByState(IDb $db, $state)
+    public static function findByState(IDb $db, $stateList)
     {
         // TODO: Finished games are likely to be too much. Make pagination here.
-        return self::_findBy($db, 'id', [$state]);
+        return self::_findBy($db, 'state', $stateList);
     }
 
     /**
@@ -150,7 +150,7 @@ class Session extends Model
      */
     public function save()
     {
-        $this->_representationalHash = sha1($this->_playersIds . $this->_playDate);
+        $this->_representationalHash = sha1(implode(',', $this->_playersIds) . $this->_playDate);
         $session = $this->_db->table(self::$_table)->findOne($this->_id);
         return ($session ? $this->_save($session) : $this->_create());
     }
@@ -174,7 +174,7 @@ class Session extends Model
             'replay_hash'           => $this->_replayHash,
             'orig_link'             => $this->_origLink,
             'play_date'             => $this->_playDate,
-            'players'               => $this->_playersIds,
+            'players'               => implode(',', $this->_playersIds),
             'state'                 => $this->_state
         ])->save();
     }
@@ -187,7 +187,7 @@ class Session extends Model
         $this->_replayHash = $data['replay_hash'];
         $this->_origLink = $data['orig_link'];
         $this->_playDate = $data['play_date'];
-        $this->_playersIds = $data['players'];
+        $this->_playersIds = explode(',', $data['players']);
         $this->_state = $data['state'];
         return $this;
     }
@@ -346,7 +346,6 @@ class Session extends Model
      */
     public function setState($state)
     {
-        // TODO: some state changing checks?
         $this->_state = $state;
         return $this;
     }
