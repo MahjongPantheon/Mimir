@@ -17,82 +17,78 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../../src/models/Event.php';
+require_once __DIR__ . '/../../src/models/Formation.php';
+require_once __DIR__ . '/../../src/models/Player.php';
 require_once __DIR__ . '/../util/Db.php';
 
-class EventModelTest extends \PHPUnit_Framework_TestCase
+class FormationModelTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
+    protected $_owner;
+
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
+        $this->_owner = (new Player($this->_db))
+            ->setDisplayName('player')
+            ->setIdent('oauth')
+            ->setTenhouId('tenhou');
+        $this->_owner->save();
     }
 
-    public function testNewEvent()
+    public function testNewFormation()
     {
-        $newEvent = new Event($this->_db);
-        $newEvent
-            ->setTitle('event1')
-            ->setDescription('eventdesc1')
-            ->setType('online')
-            ->setRuleset('');
+        $newFormation = new Formation($this->_db);
+        $newFormation
+            ->setTitle('f1')
+            ->setDescription('fdesc1')
+            ->setCity('city')
+            ->setContactInfo('someinfo')
+            ->setPrimaryOwner($this->_owner);
 
-        $this->assertEquals('event1', $newEvent->getTitle());
-        $this->assertEquals('eventdesc1', $newEvent->getDescription());
-        $this->assertEquals('online', $newEvent->getType());
+        $this->assertEquals('f1', $newFormation->getTitle());
+        $this->assertEquals('fdesc1', $newFormation->getDescription());
+        $this->assertEquals('city', $newFormation->getCity());
+        $this->assertEquals('someinfo', $newFormation->getContactInfo());
+        $this->assertTrue($this->_owner === $newFormation->getPrimaryOwner());
 
-        $success = $newEvent->save();
-        $this->assertTrue($success, "Saved event");
-        $this->assertGreaterThan(0, $newEvent->getId());
+        $success = $newFormation->save();
+        $this->assertTrue($success, "Saved formation");
+        $this->assertGreaterThan(0, $newFormation->getId());
     }
 
-    public function testFindEventById()
+    public function testFindFormationById()
     {
-        $newEvent = new Event($this->_db);
-        $newEvent
-            ->setTitle('event1')
-            ->setDescription('eventdesc1')
-            ->setType('online')
-            ->setRuleset('')
+        $newFormation = new Formation($this->_db);
+        $newFormation
+            ->setTitle('f1')
+            ->setDescription('fdesc1')
+            ->setCity('city')
+            ->setContactInfo('someinfo')
+            ->setPrimaryOwner($this->_owner)
             ->save();
 
-        $eventCopy = Event::findById($this->_db, [$newEvent->getId()]);
-        $this->assertEquals(1, count($eventCopy));
-        $this->assertEquals('event1', $eventCopy[0]->getTitle());
-        $this->assertTrue($newEvent !== $eventCopy); // different objects!
+        $formationCopy = Formation::findById($this->_db, [$newFormation->getId()]);
+        $this->assertEquals(1, count($formationCopy));
+        $this->assertEquals('f1', $formationCopy[0]->getTitle());
+        $this->assertTrue($newFormation !== $formationCopy); // different objects!
     }
 
-    public function testFindEventByLobby()
+    public function testUpdateFormation()
     {
-        $newEvent = new Event($this->_db);
-        $newEvent
-            ->setTitle('event1')
-            ->setDescription('eventdesc1')
-            ->setType('online')
-            ->setRuleset('')
-            ->setLobbyId('some_lobby')
+        $newFormation = new Formation($this->_db);
+        $newFormation
+            ->setTitle('f1')
+            ->setDescription('fdesc1')
+            ->setCity('city')
+            ->setContactInfo('someinfo')
+            ->setPrimaryOwner($this->_owner)
             ->save();
 
-        $eventCopy = Event::findByLobby($this->_db, [$newEvent->getLobbyId()]);
-        $this->assertEquals(1, count($eventCopy));
-        $this->assertEquals('event1', $eventCopy[0]->getTitle());
-        $this->assertTrue($newEvent !== $eventCopy); // different objects!
-    }
+        $formationCopy = Formation::findById($this->_db, [$newFormation->getId()]);
+        $formationCopy[0]->setDescription('someanotherdesc')->save();
 
-    public function testUpdateEvent()
-    {
-        $newEvent = new Event($this->_db);
-        $newEvent
-            ->setTitle('event1')
-            ->setDescription('eventdesc1')
-            ->setType('online')
-            ->setRuleset('')
-            ->save();
-
-        $eventCopy = Event::findById($this->_db, [$newEvent->getId()]);
-        $eventCopy[0]->setDescription('someanotherdesc')->save();
-
-        $anotherEventCopy = Event::findById($this->_db, [$newEvent->getId()]);
-        $this->assertEquals('someanotherdesc', $anotherEventCopy[0]->getDescription());
+        $anotherFormationCopy = Formation::findById($this->_db, [$newFormation->getId()]);
+        $this->assertEquals('someanotherdesc', $anotherFormationCopy[0]->getDescription());
     }
 }
