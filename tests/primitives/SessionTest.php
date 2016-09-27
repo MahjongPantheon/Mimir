@@ -17,9 +17,9 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../../src/models/Session.php';
-require_once __DIR__ . '/../../src/models/Event.php';
-require_once __DIR__ . '/../../src/models/Player.php';
+require_once __DIR__ . '/../../src/primitives/Session.php';
+require_once __DIR__ . '/../../src/primitives/Event.php';
+require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class SessionModelTest extends \PHPUnit_Framework_TestCase
@@ -32,7 +32,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
     {
         $this->_db = Db::getCleanInstance();
 
-        $this->_event = (new Event($this->_db))
+        $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
@@ -40,7 +40,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $this->_event->save();
 
         $this->_players = array_map(function($i) {
-            $p = (new Player($this->_db))
+            $p = (new PlayerPrimitive($this->_db))
                 ->setDisplayName('player' . $i)
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('tenhou' . $i);
@@ -51,7 +51,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testNewSession()
     {
-        $newSession = new Session($this->_db);
+        $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setState('inprogress')
             ->setOrigLink('test')
@@ -72,7 +72,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindSessionById()
     {
-        $newSession = new Session($this->_db);
+        $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setState('inprogress')
             ->setOrigLink('test')
@@ -80,7 +80,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setEvent($this->_event)
             ->save();
 
-        $sessionCopy = Session::findById($this->_db, [$newSession->getId()]);
+        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
         $this->assertTrue($newSession !== $sessionCopy); // different objects!
@@ -88,7 +88,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindSessionByState()
     {
-        $newSession = new Session($this->_db);
+        $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setState('inprogress')
             ->setOrigLink('test')
@@ -96,7 +96,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setEvent($this->_event)
             ->save();
 
-        $sessionCopy = Session::findByState($this->_db, [$newSession->getState()]);
+        $sessionCopy = SessionPrimitive::findByState($this->_db, [$newSession->getState()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
         $this->assertTrue($newSession !== $sessionCopy); // different objects!
@@ -104,7 +104,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindSessionByReplay()
     {
-        $newSession = new Session($this->_db);
+        $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setState('inprogress')
             ->setOrigLink('test')
@@ -112,7 +112,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setEvent($this->_event)
             ->save();
 
-        $sessionCopy = Session::findByReplayHash($this->_db, [$newSession->getReplayHash()]);
+        $sessionCopy = SessionPrimitive::findByReplayHash($this->_db, [$newSession->getReplayHash()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('inprogress', $sessionCopy[0]->getState());
         $this->assertTrue($newSession !== $sessionCopy); // different objects!
@@ -120,7 +120,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindSessionByRepHash()
     {
-        $newSession = new Session($this->_db);
+        $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setState('inprogress')
             ->setOrigLink('test')
@@ -129,7 +129,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->save();
 
         $this->assertNotEmpty($newSession->getRepresentationalHash());
-        $sessionCopy = Session::findByRepresentationalHash($this->_db, [$newSession->getRepresentationalHash()]);
+        $sessionCopy = SessionPrimitive::findByRepresentationalHash($this->_db, [$newSession->getRepresentationalHash()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
         $this->assertTrue($newSession !== $sessionCopy); // different objects!
@@ -137,7 +137,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdateSession()
     {
-        $newSession = new Session($this->_db);
+        $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setState('inprogress')
             ->setOrigLink('test')
@@ -145,11 +145,11 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setEvent($this->_event)
             ->save();
 
-        $sessionCopy = Session::findById($this->_db, [$newSession->getId()]);
+        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
         $sessionCopy[0]->setReplayHash('someanotherhash')->save();
         $this->assertEquals($newSession->getRepresentationalHash(), $sessionCopy[0]->getRepresentationalHash());
 
-        $anotherSessionCopy = Session::findById($this->_db, [$newSession->getId()]);
+        $anotherSessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
         $this->assertEquals('someanotherhash', $anotherSessionCopy[0]->getReplayHash());
         $this->assertEquals($newSession->getRepresentationalHash(), $anotherSessionCopy[0]->getRepresentationalHash());
     }

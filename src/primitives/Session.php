@@ -21,9 +21,9 @@ use \Idiorm\ORM;
 
 require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
-require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../Primitive.php';
 
-class Session extends Model
+class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';
 
@@ -39,7 +39,7 @@ class Session extends Model
     protected $_eventId;
     /**
      *
-     * @var Event
+     * @var EventPrimitive
      */
     protected $_event;
 
@@ -75,7 +75,7 @@ class Session extends Model
 
     /**
      * Ordered list of player entities
-     * @var Player[]
+     * @var PlayerPrimitive[]
      */
     protected $_players;
 
@@ -97,7 +97,7 @@ class Session extends Model
      * @param IDb $db
      * @param int[] $ids
      * @throws \Exception
-     * @return Session[]
+     * @return SessionPrimitive[]
      */
     public static function findById(IDb $db, $ids)
     {
@@ -110,7 +110,7 @@ class Session extends Model
      * @param IDb $db
      * @param string[] $replayIds
      * @throws \Exception
-     * @return Session[]
+     * @return SessionPrimitive[]
      */
     public static function findByReplayHash(IDb $db, $replayIds)
     {
@@ -123,7 +123,7 @@ class Session extends Model
      * @param IDb $db
      * @param string[] $hashList
      * @throws \Exception
-     * @return Session[]
+     * @return SessionPrimitive[]
      */
     public static function findByRepresentationalHash(IDb $db, $hashList)
     {
@@ -136,7 +136,7 @@ class Session extends Model
      * @param IDb $db
      * @param string[] $stateList
      * @throws \Exception
-     * @return Session[]
+     * @return SessionPrimitive[]
      */
     public static function findByState(IDb $db, $stateList)
     {
@@ -193,10 +193,10 @@ class Session extends Model
     }
 
     /**
-     * @param \Riichi\Event $event
+     * @param \Riichi\EventPrimitive $event
      * @return $this
      */
-    public function setEvent(Event $event)
+    public function setEvent(EventPrimitive $event)
     {
         $this->_event = $event;
         $this->_eventId = $event->getId();
@@ -205,14 +205,14 @@ class Session extends Model
 
     /**
      * @throws EntityNotFoundException
-     * @return \Riichi\Event
+     * @return \Riichi\EventPrimitive
      */
     public function getEvent()
     {
         if (!$this->_event) {
-            $foundEvents = Event::findById($this->_db, [$this->_eventId]);
+            $foundEvents = EventPrimitive::findById($this->_db, [$this->_eventId]);
             if (empty($foundEvents)) {
-                throw new EntityNotFoundException("Entity Event with id#" . $this->_eventId . ' not found in DB');
+                throw new EntityNotFoundException("Entity EventPrimitive with id#" . $this->_eventId . ' not found in DB');
             }
             $this->_event = $foundEvents[0];
         }
@@ -263,7 +263,7 @@ class Session extends Model
 
     /**
      * @throws InvalidParametersException
-     * @param \Riichi\Player[] $players
+     * @param \Riichi\PlayerPrimitive[] $players
      * @return $this
      */
     public function setPlayers($players)
@@ -271,8 +271,8 @@ class Session extends Model
         $this->_players = [];
         $ids = [];
         foreach ($players as $player) {
-            if (!($player instanceof Player)) {
-                throw new InvalidParametersException('All array elements must be Player entities');
+            if (!($player instanceof PlayerPrimitive)) {
+                throw new InvalidParametersException('All array elements must be PlayerPrimitive entities');
             }
 
             $this->_players []= $player;
@@ -285,13 +285,13 @@ class Session extends Model
 
     /**
      * @throws EntityNotFoundException
-     * @return \Riichi\Player[]
+     * @return \Riichi\PlayerPrimitive[]
      */
     public function getPlayers()
     {
         if (empty($this->_players)) {
             $idArray = explode(',', $this->_playersIds);
-            $this->_players = Player::findById(
+            $this->_players = PlayerPrimitive::findById(
                 $this->_db,
                 $idArray
             );

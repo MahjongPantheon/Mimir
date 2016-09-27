@@ -17,7 +17,7 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../../src/models/Event.php';
+require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class EventModelTest extends \PHPUnit_Framework_TestCase
@@ -30,7 +30,7 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
 
     public function testNewEvent()
     {
-        $newEvent = new Event($this->_db);
+        $newEvent = new EventPrimitive($this->_db);
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
@@ -48,7 +48,7 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindEventById()
     {
-        $newEvent = new Event($this->_db);
+        $newEvent = new EventPrimitive($this->_db);
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
@@ -56,7 +56,7 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
             ->setRuleset('')
             ->save();
 
-        $eventCopy = Event::findById($this->_db, [$newEvent->getId()]);
+        $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
         $this->assertEquals(1, count($eventCopy));
         $this->assertEquals('event1', $eventCopy[0]->getTitle());
         $this->assertTrue($newEvent !== $eventCopy); // different objects!
@@ -64,7 +64,7 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindEventByLobby()
     {
-        $newEvent = new Event($this->_db);
+        $newEvent = new EventPrimitive($this->_db);
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
@@ -73,7 +73,7 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
             ->setLobbyId('some_lobby')
             ->save();
 
-        $eventCopy = Event::findByLobby($this->_db, [$newEvent->getLobbyId()]);
+        $eventCopy = EventPrimitive::findByLobby($this->_db, [$newEvent->getLobbyId()]);
         $this->assertEquals(1, count($eventCopy));
         $this->assertEquals('event1', $eventCopy[0]->getTitle());
         $this->assertTrue($newEvent !== $eventCopy); // different objects!
@@ -81,7 +81,7 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdateEvent()
     {
-        $newEvent = new Event($this->_db);
+        $newEvent = new EventPrimitive($this->_db);
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
@@ -89,10 +89,10 @@ class EventModelTest extends \PHPUnit_Framework_TestCase
             ->setRuleset('')
             ->save();
 
-        $eventCopy = Event::findById($this->_db, [$newEvent->getId()]);
+        $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
         $eventCopy[0]->setDescription('someanotherdesc')->save();
 
-        $anotherEventCopy = Event::findById($this->_db, [$newEvent->getId()]);
+        $anotherEventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
         $this->assertEquals('someanotherdesc', $anotherEventCopy[0]->getDescription());
     }
 }

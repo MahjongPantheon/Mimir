@@ -19,9 +19,9 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../Primitive.php';
 
-class Player extends Model
+class PlayerPrimitive extends Primitive
 {
     protected static $_table = 'user';
 
@@ -52,7 +52,7 @@ class Player extends Model
      * @param IDb $db
      * @param int[] $ids
      * @throws \Exception
-     * @return Player[]
+     * @return PlayerPrimitive[]
      */
     public static function findById(IDb $db, $ids)
     {
@@ -65,7 +65,7 @@ class Player extends Model
      * @param IDb $db
      * @param int[] $idents
      * @throws \Exception
-     * @return Player[]
+     * @return PlayerPrimitive[]
      */
     public static function findByIdent(IDb $db, $idents)
     {
@@ -78,7 +78,7 @@ class Player extends Model
      * @param IDb $db
      * @param int[] $ids
      * @throws \Exception
-     * @return Player[]
+     * @return PlayerPrimitive[]
      */
     public static function findByTenhouId(IDb $db, $ids)
     {

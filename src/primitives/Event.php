@@ -19,9 +19,9 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../Primitive.php';
 
-class Event extends Model
+class EventPrimitive extends Primitive
 {
     protected static $_table = 'event';
 
@@ -52,7 +52,7 @@ class Event extends Model
     protected $_endTime;
     /**
      * Owner organisation
-     * @var Formation|null
+     * @var FormationPrimitive|null
      */
     protected $_ownerFormation = null;
     /**
@@ -62,7 +62,7 @@ class Event extends Model
     protected $_ownerFormationId;
     /**
      * Owner player
-     * @var Player|null
+     * @var PlayerPrimitive|null
      */
     protected $_ownerUser = null;
     /**
@@ -99,7 +99,7 @@ class Event extends Model
      * @param IDb $db
      * @param int[] $ids
      * @throws \Exception
-     * @return Event[]
+     * @return EventPrimitive[]
      */
     public static function findById(IDb $db, $ids)
     {
@@ -112,7 +112,7 @@ class Event extends Model
      * @param IDb $db
      * @param string[] $lobbyList
      * @throws \Exception
-     * @return Event[]
+     * @return EventPrimitive[]
      */
     public static function findByLobby(IDb $db, $lobbyList)
     {
@@ -173,7 +173,7 @@ class Event extends Model
 
     /**
      * @param string $description
-     * @return Event
+     * @return EventPrimitive
      */
     public function setDescription($description)
     {
@@ -191,7 +191,7 @@ class Event extends Model
 
     /**
      * @param string $endTime
-     * @return Event
+     * @return EventPrimitive
      */
     public function setEndTime($endTime)
     {
@@ -217,7 +217,7 @@ class Event extends Model
 
     /**
      * @param string $lobbyId
-     * @return Event
+     * @return EventPrimitive
      */
     public function setLobbyId($lobbyId)
     {
@@ -234,10 +234,10 @@ class Event extends Model
     }
 
     /**
-     * @param null|\Riichi\Formation $ownerFormation
-     * @return Event
+     * @param null|\Riichi\FormationPrimitive $ownerFormation
+     * @return EventPrimitive
      */
-    public function setOwnerFormation(Formation $ownerFormation)
+    public function setOwnerFormation(FormationPrimitive $ownerFormation)
     {
         $this->_ownerFormation = $ownerFormation;
         $this->_ownerFormationId = $ownerFormation->getId();
@@ -246,14 +246,14 @@ class Event extends Model
 
     /**
      * @throws EntityNotFoundException
-     * @return null|\Riichi\Formation
+     * @return null|\Riichi\FormationPrimitive
      */
     public function getOwnerFormation()
     {
         if (!$this->_ownerFormation) {
-            $foundFormations = Formation::findById($this->_db, [$this->_ownerFormationId]);
+            $foundFormations = FormationPrimitive::findById($this->_db, [$this->_ownerFormationId]);
             if (empty($foundFormations)) {
-                throw new EntityNotFoundException("Entity Formation with id#" . $this->_ownerFormationId . ' not found in DB');
+                throw new EntityNotFoundException("Entity FormationPrimitive with id#" . $this->_ownerFormationId . ' not found in DB');
             }
             $this->_ownerFormation = $foundFormations[0];
         }
@@ -269,8 +269,8 @@ class Event extends Model
     }
 
     /**
-     * @param null|\Riichi\Player $ownerUser
-     * @return Event
+     * @param null|\Riichi\PlayerPrimitive $ownerUser
+     * @return EventPrimitive
      */
     public function setOwnerUser($ownerUser)
     {
@@ -281,14 +281,14 @@ class Event extends Model
 
     /**
      * @throws EntityNotFoundException
-     * @return null|\Riichi\Player
+     * @return null|\Riichi\PlayerPrimitive
      */
     public function getOwnerUser()
     {
         if (!$this->_ownerUser) {
-            $foundUsers = Player::findById($this->_db, [$this->_ownerUserId]);
+            $foundUsers = PlayerPrimitive::findById($this->_db, [$this->_ownerUserId]);
             if (empty($foundUsers)) {
-                throw new EntityNotFoundException("Entity Player with id#" . $this->_ownerUserId . ' not found in DB');
+                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_ownerUserId . ' not found in DB');
             }
             $this->_ownerUser = $foundUsers[0];
         }
@@ -305,7 +305,7 @@ class Event extends Model
 
     /**
      * @param mixed $ruleset
-     * @return Event
+     * @return EventPrimitive
      */
     public function setRuleset($ruleset)
     {
@@ -323,7 +323,7 @@ class Event extends Model
 
     /**
      * @param string $startTime
-     * @return Event
+     * @return EventPrimitive
      */
     public function setStartTime($startTime)
     {
@@ -341,7 +341,7 @@ class Event extends Model
 
     /**
      * @param string $title
-     * @return Event
+     * @return EventPrimitive
      */
     public function setTitle($title)
     {
@@ -359,7 +359,7 @@ class Event extends Model
 
     /**
      * @param string $type
-     * @return Event
+     * @return EventPrimitive
      */
     public function setType($type)
     {

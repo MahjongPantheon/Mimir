@@ -19,7 +19,7 @@ namespace Riichi;
 
 use Monolog\Logger;
 
-abstract class Model
+abstract class Primitive
 {
     protected static $_table;
 
@@ -54,7 +54,7 @@ abstract class Model
      * @param string $key
      * @param array $identifiers
      * @throws \Exception
-     * @return Player[]
+     * @return PlayerPrimitive[]
      */
     protected static function _findBy(IDb $db, $key, $identifiers)
     {

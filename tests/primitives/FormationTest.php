@@ -17,8 +17,8 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../../src/models/Formation.php';
-require_once __DIR__ . '/../../src/models/Player.php';
+require_once __DIR__ . '/../../src/primitives/Formation.php';
+require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class FormationModelTest extends \PHPUnit_Framework_TestCase
@@ -29,7 +29,7 @@ class FormationModelTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
-        $this->_owner = (new Player($this->_db))
+        $this->_owner = (new PlayerPrimitive($this->_db))
             ->setDisplayName('player')
             ->setIdent('oauth')
             ->setTenhouId('tenhou');
@@ -38,7 +38,7 @@ class FormationModelTest extends \PHPUnit_Framework_TestCase
 
     public function testNewFormation()
     {
-        $newFormation = new Formation($this->_db);
+        $newFormation = new FormationPrimitive($this->_db);
         $newFormation
             ->setTitle('f1')
             ->setDescription('fdesc1')
@@ -59,7 +59,7 @@ class FormationModelTest extends \PHPUnit_Framework_TestCase
 
     public function testFindFormationById()
     {
-        $newFormation = new Formation($this->_db);
+        $newFormation = new FormationPrimitive($this->_db);
         $newFormation
             ->setTitle('f1')
             ->setDescription('fdesc1')
@@ -68,7 +68,7 @@ class FormationModelTest extends \PHPUnit_Framework_TestCase
             ->setPrimaryOwner($this->_owner)
             ->save();
 
-        $formationCopy = Formation::findById($this->_db, [$newFormation->getId()]);
+        $formationCopy = FormationPrimitive::findById($this->_db, [$newFormation->getId()]);
         $this->assertEquals(1, count($formationCopy));
         $this->assertEquals('f1', $formationCopy[0]->getTitle());
         $this->assertTrue($newFormation !== $formationCopy); // different objects!
@@ -76,7 +76,7 @@ class FormationModelTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdateFormation()
     {
-        $newFormation = new Formation($this->_db);
+        $newFormation = new FormationPrimitive($this->_db);
         $newFormation
             ->setTitle('f1')
             ->setDescription('fdesc1')
@@ -85,10 +85,10 @@ class FormationModelTest extends \PHPUnit_Framework_TestCase
             ->setPrimaryOwner($this->_owner)
             ->save();
 
-        $formationCopy = Formation::findById($this->_db, [$newFormation->getId()]);
+        $formationCopy = FormationPrimitive::findById($this->_db, [$newFormation->getId()]);
         $formationCopy[0]->setDescription('someanotherdesc')->save();
 
-        $anotherFormationCopy = Formation::findById($this->_db, [$newFormation->getId()]);
+        $anotherFormationCopy = FormationPrimitive::findById($this->_db, [$newFormation->getId()]);
         $this->assertEquals('someanotherdesc', $anotherFormationCopy[0]->getDescription());
     }
 }

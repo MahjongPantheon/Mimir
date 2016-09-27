@@ -19,14 +19,14 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../Primitive.php';
 
 /**
- * Class Formation
+ * Class FormationPrimitive
  * Represents any organisation, club, association of players, etc
  * @package Riichi
  */
-class Formation extends Model
+class FormationPrimitive extends Primitive
 {
     protected static $_table = 'formation';
 
@@ -38,17 +38,17 @@ class Formation extends Model
      */
     protected $_id;
     /**
-     * Formation title
+     * FormationPrimitive title
      * @var string
      */
     protected $_title;
     /**
-     * Formation location
+     * FormationPrimitive location
      * @var string
      */
     protected $_city;
     /**
-     * Formation description
+     * FormationPrimitive description
      * @var string
      */
     protected $_description;
@@ -64,7 +64,7 @@ class Formation extends Model
     protected $_contactInfo;
     /**
      * Owner player
-     * @var Player|null
+     * @var PlayerPrimitive|null
      */
     protected $_primaryOwner = null;
     /**
@@ -79,7 +79,7 @@ class Formation extends Model
      * @param IDb $db
      * @param int[] $ids
      * @throws \Exception
-     * @return Formation[]
+     * @return FormationPrimitive[]
      */
     public static function findById(IDb $db, $ids)
     {
@@ -133,7 +133,7 @@ class Formation extends Model
 
     /**
      * @param string $description
-     * @return Formation
+     * @return FormationPrimitive
      */
     public function setDescription($description)
     {
@@ -158,8 +158,8 @@ class Formation extends Model
     }
 
     /**
-     * @param null|\Riichi\Player $owner
-     * @return Formation
+     * @param null|\Riichi\PlayerPrimitive $owner
+     * @return FormationPrimitive
      */
     public function setPrimaryOwner($owner)
     {
@@ -170,14 +170,14 @@ class Formation extends Model
 
     /**
      * @throws EntityNotFoundException
-     * @return null|\Riichi\Player
+     * @return null|\Riichi\PlayerPrimitive
      */
     public function getPrimaryOwner()
     {
         if (!$this->_primaryOwner) {
-            $foundUsers = Player::findById($this->_db, [$this->_primaryOwnerId]);
+            $foundUsers = PlayerPrimitive::findById($this->_db, [$this->_primaryOwnerId]);
             if (empty($foundUsers)) {
-                throw new EntityNotFoundException("Entity Player with id#" . $this->_primaryOwnerId . ' not found in DB');
+                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_primaryOwnerId . ' not found in DB');
             }
             $this->_primaryOwner = $foundUsers[0];
         }
@@ -194,7 +194,7 @@ class Formation extends Model
 
     /**
      * @param string $title
-     * @return Formation
+     * @return FormationPrimitive
      */
     public function setTitle($title)
     {
@@ -212,7 +212,7 @@ class Formation extends Model
 
     /**
      * @param string $logo
-     * @return Formation
+     * @return FormationPrimitive
      */
     public function setLogo($logo)
     {
@@ -238,7 +238,7 @@ class Formation extends Model
 
     /**
      * @param string $contactInfo
-     * @return Formation
+     * @return FormationPrimitive
      */
     public function setContactInfo($contactInfo)
     {
@@ -256,7 +256,7 @@ class Formation extends Model
 
     /**
      * @param string $city
-     * @return Formation
+     * @return FormationPrimitive
      */
     public function setCity($city)
     {
