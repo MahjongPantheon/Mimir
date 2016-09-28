@@ -91,4 +91,12 @@ class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
         $anotherFormationCopy = FormationPrimitive::findById($this->_db, [$newFormation->getId()]);
         $this->assertEquals('someanotherdesc', $anotherFormationCopy[0]->getDescription());
     }
+
+    public function testRelationGetters()
+    {
+        // TODO
+        // 1) save to db
+        // 2) get copy
+        // 3) use getters of copy to get copies of resources
+    }
 }

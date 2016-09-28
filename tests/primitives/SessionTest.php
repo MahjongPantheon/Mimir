@@ -153,4 +153,12 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('someanotherhash', $anotherSessionCopy[0]->getReplayHash());
         $this->assertEquals($newSession->getRepresentationalHash(), $anotherSessionCopy[0]->getRepresentationalHash());
     }
+
+    public function testRelationGetters()
+    {
+        // TODO
+        // 1) save to db
+        // 2) get copy
+        // 3) use getters of copy to get copies of resources
+    }
 }

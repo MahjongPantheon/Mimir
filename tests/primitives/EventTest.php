@@ -95,4 +95,12 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $anotherEventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
         $this->assertEquals('someanotherdesc', $anotherEventCopy[0]->getDescription());
     }
+
+    public function testRelationGetters()
+    {
+        // TODO
+        // 1) save to db
+        // 2) get copy
+        // 3) use getters of copy to get copies of resources
+    }
 }
