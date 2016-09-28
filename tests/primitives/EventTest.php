@@ -59,7 +59,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
         $this->assertEquals(1, count($eventCopy));
         $this->assertEquals('event1', $eventCopy[0]->getTitle());
-        $this->assertTrue($newEvent !== $eventCopy); // different objects!
+        $this->assertTrue($newEvent !== $eventCopy[0]); // different objects!
     }
 
     public function testFindEventByLobby()
@@ -76,7 +76,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $eventCopy = EventPrimitive::findByLobby($this->_db, [$newEvent->getLobbyId()]);
         $this->assertEquals(1, count($eventCopy));
         $this->assertEquals('event1', $eventCopy[0]->getTitle());
-        $this->assertTrue($newEvent !== $eventCopy); // different objects!
+        $this->assertTrue($newEvent !== $eventCopy[0]); // different objects!
     }
 
     public function testUpdateEvent()

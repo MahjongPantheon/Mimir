@@ -83,7 +83,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
     public function testFindSessionByState()
@@ -99,7 +99,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $sessionCopy = SessionPrimitive::findByState($this->_db, [$newSession->getState()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
     public function testFindSessionByReplay()
@@ -115,7 +115,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $sessionCopy = SessionPrimitive::findByReplayHash($this->_db, [$newSession->getReplayHash()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('inprogress', $sessionCopy[0]->getState());
-        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
     public function testFindSessionByRepHash()
@@ -132,7 +132,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $sessionCopy = SessionPrimitive::findByRepresentationalHash($this->_db, [$newSession->getRepresentationalHash()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
     public function testUpdateSession()

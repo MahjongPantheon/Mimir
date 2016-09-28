@@ -105,6 +105,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(0, $newRound->getKanuradora());
         $this->assertEquals(0, $newRound->getMultiRon());
         $this->assertEquals('', $newRound->getYaku());
+        $this->assertTrue($this->_event === $newRound->getEvent());
+        $this->assertEquals($this->_event->getId(), $newRound->getEventId());
 
         $success = $newRound->save();
         $this->assertTrue($success, "Saved round");
@@ -113,103 +115,95 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
 
     public function testFindRoundById()
     {
-//        $newSession = new SessionPrimitive($this->_db);
-//        $newSession
-//            ->setState('inprogress')
-//            ->setOrigLink('test')
-//            ->setReplayHash('hash')
-//            ->setEvent($this->_event)
-//            ->save();
-//
-//        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
-//        $this->assertEquals(1, count($sessionCopy));
-//        $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-//        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $newRound = new RoundPrimitive($this->_db);
+        $newRound
+            ->setSession($this->_session)
+            ->setOutcome('ron')
+            ->setRoundIndex(1);
+        $newRound->save();
+
+        $roundsCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()]);
+        $this->assertEquals(1, count($roundsCopy));
+        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
+        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
     }
 
     public function testFindRoundBySession()
     {
-//        $newSession = new SessionPrimitive($this->_db);
-//        $newSession
-//            ->setState('inprogress')
-//            ->setOrigLink('test')
-//            ->setReplayHash('hash')
-//            ->setEvent($this->_event)
-//            ->save();
-//
-//        $sessionCopy = SessionPrimitive::findByState($this->_db, [$newSession->getState()]);
-//        $this->assertEquals(1, count($sessionCopy));
-//        $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-//        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $newRound = new RoundPrimitive($this->_db);
+        $newRound
+            ->setSession($this->_session)
+            ->setOutcome('ron')
+            ->setRoundIndex(1);
+        $newRound->save();
+
+        $roundsCopy = RoundPrimitive::findBySessionIds($this->_db, [$this->_session->getId()]);
+        $this->assertEquals(1, count($roundsCopy));
+        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
+        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
     }
 
     public function testFindRoundByEvent()
     {
-//        $newSession = new SessionPrimitive($this->_db);
-//        $newSession
-//            ->setState('inprogress')
-//            ->setOrigLink('test')
-//            ->setReplayHash('hash')
-//            ->setEvent($this->_event)
-//            ->save();
-//
-//        $sessionCopy = SessionPrimitive::findByReplayHash($this->_db, [$newSession->getReplayHash()]);
-//        $this->assertEquals(1, count($sessionCopy));
-//        $this->assertEquals('inprogress', $sessionCopy[0]->getState());
-//        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $newRound = new RoundPrimitive($this->_db);
+        $newRound
+            ->setSession($this->_session)
+            ->setOutcome('ron')
+            ->setRoundIndex(1);
+        $newRound->save();
+
+        $roundsCopy = RoundPrimitive::findByEventIds($this->_db, [$this->_event->getId()]);
+        $this->assertEquals(1, count($roundsCopy));
+        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
+        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
     }
 
     public function testFindRoundByWinner()
     {
-//        $newSession = new SessionPrimitive($this->_db);
-//        $newSession
-//            ->setState('inprogress')
-//            ->setOrigLink('test')
-//            ->setReplayHash('hash')
-//            ->setEvent($this->_event)
-//            ->save();
-//
-//        $this->assertNotEmpty($newSession->getRepresentationalHash());
-//        $sessionCopy = SessionPrimitive::findByRepresentationalHash($this->_db, [$newSession->getRepresentationalHash()]);
-//        $this->assertEquals(1, count($sessionCopy));
-//        $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-//        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $newRound = new RoundPrimitive($this->_db);
+        $newRound
+            ->setSession($this->_session)
+            ->setWinner($this->_players[0])
+            ->setOutcome('ron')
+            ->setRoundIndex(1);
+        $newRound->save();
+
+        $roundsCopy = RoundPrimitive::findByWinnerIds($this->_db, [$this->_players[0]->getId()]);
+        $this->assertEquals(1, count($roundsCopy));
+        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
+        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
     }
 
     public function testFindRoundByLoser()
     {
-//        $newSession = new SessionPrimitive($this->_db);
-//        $newSession
-//            ->setState('inprogress')
-//            ->setOrigLink('test')
-//            ->setReplayHash('hash')
-//            ->setEvent($this->_event)
-//            ->save();
-//
-//        $this->assertNotEmpty($newSession->getRepresentationalHash());
-//        $sessionCopy = SessionPrimitive::findByRepresentationalHash($this->_db, [$newSession->getRepresentationalHash()]);
-//        $this->assertEquals(1, count($sessionCopy));
-//        $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
-//        $this->assertTrue($newSession !== $sessionCopy); // different objects!
+        $newRound = new RoundPrimitive($this->_db);
+        $newRound
+            ->setSession($this->_session)
+            ->setLoser($this->_players[0])
+            ->setOutcome('ron')
+            ->setRoundIndex(1);
+        $newRound->save();
+
+        $roundsCopy = RoundPrimitive::findByLoserIds($this->_db, [$this->_players[0]->getId()]);
+        $this->assertEquals(1, count($roundsCopy));
+        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
+        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
     }
 
     public function testUpdateRound()
     {
-//        $newSession = new SessionPrimitive($this->_db);
-//        $newSession
-//            ->setState('inprogress')
-//            ->setOrigLink('test')
-//            ->setReplayHash('hash')
-//            ->setEvent($this->_event)
-//            ->save();
-//
-//        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
-//        $sessionCopy[0]->setReplayHash('someanotherhash')->save();
-//        $this->assertEquals($newSession->getRepresentationalHash(), $sessionCopy[0]->getRepresentationalHash());
-//
-//        $anotherSessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
-//        $this->assertEquals('someanotherhash', $anotherSessionCopy[0]->getReplayHash());
-//        $this->assertEquals($newSession->getRepresentationalHash(), $anotherSessionCopy[0]->getRepresentationalHash());
+        $newRound = new RoundPrimitive($this->_db);
+        $newRound
+            ->setSession($this->_session)
+            ->setOutcome('ron')
+            ->setRoundIndex(1);
+        $newRound->save();
+
+        $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()]);
+        $roundCopy[0]->setOutcome('tsumo')->save();
+
+        $anotherRoundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()]);
+        $this->assertEquals('tsumo', $anotherRoundCopy[0]->getOutcome());
     }
 
     public function testRelationGetters()

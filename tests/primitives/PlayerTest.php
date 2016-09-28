@@ -58,7 +58,7 @@ class PlayerPrimitiveTest extends \PHPUnit_Framework_TestCase
         $userCopy = PlayerPrimitive::findById($this->_db, [$newUser->getId()]);
         $this->assertEquals(1, count($userCopy));
         $this->assertEquals('someident', $userCopy[0]->getIdent());
-        $this->assertTrue($newUser !== $userCopy); // different objects!
+        $this->assertTrue($newUser !== $userCopy[0]); // different objects!
     }
 
     public function testFindPlayerByIdent()
@@ -73,7 +73,7 @@ class PlayerPrimitiveTest extends \PHPUnit_Framework_TestCase
         $userCopy = PlayerPrimitive::findByIdent($this->_db, [$newUser->getIdent()]);
         $this->assertEquals(1, count($userCopy));
         $this->assertEquals('someid', $userCopy[0]->getTenhouId());
-        $this->assertTrue($newUser !== $userCopy); // different objects!
+        $this->assertTrue($newUser !== $userCopy[0]); // different objects!
     }
 
     public function testFindPlayerByTenhouId()
@@ -88,7 +88,7 @@ class PlayerPrimitiveTest extends \PHPUnit_Framework_TestCase
         $userCopy = PlayerPrimitive::findByTenhouId($this->_db, [$newUser->getTenhouId()]);
         $this->assertEquals(1, count($userCopy));
         $this->assertEquals('user1', $userCopy[0]->getDisplayName());
-        $this->assertTrue($newUser !== $userCopy); // different objects!
+        $this->assertTrue($newUser !== $userCopy[0]); // different objects!
     }
 
     public function testUpdatePlayer()

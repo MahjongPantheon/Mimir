@@ -274,7 +274,7 @@ class SessionPrimitive extends Primitive
     public function setPlayers($players)
     {
         $this->_players = $players;
-        $this->_playersIds = array_map(function(PlayerPrimitive $user) {
+        $this->_playersIds = array_map(function (PlayerPrimitive $user) {
             return $user->getId();
         }, $players);
 

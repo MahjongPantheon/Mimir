@@ -283,10 +283,11 @@ class RoundPrimitive extends Primitive
     }
 
     /**
+     * @deprecated
      * @param EventPrimitive $event
      * @throws InvalidParametersException
      */
-    public function setEvent(EventPrimitive $event)
+    public function _setEvent(EventPrimitive $event)
     {
         throw new InvalidParametersException('Event should not be set directly to round. Set session instead!');
     }
@@ -478,7 +479,7 @@ class RoundPrimitive extends Primitive
     public function setRiichiUsers($riichiUsers)
     {
         $this->_riichiUsers = $riichiUsers;
-        $this->_riichiIds = array_map(function(PlayerPrimitive $user) {
+        $this->_riichiIds = array_map(function (PlayerPrimitive $user) {
             return $user->getId();
         }, $riichiUsers);
         return $this;
@@ -564,7 +565,7 @@ class RoundPrimitive extends Primitive
     public function setTempaiUsers($tempaiUsers)
     {
         $this->_tempaiUsers = $tempaiUsers;
-        $this->_tempaiIds = array_map(function(PlayerPrimitive $user) {
+        $this->_tempaiIds = array_map(function (PlayerPrimitive $user) {
             return $user->getId();
         }, $tempaiUsers);
         return $this;

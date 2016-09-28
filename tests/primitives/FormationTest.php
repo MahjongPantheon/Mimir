@@ -71,7 +71,7 @@ class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
         $formationCopy = FormationPrimitive::findById($this->_db, [$newFormation->getId()]);
         $this->assertEquals(1, count($formationCopy));
         $this->assertEquals('f1', $formationCopy[0]->getTitle());
-        $this->assertTrue($newFormation !== $formationCopy); // different objects!
+        $this->assertTrue($newFormation !== $formationCopy[0]); // different objects!
     }
 
     public function testUpdateFormation()
