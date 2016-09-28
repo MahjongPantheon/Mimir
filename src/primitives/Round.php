@@ -23,6 +23,7 @@ require_once __DIR__ . '/Player.php';
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Event.php';
 require_once __DIR__ . '/../Primitive.php';
+require_once __DIR__ . '/../validators/Round.php';
 
 /**
  * Class EventPrimitive
@@ -262,6 +263,16 @@ class RoundPrimitive extends Primitive
         $this->_riichiIds   = explode(',', $data['riichi']);
         $this->_multiRon    = $data['multi_ron'];
         return $this;
+    }
+
+    public static function createFromData(Db $db, SessionPrimitive $session, $roundData)
+    {
+        RoundsHelper::checkRound($db, $session, $roundData);
+        $roundData['session_id'] = $session->getId();
+        $roundData['event_id'] = $session->getEventId();
+
+        // Just set it, as we already checked its perfect validity.
+        return (new RoundPrimitive($db))->_restore($roundData);
     }
 
     /**

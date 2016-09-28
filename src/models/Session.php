@@ -96,26 +96,19 @@ class SessionModel extends Model
     /**
      * @param $gameHashcode string Hashcode of game
      * @param $roundData array Structure of round data
-     * @throws DatabaseException
+     * @throws InvalidParametersException
      * @throws BadActionException
      * @return bool Success?
      */
     public function addRound($gameHashcode, $roundData)
     {
-        // TODO
-        /*
-        $game = $this->_checkValidHashcode($gameHashcode);
-        RoundsHelper::checkRound($this->_db, $game, $roundData);
-        $newRound = $this->_db->table('round')->create();
-        $newRound->set( // Just set it, as we already checked its perfect validity.
-            array_merge($roundData, [
-                    'session_id' => $game->get('id'),
-                    'event_id' =>   $game->get('event_id')
-                ])
-        );
-        $result = $newRound->save();
-        return $result;
-        */
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, $gameHashcode);
+        if (empty($session)) {
+            throw new InvalidParametersException("Couldn't find session in DB");
+        }
+
+        $newRound = RoundPrimitive::createFromData($this->_db, $session[0], $roundData);
+        return $newRound->save();
     }
 
     protected function _findGame($gameHash, $withState)

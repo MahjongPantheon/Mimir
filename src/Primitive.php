@@ -17,7 +17,7 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/helpers/Date.php';
+require_once __DIR__ . '/Date.php';
 
 use Monolog\Logger;
 

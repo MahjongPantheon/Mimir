@@ -17,7 +17,7 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../../src/helpers/Rounds.php';
+require_once __DIR__ . '/../../src/validators/Round.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class RoundsHelperTest extends \PHPUnit_Framework_TestCase
