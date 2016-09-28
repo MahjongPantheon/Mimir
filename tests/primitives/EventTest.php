@@ -18,6 +18,8 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../src/primitives/Event.php';
+require_once __DIR__ . '/../../src/primitives/Formation.php';
+require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
@@ -96,11 +98,62 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('someanotherdesc', $anotherEventCopy[0]->getDescription());
     }
 
-    public function testRelationGetters()
+    public function testRelationOwnerUser()
     {
-        // TODO
-        // 1) save to db
-        // 2) get copy
-        // 3) use getters of copy to get copies of resources
+        $newUser = new PlayerPrimitive($this->_db);
+        $newUser
+            ->setDisplayName('user1')
+            ->setIdent('someident')
+            ->setTenhouId('someid');
+        $newUser->save();
+
+        $newEvent = new EventPrimitive($this->_db);
+        $newEvent
+            ->setTitle('event1')
+            ->setOwnerUser($newUser)
+            ->setDescription('eventdesc1')
+            ->setType('online')
+            ->setRuleset('')
+            ->save();
+
+        $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()])[0];
+        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerUserId()); // before fetch
+        $this->assertNotEmpty($eventCopy->getOwnerUser());
+        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerUser()->getId());
+        $this->assertTrue($newUser !== $eventCopy->getOwnerUser()); // different objects!
+    }
+
+    public function testRelationOwnerFormation()
+    {
+        $newUser = new PlayerPrimitive($this->_db);
+        $newUser
+            ->setDisplayName('user1')
+            ->setIdent('someident')
+            ->setTenhouId('someid');
+        $newUser->save();
+
+        $newFormation = new FormationPrimitive($this->_db);
+        $newFormation
+            ->setPrimaryOwner($newUser)
+            ->setTitle('f1')
+            ->setDescription('fdesc1')
+            ->setCity('city')
+            ->setContactInfo('someinfo')
+            ->save();
+
+        $newEvent = new EventPrimitive($this->_db);
+        $newEvent
+            ->setTitle('event1')
+            ->setOwnerFormation($newFormation)
+            ->setDescription('eventdesc1')
+            ->setType('online')
+            ->setRuleset('')
+            ->save();
+
+        $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()])[0];
+        $this->assertEquals($newFormation->getId(), $eventCopy->getOwnerFormationId()); // before fetch
+        $this->assertNotEmpty($eventCopy->getOwnerFormation());
+        $this->assertEquals($newFormation->getId(), $eventCopy->getOwnerFormation()->getId());
+        $this->assertTrue($newFormation !== $eventCopy->getOwnerFormation()); // different objects!
     }
 }

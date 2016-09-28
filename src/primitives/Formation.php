@@ -187,14 +187,6 @@ class FormationPrimitive extends Primitive
     }
 
     /**
-     * @return int
-     */
-    public function getOwnerUserId()
-    {
-        return $this->_primaryOwnerId;
-    }
-
-    /**
      * @param string $title
      * @return FormationPrimitive
      */

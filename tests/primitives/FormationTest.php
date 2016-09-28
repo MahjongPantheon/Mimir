@@ -24,6 +24,9 @@ require_once __DIR__ . '/../util/Db.php';
 class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
+    /**
+     * @var PlayerPrimitive
+     */
     protected $_owner;
 
     public function setUp()
@@ -92,11 +95,22 @@ class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('someanotherdesc', $anotherFormationCopy[0]->getDescription());
     }
 
-    public function testRelationGetters()
+    public function testRelationPrimaryOwner()
     {
-        // TODO
-        // 1) save to db
-        // 2) get copy
-        // 3) use getters of copy to get copies of resources
+        $newFormation = new FormationPrimitive($this->_db);
+        $newFormation
+            ->setTitle('f1')
+            ->setDescription('fdesc1')
+            ->setCity('city')
+            ->setContactInfo('someinfo')
+            ->setPrimaryOwner($this->_owner)
+            ->save();
+
+        $formationCopy = FormationPrimitive::findById($this->_db, [$newFormation->getId()])[0];
+        $this->assertEquals($this->_owner->getId(), $formationCopy->getPrimaryOwnerId()); // before fetch
+        $this->assertNotEmpty($formationCopy->getPrimaryOwner());
+        $this->assertEquals($this->_owner->getId(), $formationCopy->getPrimaryOwner()->getId());
+        $this->assertTrue($this->_owner !== $formationCopy->getPrimaryOwner()); // different objects!
     }
+
 }

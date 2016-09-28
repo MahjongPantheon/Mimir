@@ -278,7 +278,7 @@ class EventPrimitive extends Primitive
      * @param null|\Riichi\PlayerPrimitive $ownerUser
      * @return EventPrimitive
      */
-    public function setOwnerUser($ownerUser)
+    public function setOwnerUser(PlayerPrimitive $ownerUser)
     {
         $this->_ownerUser = $ownerUser;
         $this->_ownerUserId = $ownerUser->getId();

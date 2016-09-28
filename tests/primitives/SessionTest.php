@@ -25,7 +25,13 @@ require_once __DIR__ . '/../util/Db.php';
 class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
+    /**
+     * @var EventPrimitive
+     */
     protected $_event;
+    /**
+     * @var PlayerPrimitive[]
+     */
     protected $_players;
 
     public function setUp()
@@ -154,11 +160,41 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($newSession->getRepresentationalHash(), $anotherSessionCopy[0]->getRepresentationalHash());
     }
 
-    public function testRelationGetters()
+    public function testRelationEvent()
     {
-        // TODO
-        // 1) save to db
-        // 2) get copy
-        // 3) use getters of copy to get copies of resources
+        $newSession = new SessionPrimitive($this->_db);
+        $newSession
+            ->setState('inprogress')
+            ->setOrigLink('test')
+            ->setReplayHash('hash')
+            ->setEvent($this->_event)
+            ->save();
+
+        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()])[0];
+        $this->assertEquals($this->_event->getId(), $sessionCopy->getEventId()); // before fetch
+        $this->assertNotEmpty($sessionCopy->getEvent());
+        $this->assertEquals($this->_event->getId(), $sessionCopy->getEvent()->getId());
+        $this->assertTrue($this->_event !== $sessionCopy->getEvent()); // different objects!
+    }
+
+    public function testRelationPlayers()
+    {
+        $newSession = new SessionPrimitive($this->_db);
+        $newSession
+            ->setState('inprogress')
+            ->setOrigLink('test')
+            ->setReplayHash('hash')
+            ->setEvent($this->_event)
+            ->setPlayers($this->_players)
+            ->save();
+
+        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()])[0];
+        $this->assertEquals( // before fetch
+            $this->_players[0]->getId(),
+            explode(',', $sessionCopy->getPlayersIds())[0]
+        );
+        $this->assertNotEmpty($sessionCopy->getPlayers());
+        $this->assertEquals($this->_players[0]->getId(), $sessionCopy->getPlayers()[0]->getId());
+        $this->assertTrue($this->_players[0] !== $sessionCopy->getPlayers()[0]); // different objects!
     }
 }
