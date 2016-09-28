@@ -233,13 +233,13 @@ class RoundPrimitive extends Primitive
             'han'           => $this->_han,
             'fu'            => $this->_fu,
             'round'         => $this->_roundIndex,
-            'tempai'        => implode(',', $this->_tempaiIds),
+            'tempai'        => $this->_tempaiIds ? implode(',', $this->_tempaiIds) : '',
             'yaku'          => $this->_yaku,
             'dora'          => $this->_dora,
             'uradora'       => $this->_uradora,
             'kandora'       => $this->_kandora,
             'kanuradora'    => $this->_kanuradora,
-            'riichi'        => implode(',', $this->_riichiIds),
+            'riichi'        => $this->_riichiIds ? implode(',', $this->_riichiIds) : '',
             'multi_ron'     => $this->_multiRon
         ])->save();
     }
