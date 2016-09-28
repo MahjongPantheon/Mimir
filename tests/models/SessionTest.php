@@ -28,7 +28,7 @@ require_once __DIR__ . '/../util/Db.php';
  * Class SessionTest: integration test suite
  * @package Riichi
  */
-class SessionTest extends \PHPUnit_Framework_TestCase
+class SessionModelTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var Db

@@ -32,6 +32,8 @@ require_once __DIR__ . '/../Primitive.php';
  */
 class RoundPrimitive extends Primitive
 {
+    protected static $_table = 'round';
+
     /**
      * @var int
      */
@@ -97,7 +99,7 @@ class RoundPrimitive extends Primitive
     /**
      * @var PlayerPrimitive[]
      */
-    protected $_tempaiUsers;
+    protected $_tempaiUsers = null;
     /**
      * comma-separated yaku id list
      * @var string
@@ -126,7 +128,7 @@ class RoundPrimitive extends Primitive
     /**
      * @var PlayerPrimitive[]
      */
-    protected $_riichiUsers;
+    protected $_riichiUsers = null;
     /**
      * double or triple ron flag to properly display results of round
      * @var int
@@ -223,7 +225,7 @@ class RoundPrimitive extends Primitive
     {
         return $session->set([
             'session_id'    => $this->_sessionId,
-            'event_id'      => $this->_eventId,
+            'event_id'      => $this->getSession()->getEventId(),
             'outcome'       => $this->_outcome,
             'winner_id'     => $this->_winnerId,
             'loser_id'      => $this->_loserId,
@@ -281,21 +283,24 @@ class RoundPrimitive extends Primitive
     }
 
     /**
-     * @param \Riichi\EventPrimitive $event
-     * @return RoundPrimitive
+     * @param EventPrimitive $event
+     * @throws InvalidParametersException
      */
     public function setEvent(EventPrimitive $event)
     {
-        $this->_event = $event;
-        $this->_eventId = $event->getId();
-        return $this;
+        throw new InvalidParametersException('Event should not be set directly to round. Set session instead!');
     }
 
     /**
+     * @throws EntityNotFoundException
      * @return \Riichi\EventPrimitive
      */
     public function getEvent()
     {
+        if (!$this->_event) {
+            $this->_event = $this->_session->getEvent();
+            $this->_eventId = $this->_event->getId();
+        }
         return $this->_event;
     }
 
@@ -399,10 +404,18 @@ class RoundPrimitive extends Primitive
     }
 
     /**
+     * @throws EntityNotFoundException
      * @return \Riichi\PlayerPrimitive
      */
     public function getLoser()
     {
+        if (!$this->_loser) {
+            $foundUsers = PlayerPrimitive::findById($this->_db, [$this->_loserId]);
+            if (empty($foundUsers)) {
+                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_loserId . ' not found in DB');
+            }
+            $this->_loser = $foundUsers[0];
+        }
         return $this->_loser;
     }
 
@@ -472,10 +485,22 @@ class RoundPrimitive extends Primitive
     }
 
     /**
+     * @throws EntityNotFoundException
      * @return \Riichi\PlayerPrimitive[]
      */
     public function getRiichiUsers()
     {
+        if ($this->_riichiUsers === null) {
+            $idArray = explode(',', $this->_riichiIds);
+            $this->_riichiUsers = PlayerPrimitive::findById(
+                $this->_db,
+                $idArray
+            );
+            if (empty($this->_riichiUsers) || count($this->_riichiUsers) !== count($idArray)) {
+                $this->_riichiUsers = null;
+                throw new EntityNotFoundException("Not all players were found in DB (among id#" . $this->_riichiUsers);
+            }
+        }
         return $this->_riichiUsers;
     }
 
@@ -546,10 +571,22 @@ class RoundPrimitive extends Primitive
     }
 
     /**
+     * @throws EntityNotFoundException
      * @return \Riichi\PlayerPrimitive[]
      */
     public function getTempaiUsers()
     {
+        if ($this->_tempaiUsers === null) {
+            $idArray = explode(',', $this->_tempaiIds);
+            $this->_tempaiUsers = PlayerPrimitive::findById(
+                $this->_db,
+                $idArray
+            );
+            if (empty($this->_tempaiUsers) || count($this->_tempaiUsers) !== count($idArray)) {
+                $this->_tempaiUsers = null;
+                throw new EntityNotFoundException("Not all players were found in DB (among id#" . $this->_tempaiUsers);
+            }
+        }
         return $this->_tempaiUsers;
     }
 
@@ -583,10 +620,18 @@ class RoundPrimitive extends Primitive
     }
 
     /**
+     * @throws EntityNotFoundException
      * @return \Riichi\PlayerPrimitive
      */
     public function getWinner()
     {
+        if (!$this->_winner) {
+            $foundUsers = PlayerPrimitive::findById($this->_db, [$this->_winnerId]);
+            if (empty($foundUsers)) {
+                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_winnerId . ' not found in DB');
+            }
+            $this->_winner = $foundUsers[0];
+        }
         return $this->_winner;
     }
 

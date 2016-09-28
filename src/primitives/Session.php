@@ -83,7 +83,7 @@ class SessionPrimitive extends Primitive
      * Ordered list of player entities
      * @var PlayerPrimitive[]
      */
-    protected $_players;
+    protected $_players = null;
 
     /**
      * planned / inprogress / finished
@@ -268,24 +268,16 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * @throws InvalidParametersException
      * @param \Riichi\PlayerPrimitive[] $players
      * @return $this
      */
     public function setPlayers($players)
     {
-        $this->_players = [];
-        $ids = [];
-        foreach ($players as $player) {
-            if (!($player instanceof PlayerPrimitive)) {
-                throw new InvalidParametersException('All array elements must be PlayerPrimitive entities');
-            }
+        $this->_players = $players;
+        $this->_playersIds = array_map(function(PlayerPrimitive $user) {
+            return $user->getId();
+        }, $players);
 
-            $this->_players []= $player;
-            $ids []= $player->getId();
-        }
-
-        $this->_playersIds = $ids;
         return $this;
     }
 
@@ -295,7 +287,7 @@ class SessionPrimitive extends Primitive
      */
     public function getPlayers()
     {
-        if (empty($this->_players)) {
+        if ($this->_players === null) {
             $idArray = explode(',', $this->_playersIds);
             $this->_players = PlayerPrimitive::findById(
                 $this->_db,

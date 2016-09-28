@@ -20,7 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../util/Db.php';
 
-class EventModelTest extends \PHPUnit_Framework_TestCase
+class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
     public function setUp()

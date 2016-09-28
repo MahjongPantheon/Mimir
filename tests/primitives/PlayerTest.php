@@ -20,7 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/Db.php';
 
-class PlayerModelTest extends \PHPUnit_Framework_TestCase
+class PlayerPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
     public function setUp()
