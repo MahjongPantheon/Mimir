@@ -257,6 +257,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
 
         $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()])[0];
         $this->assertEquals($newUser->getId(), $roundCopy->getWinnerId()); // before fetch
+
         $this->assertNotEmpty($roundCopy->getWinner());
         $this->assertEquals($newUser->getId(), $roundCopy->getWinner()->getId());
         $this->assertTrue($newUser !== $roundCopy->getWinner()); // different objects!
@@ -299,7 +300,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()])[0];
         $this->assertEquals( // before fetch
             $this->_players[0]->getId(),
-            explode(',', $roundCopy->getTempaiIds())[0]
+            explode(',', $roundCopy->getTempaiIds()[0])[0]
         );
         $this->assertNotEmpty($roundCopy->getTempaiUsers());
         $this->assertEquals($this->_players[0]->getId(), $roundCopy->getTempaiUsers()[0]->getId());
@@ -319,7 +320,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()])[0];
         $this->assertEquals( // before fetch
             $this->_players[0]->getId(),
-            explode(',', $roundCopy->getRiichiIds())[0]
+            explode(',', $roundCopy->getRiichiIds()[0])[0]
         );
         $this->assertNotEmpty($roundCopy->getRiichiUsers());
         $this->assertEquals($this->_players[0]->getId(), $roundCopy->getRiichiUsers()[0]->getId());

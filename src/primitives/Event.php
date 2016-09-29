@@ -126,16 +126,6 @@ class EventPrimitive extends Primitive
         return self::_findBy($db, 'lobby_id', $lobbyList);
     }
 
-    /**
-     * Save event instance to db
-     * @return bool success
-     */
-    public function save()
-    {
-        $session = $this->_db->table(self::$_table)->findOne($this->_id);
-        return ($session ? $this->_save($session) : $this->_create());
-    }
-
     protected function _create()
     {
         $session = $this->_db->table(self::$_table)->create();

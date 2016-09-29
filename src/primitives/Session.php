@@ -157,8 +157,7 @@ class SessionPrimitive extends Primitive
     public function save()
     {
         $this->_representationalHash = sha1(implode(',', $this->_playersIds) . $this->_playDate);
-        $session = $this->_db->table(self::$_table)->findOne($this->_id);
-        return ($session ? $this->_save($session) : $this->_create());
+        return parent::save();
     }
 
     protected function _create()
@@ -288,14 +287,13 @@ class SessionPrimitive extends Primitive
     public function getPlayers()
     {
         if ($this->_players === null) {
-            $idArray = explode(',', $this->_playersIds);
             $this->_players = PlayerPrimitive::findById(
                 $this->_db,
-                $idArray
+                $this->_playersIds
             );
-            if (empty($this->_players) || count($this->_players) !== count($idArray)) {
+            if (empty($this->_players) || count($this->_players) !== count($this->_playersIds)) {
                 $this->_players = null;
-                throw new EntityNotFoundException("Not all players were found in DB (among id#" . $this->_playersIds);
+                throw new EntityNotFoundException("Not all players were found in DB (among id#" . implode(',', $this->_playersIds));
             }
         }
         return $this->_players;

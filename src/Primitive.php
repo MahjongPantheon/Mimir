@@ -20,6 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/Date.php';
 
 use Monolog\Logger;
+use Idiorm\ORM;
 
 abstract class Primitive
 {
@@ -38,7 +39,35 @@ abstract class Primitive
         }
     }
 
-    abstract public function save();
+    /**
+     * Save instance to db
+     * @return bool success
+     */
+    public function save()
+    {
+        $id = $this->getId();
+        if (empty($id)) {
+            return $this->_create();
+        }
+
+        $instance = $this->_db->table(static::$_table)->findOne($id);
+        return ($instance ? $this->_save($instance) : $this->_create());
+    }
+
+    /**
+     * Update instance in db
+     * @param ORM $instance
+     * @return mixed
+     */
+    abstract protected function _save(ORM $instance);
+
+    /**
+     * Create instance to db
+     * @return mixed
+     */
+    abstract protected function _create();
+
+    abstract public function getId();
 
     abstract protected function _restore($data);
 

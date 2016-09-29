@@ -91,16 +91,6 @@ class PlayerPrimitive extends Primitive
         return self::_findBy($db, 'tenhou_id', $ids);
     }
 
-    /**
-     * Save user instance to db
-     * @return bool success
-     */
-    public function save()
-    {
-        $user = $this->_db->table(self::$_table)->findOne($this->_id);
-        return ($user ? $this->_save($user) : $this->_create());
-    }
-
     protected function _create()
     {
         $user = $this->_db->table(self::$_table)->create();

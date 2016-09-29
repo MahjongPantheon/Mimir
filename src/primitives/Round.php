@@ -201,16 +201,6 @@ class RoundPrimitive extends Primitive
         return self::_findBy($db, 'loser_id', $idList);
     }
 
-    /**
-     * Save formation instance to db
-     * @return bool success
-     */
-    public function save()
-    {
-        $session = $this->_db->table(self::$_table)->findOne($this->_id);
-        return ($session ? $this->_save($session) : $this->_create());
-    }
-
     protected function _create()
     {
         $session = $this->_db->table(self::$_table)->create();
@@ -246,6 +236,7 @@ class RoundPrimitive extends Primitive
 
     protected function _restore($data)
     {
+        $this->_id          = $data['id'];
         $this->_sessionId   = $data['session_id'];
         $this->_eventId     = $data['event_id'];
         $this->_outcome     = $data['outcome'];
@@ -310,7 +301,7 @@ class RoundPrimitive extends Primitive
     public function getEvent()
     {
         if (!$this->_event) {
-            $this->_event = $this->_session->getEvent();
+            $this->_event = $this->getSession()->getEvent();
             $this->_eventId = $this->_event->getId();
         }
         return $this->_event;
@@ -503,14 +494,13 @@ class RoundPrimitive extends Primitive
     public function getRiichiUsers()
     {
         if ($this->_riichiUsers === null) {
-            $idArray = explode(',', $this->_riichiIds);
             $this->_riichiUsers = PlayerPrimitive::findById(
                 $this->_db,
-                $idArray
+                $this->_riichiIds
             );
-            if (empty($this->_riichiUsers) || count($this->_riichiUsers) !== count($idArray)) {
+            if (empty($this->_riichiUsers) || count($this->_riichiUsers) !== count($this->_riichiIds)) {
                 $this->_riichiUsers = null;
-                throw new EntityNotFoundException("Not all players were found in DB (among id#" . $this->_riichiUsers);
+                throw new EntityNotFoundException("Not all players were found in DB (among id#" . implode(',', $this->_riichiIds));
             }
         }
         return $this->_riichiUsers;
@@ -550,6 +540,13 @@ class RoundPrimitive extends Primitive
      */
     public function getSession()
     {
+        if (!$this->_session) {
+            $foundSessions = SessionPrimitive::findById($this->_db, [$this->_sessionId]);
+            if (empty($foundSessions)) {
+                throw new EntityNotFoundException("Entity SessionPrimitive with id#" . $this->_winnerId . ' not found in DB');
+            }
+            $this->_session = $foundSessions[0];
+        }
         return $this->_session;
     }
 
@@ -589,14 +586,13 @@ class RoundPrimitive extends Primitive
     public function getTempaiUsers()
     {
         if ($this->_tempaiUsers === null) {
-            $idArray = explode(',', $this->_tempaiIds);
             $this->_tempaiUsers = PlayerPrimitive::findById(
                 $this->_db,
-                $idArray
+                $this->_tempaiIds
             );
-            if (empty($this->_tempaiUsers) || count($this->_tempaiUsers) !== count($idArray)) {
+            if (empty($this->_tempaiUsers) || count($this->_tempaiUsers) !== count($this->_tempaiIds)) {
                 $this->_tempaiUsers = null;
-                throw new EntityNotFoundException("Not all players were found in DB (among id#" . $this->_tempaiUsers);
+                throw new EntityNotFoundException("Not all players were found in DB (among id#" . implode(',', $this->_tempaiIds));
             }
         }
         return $this->_tempaiUsers;
