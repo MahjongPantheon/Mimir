@@ -34,7 +34,13 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
      * @var Db
      */
     protected $_db;
+    /**
+     * @var PlayerPrimitive[]
+     */
     protected $_players = [];
+    /**
+     * @var EventPrimitive
+     */
     protected $_event;
     public function setUp()
     {
@@ -60,12 +66,32 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testNewGame()
     {
-        //->start([1, 2, 3, 4]);
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players)
+        );
+
+        $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
+        $this->assertEquals(1, count($sessionPrimitive));
+        $this->assertEquals($this->_event->getId(), $sessionPrimitive[0]->getEventId());
+        $this->assertEquals('inprogress', $sessionPrimitive[0]->getState());
     }
 
     public function testEndGame()
     {
-        //->end('some_existing_hash');
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players)
+        );
+
+        $session->endGame($hash);
+
+        $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
+        $this->assertEquals(1, count($sessionPrimitive));
+        $this->assertEquals($this->_event->getId(), $sessionPrimitive[0]->getEventId());
+        $this->assertEquals('finished', $sessionPrimitive[0]->getState());
     }
 
     public function testAddRoundRon()
@@ -134,45 +160,59 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
     }
 
     // Negative tests
-//
-//    /**
-//     * @expectedException \Riichi\InvalidUserException
-//     */
-//    public function testNewGameBadUser()
-//    {
-//        //->start([2, 3, 4, 5]); // id 5 does not exist
-//    }
-//
-//    /**
-//     * @expectedException \Riichi\InvalidUserException
-//     */
-//    public function testNewGameWrongUserCount()
-//    {
-//        //->start([2, 3, 4]);
-//    }
-//
-//    /**
-//     * @expectedException \Riichi\DatabaseException
-//     */
-//    public function testEndGameWrongHash()
-//    {
-//        //->end('some_inexisting_hash');
-//    }
-//
-//    public function testEndGameButGameAlreadyFinished()
-//    {
-//        //->start([1, 2, 3, 4]);
-//        //->end($hash); // Really finish
-//
-//        $caught = false;
-//        try {
-//            //->end($hash); // Try to finish again
-//        } catch (BadActionException $e) {
-//            // We do try/catch here to avoid catching same exception from
-//            // upper clauses, as it might give some false positives in that case.
-//            $caught = true;
-//        }
-//
-//        $this->assertTrue($caught, "Finished game throws exception");
-//    }
+
+    /**
+     * @expectedException \Riichi\InvalidUserException
+     */
+    public function testNewGameBadUser()
+    {
+        $playerIds = array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players);
+        $playerIds[1] = 100400; // non-existing id
+
+        $session = new SessionModel($this->_db);
+        $session->startGame($this->_event->getId(), $playerIds);
+    }
+
+    /**
+     * @expectedException \Riichi\InvalidUserException
+     */
+    public function testNewGameWrongUserCount()
+    {
+        $playerIds = array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players);
+        array_pop($playerIds); // 3 players instead of 4
+
+        $session = new SessionModel($this->_db);
+        $session->startGame($this->_event->getId(), $playerIds);
+    }
+
+    /**
+         * @expectedException \Riichi\InvalidParametersException
+     */
+    public function testEndGameWrongHash()
+    {
+        $session = new SessionModel($this->_db);
+        $session->endGame('inexisting_hash');
+    }
+
+    public function testEndGameButGameAlreadyFinished()
+    {
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players)
+        );
+
+        $session->endGame($hash); // Finish ok
+
+        $caught = false;
+        try {
+            $session->endGame($hash); // Try to finish again
+        } catch (BadActionException $e) {
+            // We do try/catch here to avoid catching same exception from
+            // upper clauses, as it might give some false positives in that case.
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, "Finished game throws exception");
+    }
 }
