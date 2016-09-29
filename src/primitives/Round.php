@@ -35,6 +35,39 @@ class RoundPrimitive extends Primitive
 {
     protected static $_table = 'round';
 
+    protected static $_fieldsMapping = [
+        'id'            => '_id',
+        'session_id'    => '_sessionId',
+        'event_id'      => '_eventId',
+        'outcome'       => '_outcome',
+        'han'           => '_han',
+        'fu'            => '_fu',
+        'round'         => '_roundIndex',
+        'dora'          => '_dora',
+        'uradora'       => '_uradora',
+        'kandora'       => '_kandora',
+        'kanuradora'    => '_kanuradora',
+        'multi_ron'     => '_multiRon',
+        'riichi'        => '_riichiIds',
+        'yaku'          => '_yaku',
+        'tempai'        => '_tempaiIds',
+        'winner_id'     => '_winnerId',
+        'loser_id'      => '_loserId'
+    ];
+
+    protected function _getFieldsTransforms()
+    {
+        return [
+            '_eventId' => [
+                'serialize'     => function () {
+                    return $this->getSession()->getEventId();
+                }
+            ],
+            '_tempaiIds' => $this->_csvTransform(),
+            '_riichiIds' => $this->_csvTransform()
+        ];
+    }
+
     /**
      * @var int
      */
@@ -212,55 +245,12 @@ class RoundPrimitive extends Primitive
         return $success;
     }
 
-    protected function _save(ORM $session)
-    {
-        return $session->set([
-            'session_id'    => $this->_sessionId,
-            'event_id'      => $this->getSession()->getEventId(),
-            'outcome'       => $this->_outcome,
-            'winner_id'     => $this->_winnerId,
-            'loser_id'      => $this->_loserId,
-            'han'           => $this->_han,
-            'fu'            => $this->_fu,
-            'round'         => $this->_roundIndex,
-            'tempai'        => $this->_tempaiIds ? implode(',', $this->_tempaiIds) : '',
-            'yaku'          => $this->_yaku,
-            'dora'          => $this->_dora,
-            'uradora'       => $this->_uradora,
-            'kandora'       => $this->_kandora,
-            'kanuradora'    => $this->_kanuradora,
-            'riichi'        => $this->_riichiIds ? implode(',', $this->_riichiIds) : '',
-            'multi_ron'     => $this->_multiRon
-        ])->save();
-    }
-
-    protected function _restore($data)
-    {
-        $this->_id          = $data['id'];
-        $this->_sessionId   = $data['session_id'];
-        $this->_eventId     = $data['event_id'];
-        $this->_outcome     = $data['outcome'];
-        $this->_winnerId    = $data['winner_id'];
-        $this->_loserId     = $data['loser_id'];
-        $this->_han         = $data['han'];
-        $this->_fu          = $data['fu'];
-        $this->_roundIndex  = $data['round'];
-        $this->_tempaiIds   = explode(',', $data['tempai']);
-        $this->_yaku        = $data['yaku'];
-        $this->_dora        = $data['dora'];
-        $this->_uradora     = $data['uradora'];
-        $this->_kandora     = $data['kandora'];
-        $this->_kanuradora  = $data['kanuradora'];
-        $this->_riichiIds   = explode(',', $data['riichi']);
-        $this->_multiRon    = $data['multi_ron'];
-        return $this;
-    }
-
     public static function createFromData(Db $db, SessionPrimitive $session, $roundData)
     {
         RoundsHelper::checkRound($db, $session, $roundData);
         $roundData['session_id'] = $session->getId();
         $roundData['event_id'] = $session->getEventId();
+        $roundData['id'] = null;
 
         // Just set it, as we already checked its perfect validity.
         return (new RoundPrimitive($db))->_restore($roundData);

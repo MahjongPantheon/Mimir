@@ -69,7 +69,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $session = new SessionModel($this->_db);
         $hash = $session->startGame(
             $this->_event->getId(),
-            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players)
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
         );
 
         $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
@@ -83,7 +85,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $session = new SessionModel($this->_db);
         $hash = $session->startGame(
             $this->_event->getId(),
-            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players)
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
         );
 
         $session->endGame($hash);
@@ -96,12 +100,20 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundRon()
     {
-        /*$roundData = [
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
+        );
+
+        $roundData = [
             'outcome'   => 'ron',
             'round'     => 1,
             'riichi'    => '',
-            'winner_id' => 2,
-            'loser_id'  => 3,
+            'winner_id' => $this->_players[1]->getId(),
+            'loser_id'  => $this->_players[2]->getId(),
             'han'       => 2,
             'fu'        => 30,
             'multi_ron' => null,
@@ -110,7 +122,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             'kandora'   => 0,
             'kanuradora' => 1,
             'yaku'      => ''
-        ];*/
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData));
     }
 
     public function testAddRoundTsumo()
@@ -166,7 +180,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
      */
     public function testNewGameBadUser()
     {
-        $playerIds = array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players);
+        $playerIds = array_map(function (PlayerPrimitive $p) {
+            return $p->getId();
+        }, $this->_players);
         $playerIds[1] = 100400; // non-existing id
 
         $session = new SessionModel($this->_db);
@@ -178,7 +194,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
      */
     public function testNewGameWrongUserCount()
     {
-        $playerIds = array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players);
+        $playerIds = array_map(function (PlayerPrimitive $p) {
+            return $p->getId();
+        }, $this->_players);
         array_pop($playerIds); // 3 players instead of 4
 
         $session = new SessionModel($this->_db);
@@ -199,7 +217,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $session = new SessionModel($this->_db);
         $hash = $session->startGame(
             $this->_event->getId(),
-            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players)
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
         );
 
         $session->endGame($hash); // Finish ok

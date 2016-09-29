@@ -102,7 +102,7 @@ class SessionModel extends Model
      */
     public function addRound($gameHashcode, $roundData)
     {
-        $session = SessionPrimitive::findByRepresentationalHash($this->_db, $gameHashcode);
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$gameHashcode]);
         if (empty($session)) {
             throw new InvalidParametersException("Couldn't find session in DB");
         }

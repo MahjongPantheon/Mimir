@@ -112,5 +112,4 @@ class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_owner->getId(), $formationCopy->getPrimaryOwner()->getId());
         $this->assertTrue($this->_owner !== $formationCopy->getPrimaryOwner()); // different objects!
     }
-
 }

@@ -35,21 +35,22 @@ class RoundsHelper
     public static function checkRound(Db $db, SessionPrimitive $game, $roundData)
     {
         self::_checkOneOf($roundData, 'outcome', ['ron', 'tsumo', 'draw', 'abort', 'chombo']);
+        $playerIds = implode(',', $game->getPlayersIds());
         switch ($roundData['outcome']) {
             case 'ron':
-                self::_checkRon($game->getPlayersIds(), self::_getYakuList($db), $roundData);
+                self::_checkRon($playerIds, self::_getYakuList($db), $roundData);
                 break;
             case 'tsumo':
-                self::_checkTsumo($game->getPlayersIds(), self::_getYakuList($db), $roundData);
+                self::_checkTsumo($playerIds, self::_getYakuList($db), $roundData);
                 break;
             case 'draw':
-                self::_checkDraw($game->getPlayersIds(), $roundData);
+                self::_checkDraw($playerIds, $roundData);
                 break;
             case 'abort':
-                self::_checkAbortiveDraw($game->getPlayersIds(), $roundData);
+                self::_checkAbortiveDraw($playerIds, $roundData);
                 break;
             case 'chombo':
-                self::_checkChombo($game->getPlayersIds(), $roundData);
+                self::_checkChombo($playerIds, $roundData);
                 break;
         }
     }

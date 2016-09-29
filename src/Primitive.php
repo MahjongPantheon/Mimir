@@ -24,7 +24,49 @@ use Idiorm\ORM;
 
 abstract class Primitive
 {
+    /**
+     * @var string
+     */
     protected static $_table;
+
+    /**
+     * @var array
+     */
+    protected static $_fieldsMapping = [];
+
+    /**
+     * Default csv array serializer
+     *
+     * @param array $obj
+     * @return string
+     */
+    protected function _serializeCsv($obj)
+    {
+        return $obj ? implode(',', $obj) : '';
+    }
+
+    /**
+     * Default csv array deserializer
+     *
+     * @param string $str
+     * @return array
+     */
+    protected function _deserializeCsv($str)
+    {
+        return $str ? explode(',', $str) : [];
+    }
+
+    /**
+     * Default csv array transformer
+     * @return array
+     */
+    protected function _csvTransform()
+    {
+        return [
+            'serialize' => [$this, '_serializeCsv'],
+            'deserialize' => [$this, '_deserializeCsv']
+        ];
+    }
 
     /**
      * @var Db
@@ -36,6 +78,10 @@ abstract class Primitive
         $this->_db = $db;
         if (empty(static::$_table)) {
             throw new \Exception('Table name must be set!');
+        }
+
+        if (empty(static::$_fieldsMapping)) {
+            throw new \Exception('ORM field mapping must be set!');
         }
     }
 
@@ -57,9 +103,23 @@ abstract class Primitive
     /**
      * Update instance in db
      * @param ORM $instance
-     * @return mixed
+     * @return bool
      */
-    abstract protected function _save(ORM $instance);
+    protected function _save(ORM $instance)
+    {
+        $fieldsTransform = $this->_getFieldsTransforms();
+
+        foreach (static::$_fieldsMapping as $dst => $src) {
+            $instance->set(
+                $dst,
+                empty($fieldsTransform[$src]['serialize'])
+                    ? $this->$src
+                    : call_user_func($fieldsTransform[$src]['serialize'], $this->$src)
+            );
+        }
+
+        return $instance->save();
+    }
 
     /**
      * Create instance to db
@@ -69,7 +129,34 @@ abstract class Primitive
 
     abstract public function getId();
 
-    abstract protected function _restore($data);
+    /**
+     * @overrideMe
+     * @return array
+     */
+    protected function _getFieldsTransforms()
+    {
+        return [];
+    }
+
+    /**
+     * @param $data
+     * @return $this
+     */
+    protected function _restore($data)
+    {
+        $fieldsTransform = $this->_getFieldsTransforms();
+
+        foreach (static::$_fieldsMapping as $src => $dst) {
+            $this->$dst = empty($fieldsTransform[$dst]['deserialize'])
+                ? $data[$src]
+                : call_user_func(
+                    $fieldsTransform[$dst]['deserialize'],
+                    empty($data[$src]) ? '' : $data[$src]
+                );
+        }
+
+        return $this;
+    }
 
     protected static function _recreateInstance(IDb $db, $data)
     {

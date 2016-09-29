@@ -31,6 +31,19 @@ class EventPrimitive extends Primitive
 {
     protected static $_table = 'event';
 
+    protected static $_fieldsMapping = [
+        'id'                => '_id',
+        'title'             => '_title',
+        'description'       => '_description',
+        'start_time'        => '_startTime',
+        'end_time'          => '_endTime',
+        'owner_formation'   => '_ownerFormationId',
+        'owner_user'        => '_ownerUserId',
+        'type'              => '_type',
+        'lobby_id'          => '_lobbyId',
+        'ruleset'           => '_ruleset',
+    ];
+
     /**
      * Local id
      * @var int
@@ -135,36 +148,6 @@ class EventPrimitive extends Primitive
         }
 
         return $success;
-    }
-
-    protected function _save(ORM $session)
-    {
-        return $session->set([
-            'title'             => $this->_title,
-            'description'       => $this->_description,
-            'start_time'        => $this->_startTime,
-            'end_time'          => $this->_endTime,
-            'owner_formation'   => $this->_ownerFormationId,
-            'owner_user'        => $this->_ownerUserId,
-            'type'              => $this->_type,
-            'lobby_id'          => $this->_lobbyId,
-            'ruleset'           => $this->_ruleset
-        ])->save();
-    }
-
-    protected function _restore($data)
-    {
-        $this->_id = $data['id'];
-        $this->_title = $data['title'];
-        $this->_description = $data['description'];
-        $this->_startTime = $data['start_time'];
-        $this->_endTime = $data['end_time'];
-        $this->_ownerFormationId = $data['owner_formation'];
-        $this->_ownerUserId = $data['owner_user'];
-        $this->_type = $data['type'];
-        $this->_lobbyId = $data['lobby_id'];
-        $this->_ruleset = $data['ruleset'];
-        return $this;
     }
 
     /**

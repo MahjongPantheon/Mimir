@@ -32,6 +32,16 @@ class FormationPrimitive extends Primitive
 {
     protected static $_table = 'formation';
 
+    protected static $_fieldsMapping = [
+        'id'            => '_id',
+        'title'         => '_title',
+        'description'   => '_description',
+        'city'          => '_city',
+        'logo'          => '_logo',
+        'contact_info'  => '_contactInfo',
+        'primary_owner' => '_primaryOwnerId',
+    ];
+
     // TODO! many-to-many relation here!
 
     /**
@@ -97,30 +107,6 @@ class FormationPrimitive extends Primitive
         }
 
         return $success;
-    }
-
-    protected function _save(ORM $session)
-    {
-        return $session->set([
-            'title'             => $this->_title,
-            'description'       => $this->_description,
-            'city'              => $this->_city,
-            'logo'              => $this->_logo,
-            'contact_info'      => $this->_contactInfo,
-            'primary_owner'     => $this->_primaryOwnerId
-        ])->save();
-    }
-
-    protected function _restore($data)
-    {
-        $this->_id = $data['id'];
-        $this->_title = $data['title'];
-        $this->_description = $data['description'];
-        $this->_city = $data['city'];
-        $this->_logo = $data['logo'];
-        $this->_contactInfo = $data['contact_info'];
-        $this->_primaryOwnerId = $data['primary_owner'];
-        return $this;
     }
 
     /**

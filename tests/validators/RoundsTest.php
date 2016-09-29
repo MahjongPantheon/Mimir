@@ -94,7 +94,7 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
             [],
             [
                 'round'     => 1,
-                'riichi'    => '1',
+                'riichi'    => '',
                 'winner_id' => 2,
                 'loser_id'  => 3,
                 'han'       => 2,

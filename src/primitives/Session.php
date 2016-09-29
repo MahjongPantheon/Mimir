@@ -33,6 +33,22 @@ class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';
 
+    protected static $_fieldsMapping = [
+        'id'                    => '_id',
+        'event_id'              => '_eventId',
+        'representational_hash' => '_representationalHash',
+        'replay_hash'           => '_replayHash',
+        'orig_link'             => '_origLink',
+        'play_date'             => '_playDate',
+        'players'               => '_playersIds',
+        'state'                 => '_state'
+    ];
+
+    protected function _getFieldsTransforms()
+    {
+        return [ '_playersIds' => $this->_csvTransform() ];
+    }
+
     /**
      * Local id
      * @var int
@@ -169,32 +185,6 @@ class SessionPrimitive extends Primitive
         }
 
         return $success;
-    }
-
-    protected function _save(ORM $session)
-    {
-        return $session->set([
-            'event_id'              => $this->_eventId,
-            'representational_hash' => $this->_representationalHash,
-            'replay_hash'           => $this->_replayHash,
-            'orig_link'             => $this->_origLink,
-            'play_date'             => $this->_playDate,
-            'players'               => implode(',', $this->_playersIds),
-            'state'                 => $this->_state
-        ])->save();
-    }
-
-    protected function _restore($data)
-    {
-        $this->_id = $data['id'];
-        $this->_eventId = $data['event_id'];
-        $this->_representationalHash = $data['representational_hash'];
-        $this->_replayHash = $data['replay_hash'];
-        $this->_origLink = $data['orig_link'];
-        $this->_playDate = $data['play_date'];
-        $this->_playersIds = explode(',', $data['players']);
-        $this->_state = $data['state'];
-        return $this;
     }
 
     /**

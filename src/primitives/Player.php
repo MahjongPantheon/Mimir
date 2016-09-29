@@ -31,6 +31,13 @@ class PlayerPrimitive extends Primitive
 {
     protected static $_table = 'user';
 
+    protected static $_fieldsMapping = [
+        'id' => '_id',
+        'display_name' => '_displayName',
+        'ident' => '_ident',
+        'tenhou_id' => '_tenhouId'
+    ];
+
     /**
      * Local id
      * @var int
@@ -100,24 +107,6 @@ class PlayerPrimitive extends Primitive
         }
 
         return $success;
-    }
-
-    protected function _save(ORM $user)
-    {
-        return $user->set([
-            'ident'         => $this->_ident,
-            'display_name'  => $this->_displayName,
-            'tenhou_id'     => $this->_tenhouId
-        ])->save();
-    }
-
-    protected function _restore($data)
-    {
-        $this->_id = $data['id'];
-        $this->_displayName = $data['display_name'];
-        $this->_ident = $data['ident'];
-        $this->_tenhouId = $data['tenhou_id'];
-        return $this;
     }
 
     /**
