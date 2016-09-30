@@ -44,6 +44,15 @@ class EventPrimitive extends Primitive
         'ruleset'           => '_ruleset',
     ];
 
+    protected function _getFieldsTransforms()
+    {
+        return [
+            '_ownerFormationId'   => $this->_integerTransform(),
+            '_ownerUserId'        => $this->_integerTransform(),
+            '_id'                 => $this->_nullableIntegerTransform(),
+        ];
+    }
+
     /**
      * Local id
      * @var int

@@ -59,12 +59,20 @@ class RoundPrimitive extends Primitive
     {
         return [
             '_eventId' => [
-                'serialize'     => function () {
-                    return $this->getSession()->getEventId();
+                'serialize' => function () {
+                    return (int)$this->getSession()->getEventId();
                 }
             ],
-            '_tempaiIds' => $this->_csvTransform(),
-            '_riichiIds' => $this->_csvTransform()
+            '_tempaiIds'  => $this->_csvTransform(),
+            '_riichiIds'  => $this->_csvTransform(),
+            '_winnerId'   => $this->_integerTransform(),
+            '_loserId'    => $this->_integerTransform(),
+            '_sessionId'  => $this->_integerTransform(),
+            '_dora'       => $this->_integerTransform(),
+            '_uradora'    => $this->_integerTransform(),
+            '_kandora'    => $this->_integerTransform(),
+            '_kanuradora' => $this->_integerTransform(),
+            '_id'         => $this->_nullableIntegerTransform(),
         ];
     }
 

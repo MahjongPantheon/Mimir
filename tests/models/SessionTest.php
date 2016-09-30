@@ -129,7 +129,15 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundTsumo()
     {
-        /*$roundData = [
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+            }, $this->_players)
+        );
+
+        $roundData = [
             'outcome'   => 'tsumo',
             'round'     => 1,
             'riichi'    => '',
@@ -142,35 +150,67 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             'kandora'   => 0,
             'kanuradora' => 1,
             'yaku'      => ''
-        ];*/
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData));
     }
 
     public function testAddRoundDraw()
     {
-        /*$roundData = [
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+            }, $this->_players)
+        );
+
+        $roundData = [
             'outcome'   => 'draw',
             'round'     => 1,
             'riichi'    => '',
             'tempai'    => ''
-        ];*/
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData));
     }
 
     public function testAddRoundAbortiveDraw()
     {
-        /*$roundData = [
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+            }, $this->_players)
+        );
+
+        $roundData = [
             'outcome'   => 'abort',
             'round'     => 1,
             'riichi'    => ''
-        ];*/
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData));
     }
 
     public function testAddRoundChombo()
     {
-        /*$roundData = [
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+            }, $this->_players)
+        );
+
+        $roundData = [
             'outcome'   => 'chombo',
             'round'     => 1,
             'loser_id'  => 2,
-        ];*/
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData));
     }
 
     // Negative tests

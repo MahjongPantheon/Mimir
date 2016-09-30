@@ -42,6 +42,14 @@ class FormationPrimitive extends Primitive
         'primary_owner' => '_primaryOwnerId',
     ];
 
+    protected function _getFieldsTransforms()
+    {
+        return [
+            '_primaryOwnerId'  => $this->_integerTransform(),
+            '_id'              => $this->_nullableIntegerTransform(),
+        ];
+    }
+
     // TODO! many-to-many relation here!
 
     /**

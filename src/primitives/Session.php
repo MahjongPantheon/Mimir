@@ -46,7 +46,11 @@ class SessionPrimitive extends Primitive
 
     protected function _getFieldsTransforms()
     {
-        return [ '_playersIds' => $this->_csvTransform() ];
+        return [
+            '_playersIds'   => $this->_csvTransform(),
+            '_eventId'      => $this->_integerTransform(),
+            '_id'           => $this->_nullableIntegerTransform(),
+        ];
     }
 
     /**

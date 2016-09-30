@@ -38,6 +38,13 @@ class PlayerPrimitive extends Primitive
         'tenhou_id' => '_tenhouId'
     ];
 
+    protected function _getFieldsTransforms()
+    {
+        return [
+            '_id' => $this->_nullableIntegerTransform(),
+        ];
+    }
+
     /**
      * Local id
      * @var int

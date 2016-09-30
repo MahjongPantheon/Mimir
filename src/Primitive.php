@@ -69,6 +69,33 @@ abstract class Primitive
     }
 
     /**
+     * Default integer cast transform
+     * @return array
+     */
+    protected function _integerTransform()
+    {
+        return [
+            'serialize' => function ($obj) {
+                return (int)$obj;
+            }
+        ];
+    }
+
+    /**
+     * Default integer cast transform
+     * Return null if empty
+     * @return array
+     */
+    protected function _nullableIntegerTransform()
+    {
+        return [
+            'serialize' => function ($obj) {
+                return $obj ? (int)$obj : null;
+            }
+        ];
+    }
+
+    /**
      * @var Db
      */
     protected $_db;
@@ -148,7 +175,7 @@ abstract class Primitive
 
         foreach (static::$_fieldsMapping as $src => $dst) {
             $this->$dst = empty($fieldsTransform[$dst]['deserialize'])
-                ? $data[$src]
+                ? empty($data[$src]) ? '' : $data[$src]
                 : call_user_func(
                     $fieldsTransform[$dst]['deserialize'],
                     empty($data[$src]) ? '' : $data[$src]
