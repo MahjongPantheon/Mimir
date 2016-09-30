@@ -17,17 +17,15 @@
  */
 namespace Riichi;
 
-require_once __DIR__.'/../src/helpers/Rounds.php';
-require_once __DIR__ . '/util/Db.php';
+require_once __DIR__ . '/../../src/validators/Round.php';
+require_once __DIR__ . '/../util/Db.php';
 
 class RoundsHelperTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
-    protected $_log;
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
-        $this->_log = $this->getMock('Monolog\\Logger', null, ['RiichiApi']);
     }
 
     // Positive tests
@@ -96,7 +94,7 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
             [],
             [
                 'round'     => 1,
-                'riichi'    => '1',
+                'riichi'    => '',
                 'winner_id' => 2,
                 'loser_id'  => 3,
                 'han'       => 2,

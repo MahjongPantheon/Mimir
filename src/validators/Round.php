@@ -19,6 +19,7 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
+require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../exceptions/MalformedPayload.php';
 
 class RoundsHelper
@@ -27,28 +28,29 @@ class RoundsHelper
      * Check if round data is valid
      *
      * @param Db $db
-     * @param \Idiorm\ORM $game
+     * @param SessionPrimitive $game
      * @throws MalformedPayloadException
      * @param $roundData
      */
-    public static function checkRound(Db $db, ORM $game, $roundData)
+    public static function checkRound(Db $db, SessionPrimitive $game, $roundData)
     {
         self::_checkOneOf($roundData, 'outcome', ['ron', 'tsumo', 'draw', 'abort', 'chombo']);
+        $playerIds = implode(',', $game->getPlayersIds());
         switch ($roundData['outcome']) {
             case 'ron':
-                self::_checkRon($game->get('players'), self::_getYakuList($db), $roundData);
+                self::_checkRon($playerIds, self::_getYakuList($db), $roundData);
                 break;
             case 'tsumo':
-                self::_checkTsumo($game->get('players'), self::_getYakuList($db), $roundData);
+                self::_checkTsumo($playerIds, self::_getYakuList($db), $roundData);
                 break;
             case 'draw':
-                self::_checkDraw($game->get('players'), $roundData);
+                self::_checkDraw($playerIds, $roundData);
                 break;
             case 'abort':
-                self::_checkAbortiveDraw($game->get('players'), $roundData);
+                self::_checkAbortiveDraw($playerIds, $roundData);
                 break;
             case 'chombo':
-                self::_checkChombo($game->get('players'), $roundData);
+                self::_checkChombo($playerIds, $roundData);
                 break;
         }
     }

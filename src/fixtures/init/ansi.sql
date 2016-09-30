@@ -59,27 +59,13 @@ CREATE TABLE "event" (
   "end_time" timestamp,
   "owner_formation" integer, -- at least one owner id should be set!
   "owner_user" integer,
-  "type" varchar(255) not null, -- online or offline, tournament or local rating, hiroshima or normal
+  "type" varchar(255) not null, -- online or offline, tournament or local rating
   "lobby_id" integer, -- tenhou lobby id for online events
   "ruleset" text not null, -- table rules, in JSON
   foreign key ("owner_formation") references "formation" ("id"),
   foreign key ("owner_user") references "user" ("id")
 );
 CREATE INDEX "event_lobby" ON "event"("lobby_id");
--- Default dummy event
-INSERT INTO "event" (
-  "id",
-  "title", "description",
-  "start_time", "end_time",
-  "owner_formation", "owner_user", "type",
-  "lobby_id", "ruleset"
-) VALUES (
-  0,
-  'Dummy event', '',
-  now(), now(), -- datewrap: date('now'), date('now'),
-  NULL, NULL, 'online',
-  NULL, ''
-);
 
 -- Game session: tonpuusen, hanchan, either online or offline
 DROP TABLE

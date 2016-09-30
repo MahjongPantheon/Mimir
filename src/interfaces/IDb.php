@@ -20,5 +20,14 @@ namespace Riichi;
 
 interface IDb
 {
+    /**
+     * @param $tableName
+     * @return \Idiorm\ORM
+     */
     public function table($tableName);
+
+    /**
+     * @return int
+     */
+    public function lastInsertId();
 }

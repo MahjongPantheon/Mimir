@@ -17,12 +17,17 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../Controller.php';
-
-class SortitionController extends Controller
+abstract class Model
 {
-    public function generate()
+    /**
+     * @var Db
+     */
+    protected $_db;
+
+    public function __construct(IDb $db)
     {
-        return 'test data!';
+        $this->_db = $db;
     }
+
+    abstract public function save();
 }

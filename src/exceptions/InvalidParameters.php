@@ -17,12 +17,6 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../Controller.php';
-
-class SortitionController extends Controller
+class InvalidParametersException extends \Exception
 {
-    public function generate()
-    {
-        return 'test data!';
-    }
 }
