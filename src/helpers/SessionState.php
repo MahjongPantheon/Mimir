@@ -49,6 +49,14 @@ class SessionState
      */
     protected $_riichiBets = 0;
 
+    public function __construct(Ruleset $rules, $playersIds)
+    {
+        $this->_scores = array_combine(
+            $playersIds,
+            array_fill(0, 4, $rules->startPoints())
+        );
+    }
+
     /**
      * @throws InvalidParametersException
      * @return string
@@ -66,17 +74,23 @@ class SessionState
     }
 
     /**
+     * @param Ruleset $rules
+     * @param $playersIds
      * @param $json
-     * @throws InvalidParametersException
      * @return SessionState
+     * @throws InvalidParametersException
      */
-    public static function fromJson($json)
+    public static function fromJson(Ruleset $rules, $playersIds, $json)
     {
-        $ret = json_decode($json, true);
-        if ($ret === null) {
-            throw new InvalidParametersException(json_last_error());
+        if (empty($ret)) {
+            $ret = [];
+        } else {
+            $ret = json_decode($json, true);
+            if (json_last_error() !== 0) {
+                throw new InvalidParametersException(json_last_error_msg());
+            }
         }
-        $instance = new self();
+        $instance = new self($rules, $playersIds);
         foreach ($ret as $key => $value) {
             $instance->$key = $value;
         }

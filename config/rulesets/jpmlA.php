@@ -56,5 +56,3 @@ class RulesetJpmlA extends Ruleset
         );
     }
 }
-
-return RulesetJpmlA::instance();

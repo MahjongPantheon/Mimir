@@ -60,7 +60,11 @@ class SessionPrimitive extends Primitive
                     return $obj->toJson();
                 },
                 'deserialize' => function ($str) {
-                    return SessionState::fromJson($str);
+                    return SessionState::fromJson(
+                        $this->getEvent()->getRules(),
+                        $this->getPlayersIds(),
+                        $str
+                    );
                 }
             ]
         ];
@@ -372,6 +376,12 @@ class SessionPrimitive extends Primitive
      */
     public function getCurrentState()
     {
+        if (empty($this->_current)) {
+            $this->_current = new SessionState(
+                $this->getEvent()->getRules(),
+                $this->getPlayersIds()
+            );
+        }
         return $this->_current;
     }
 
@@ -381,6 +391,9 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        return $this->_current->update($this->getEvent()->getRules(), $round);
+        return $this->getCurrentState()->update(
+            $this->getEvent()->getRules(),
+            $round
+        );
     }
 }

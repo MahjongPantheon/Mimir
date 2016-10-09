@@ -56,5 +56,3 @@ class RulesetEma extends Ruleset
         );
     }
 }
-
-return RulesetEma::instance();

@@ -42,7 +42,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('');
+            ->setRuleset('jpmlA');
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {
@@ -81,6 +81,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession = new SessionPrimitive($this->_db);
         $newSession
             ->setStatus('inprogress')
+            ->setPlayers($this->_players)
             ->setOrigLink('test')
             ->setReplayHash('hash')
             ->setEvent($this->_event)
@@ -98,6 +99,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession
             ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -114,6 +116,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession
             ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -130,6 +133,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession
             ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -147,6 +151,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession
             ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -166,6 +171,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession
             ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -183,6 +189,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newSession
             ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->setPlayers($this->_players)

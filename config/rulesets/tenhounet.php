@@ -62,5 +62,3 @@ class RulesetTenhounet extends Ruleset
         );
     }
 }
-
-return RulesetTenhounet::instance();

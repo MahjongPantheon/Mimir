@@ -267,7 +267,7 @@ class RoundPrimitive extends Primitive
     public function save()
     {
         if ($r = parent::save()) {
-            $r &= $this->getSession()->updateCurrentState($this);
+            $r = $r && $this->getSession()->updateCurrentState($this);
         }
 
         return $r;
@@ -570,6 +570,9 @@ class RoundPrimitive extends Primitive
      */
     public function getTempaiIds()
     {
+        if (empty($this->_tempaiIds)) {
+            $this->_tempaiIds = [];
+        }
         return $this->_tempaiIds;
     }
 

@@ -32,8 +32,17 @@ class PointsCalc
         $riichiBetsCount
     ) {
         $pointsDiff = self::_calcPoints($rules, $han, $fu, false, $isDealer);
+
+        if (empty($winnerId) || empty($loserId)) {
+            throw new InvalidParametersException('Ron must have winner and loser');
+        }
+
         $currentScores[$winnerId] += $pointsDiff['winner'];
         $currentScores[$loserId] += $pointsDiff['loser'];
+
+        if (empty($riichiIds)) {
+            $riichiIds = [];
+        }
 
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
@@ -60,6 +69,11 @@ class PointsCalc
         $riichiBetsCount
     ) {
         $pointsDiff = self::_calcPoints($rules, $han, $fu, true, $currentDealer === $winnerId);
+
+        if (empty($winnerId)) {
+            throw new InvalidParametersException('Tsumo must have winner');
+        }
+
         $currentScores[$winnerId] += $pointsDiff['winner'];
 
         if ($currentDealer === $winnerId) { // dealer tsumo
@@ -80,6 +94,10 @@ class PointsCalc
                     $currentScores[$playerId] += $pointsDiff['player'];
                 }
             }
+        }
+
+        if (empty($riichiIds)) {
+            $riichiIds = [];
         }
 
         foreach ($riichiIds as $playerId) {
@@ -105,6 +123,10 @@ class PointsCalc
         $tempaiIds,
         $riichiIds
     ) {
+        if (empty($riichiIds)) {
+            $riichiIds = [];
+        }
+
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
         }
@@ -153,6 +175,10 @@ class PointsCalc
         $currentScores,
         $riichiIds
     ) {
+        if (empty($riichiIds)) {
+            $riichiIds = [];
+        }
+
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
         }

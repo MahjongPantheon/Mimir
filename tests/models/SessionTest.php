@@ -49,7 +49,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('');
+            ->setRuleset('jpmlA');
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {
