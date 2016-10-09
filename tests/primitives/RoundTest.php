@@ -62,7 +62,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_session = (new SessionPrimitive($this->_db))
             ->setEvent($this->_event)
             ->setPlayers($this->_players)
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setReplayHash('')
             ->setOrigLink('');
         $this->_session->save();
