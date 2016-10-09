@@ -44,6 +44,7 @@ class RulesetTenhounet extends Ruleset
         'withMultiYakumans'     => true,
         'withOpenRiichi'        => false,
         'withNagashiMangan'     => true,
+        'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'withLeadingDealerGameOver' => true,
         'uma' => [

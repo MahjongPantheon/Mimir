@@ -38,6 +38,7 @@ class RulesetEma extends Ruleset
         'withMultiYakumans'     => false,
         'withOpenRiichi'        => false,
         'withNagashiMangan'     => false,
+        'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'withLeadingDealerGameOver' => false,
         'uma' => [

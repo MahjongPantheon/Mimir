@@ -22,7 +22,7 @@ use \Idiorm\ORM;
 require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 require_once __DIR__ . '/../Primitive.php';
-require_once __DIR__ . '/SessionState.php';
+require_once __DIR__ . '/../helpers/SessionState.php';
 
 /**
  * Class SessionPrimitive
@@ -53,13 +53,13 @@ class SessionPrimitive extends Primitive
             '_eventId'      => $this->_integerTransform(),
             '_id'           => $this->_nullableIntegerTransform(),
             '_current'      => [
-                'serialize' => function(SessionState $obj = null) {
+                'serialize' => function (SessionState $obj = null) {
                     if (!$obj) {
                         return '';
                     }
                     return $obj->toJson();
                 },
-                'deserialize' => function($str) {
+                'deserialize' => function ($str) {
                     return SessionState::fromJson($str);
                 }
             ]
@@ -373,5 +373,14 @@ class SessionPrimitive extends Primitive
     public function getCurrentState()
     {
         return $this->_current;
+    }
+
+    /**
+     * @param RoundPrimitive $round
+     * @return bool
+     */
+    public function updateCurrentState(RoundPrimitive $round)
+    {
+        return $this->_current->update($this->getEvent()->getRules(), $round);
     }
 }
