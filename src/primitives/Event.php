@@ -110,10 +110,15 @@ class EventPrimitive extends Primitive
      */
     protected $_lobbyId;
     /**
-     * Rules to apply to the event
-     * @var mixed
+     * Identifier of rules to apply to the event
+     * @var string
      */
     protected $_ruleset;
+    /**
+     * Ruleset details
+     * @var Ruleset
+     */
+    protected $_rulesetDetails;
 
     public function __construct(Db $db)
     {
@@ -307,6 +312,17 @@ class EventPrimitive extends Primitive
     public function getRuleset()
     {
         return $this->_ruleset;
+    }
+
+    /**
+     * @return Ruleset
+     */
+    public function getRules()
+    {
+        if (empty($this->_rulesetDetails) || $this->_rulesetDetails->title() != $this->_ruleset) {
+            $this->_rulesetDetails = require __DIR__ . '/../../config/rulesets/' . $this->_ruleset . '.php';
+        }
+        return $this->_rulesetDetails;
     }
 
     /**
