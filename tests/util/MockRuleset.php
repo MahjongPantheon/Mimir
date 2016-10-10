@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+
 require_once __DIR__ . '/../../src/Ruleset.php';
 
 class MockRuleset extends Ruleset

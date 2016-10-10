@@ -41,7 +41,7 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
-        $this->_players = array_map(function($i) {
+        $this->_players = array_map(function ($i) {
             $p = (new PlayerPrimitive($this->_db))
                 ->setDisplayName('test' . $i)
                 ->setIdent("$i");
@@ -51,10 +51,9 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
 
         $this->_ruleset = new MockRuleset();
         $this->_ruleset->setRule('startPoints', 30000);
-        $this->_state = new SessionState($this->_ruleset, array_map(function(PlayerPrimitive $player) {
+        $this->_state = new SessionState($this->_ruleset, array_map(function (PlayerPrimitive $player) {
             return $player->getId();
         }, $this->_players));
-
     }
 
     public function tearDown()
