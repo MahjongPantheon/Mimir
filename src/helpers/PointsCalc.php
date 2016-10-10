@@ -262,15 +262,15 @@ class PointsCalc
         if ($tsumo) {
             return [
                 'winner' => $dealer
-                    ? (3 * $doubleRounded)
-                    : ($doubleRounded + (2 * $rounded)),
-                'dealer' => -$doubleRounded,
-                'player' => -$rounded
+                    ? (int)(3 * $doubleRounded)
+                    : (int)($doubleRounded + (2 * $rounded)),
+                'dealer' => (int)-$doubleRounded,
+                'player' => (int)-$rounded
             ];
         } else {
             return [
-                'winner' => $dealer ? $timesSixRounded : $timesFourRounded,
-                'loser' => $dealer ? -$timesSixRounded : -$timesFourRounded
+                'winner' => $dealer ? (int)$timesSixRounded : (int)$timesFourRounded,
+                'loser' => $dealer ? (int)-$timesSixRounded : (int)-$timesFourRounded
             ];
         }
     }
