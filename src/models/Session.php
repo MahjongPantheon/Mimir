@@ -76,7 +76,7 @@ class SessionModel extends Model
         $success = $newSession
             ->setEvent($event[0])
             ->setPlayers($players)
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setReplayHash($replayHash)
             ->setOrigLink($origLink)
             ->save();
@@ -91,7 +91,7 @@ class SessionModel extends Model
     {
         $game = $this->_findGame($gameHash, 'inprogress');
         // TODO: fill session_results and make all last calculations
-        return $game->setState('finished')->save();
+        return $game->setStatus('finished')->save();
     }
 
     /**
@@ -109,18 +109,21 @@ class SessionModel extends Model
         }
 
         $newRound = RoundPrimitive::createFromData($this->_db, $session[0], $roundData);
-        return $newRound->save();
+        $success = $newRound->save();
+        $success = $success && $session[0]->updateCurrentState($newRound);
+
+        return $success;
     }
 
-    protected function _findGame($gameHash, $withState)
+    protected function _findGame($gameHash, $withStatus)
     {
         $game = SessionPrimitive::findByRepresentationalHash($this->_db, [$gameHash]);
         if (empty($game)) {
             throw new InvalidParametersException("Couldn't find session in DB");
         }
 
-        if ($game[0]->getState() !== $withState) {
-            throw new BadActionException("This action is not supported over the game in current state");
+        if ($game[0]->getStatus() !== $withStatus) {
+            throw new BadActionException("This action is not supported over the game in current status");
         }
 
         return $game[0];

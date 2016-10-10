@@ -47,7 +47,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('');
+            ->setRuleset('jpmlA');
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {
@@ -62,7 +62,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_session = (new SessionPrimitive($this->_db))
             ->setEvent($this->_event)
             ->setPlayers($this->_players)
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setReplayHash('')
             ->setOrigLink('');
         $this->_session->save();
@@ -119,6 +119,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
+            ->setWinner($this->_players[2])
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -134,6 +136,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
+            ->setWinner($this->_players[2])
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -149,6 +153,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
+            ->setWinner($this->_players[2])
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -165,6 +171,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setSession($this->_session)
             ->setWinner($this->_players[0])
             ->setOutcome('ron')
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -179,6 +186,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound = new RoundPrimitive($this->_db);
         $newRound
             ->setSession($this->_session)
+            ->setWinner($this->_players[2])
             ->setLoser($this->_players[0])
             ->setOutcome('ron')
             ->setRoundIndex(1);
@@ -196,6 +204,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
+            ->setWinner($this->_players[2])
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -212,6 +222,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
+            ->setWinner($this->_players[2])
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -228,6 +240,8 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
+            ->setWinner($this->_players[2])
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -247,11 +261,15 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTenhouId('someid');
         $newUser->save();
 
+        $this->_players[1] = $newUser;
+        $this->_session->setPlayers($this->_players)->save();
+
         $newRound = new RoundPrimitive($this->_db);
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
             ->setWinner($newUser)
+            ->setLoser($this->_players[3])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -272,11 +290,15 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTenhouId('someid');
         $newUser->save();
 
+        $this->_players[1] = $newUser;
+        $this->_session->setPlayers($this->_players)->save();
+
         $newRound = new RoundPrimitive($this->_db);
         $newRound
             ->setSession($this->_session)
             ->setOutcome('ron')
             ->setLoser($newUser)
+            ->setWinner($this->_players[2])
             ->setRoundIndex(1);
         $newRound->save();
 
@@ -292,7 +314,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound = new RoundPrimitive($this->_db);
         $newRound
             ->setSession($this->_session)
-            ->setOutcome('ron')
+            ->setOutcome('draw')
             ->setTempaiUsers($this->_players)
             ->setRoundIndex(1);
         $newRound->save();
@@ -312,7 +334,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newRound = new RoundPrimitive($this->_db);
         $newRound
             ->setSession($this->_session)
-            ->setOutcome('ron')
+            ->setOutcome('draw')
             ->setRiichiUsers($this->_players)
             ->setRoundIndex(1);
         $newRound->save();

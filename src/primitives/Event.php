@@ -320,7 +320,10 @@ class EventPrimitive extends Primitive
     public function getRules()
     {
         if (empty($this->_rulesetDetails) || $this->_rulesetDetails->title() != $this->_ruleset) {
-            $this->_rulesetDetails = require __DIR__ . '/../../config/rulesets/' . $this->_ruleset . '.php';
+            require_once __DIR__ . '/../../config/rulesets/' . $this->_ruleset . '.php';
+            /** @var Ruleset $className */
+            $className = 'Riichi\Ruleset' . ucfirst($this->_ruleset);
+            $this->_rulesetDetails = $className::instance();
         }
         return $this->_rulesetDetails;
     }

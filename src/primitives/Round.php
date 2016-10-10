@@ -561,6 +561,9 @@ class RoundPrimitive extends Primitive
      */
     public function getTempaiIds()
     {
+        if (empty($this->_tempaiIds)) {
+            $this->_tempaiIds = [];
+        }
         return $this->_tempaiIds;
     }
 

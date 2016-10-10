@@ -22,6 +22,7 @@ use \Idiorm\ORM;
 require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 require_once __DIR__ . '/../Primitive.php';
+require_once __DIR__ . '/../helpers/SessionState.php';
 
 /**
  * Class SessionPrimitive
@@ -41,7 +42,8 @@ class SessionPrimitive extends Primitive
         'orig_link'             => '_origLink',
         'play_date'             => '_playDate',
         'players'               => '_playersIds',
-        'state'                 => '_state'
+        'status'                => '_status',
+        'intermediate_results'  => '_current',
     ];
 
     protected function _getFieldsTransforms()
@@ -50,6 +52,21 @@ class SessionPrimitive extends Primitive
             '_playersIds'   => $this->_csvTransform(),
             '_eventId'      => $this->_integerTransform(),
             '_id'           => $this->_nullableIntegerTransform(),
+            '_current'      => [
+                'serialize' => function (SessionState $obj = null) {
+                    if (!$obj) {
+                        return '';
+                    }
+                    return $obj->toJson();
+                },
+                'deserialize' => function ($str) {
+                    return SessionState::fromJson(
+                        $this->getEvent()->getRules(),
+                        $this->getPlayersIds(),
+                        $str
+                    );
+                }
+            ]
         ];
     }
 
@@ -109,7 +126,13 @@ class SessionPrimitive extends Primitive
      * planned / inprogress / finished
      * @var string
      */
-    protected $_state;
+    protected $_status;
+
+    /**
+     * current game status
+     * @var SessionState
+     */
+    protected $_current;
 
     public function __construct(Db $db)
     {
@@ -164,10 +187,10 @@ class SessionPrimitive extends Primitive
      * @throws \Exception
      * @return SessionPrimitive[]
      */
-    public static function findByState(IDb $db, $stateList)
+    public static function findByStatus(IDb $db, $stateList)
     {
         // TODO: Finished games are likely to be too much. Make pagination here.
-        return self::_findBy($db, 'state', $stateList);
+        return self::_findBy($db, 'status', $stateList);
     }
 
     /**
@@ -331,20 +354,43 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * @param string $state
+     * @param string $status
      * @return $this
      */
-    public function setState($state)
+    public function setStatus($status)
     {
-        $this->_state = $state;
+        $this->_status = $status;
         return $this;
     }
 
     /**
      * @return string
      */
-    public function getState()
+    public function getStatus()
     {
-        return $this->_state;
+        return $this->_status;
+    }
+
+    /**
+     * @return SessionState
+     */
+    public function getCurrentState()
+    {
+        if (empty($this->_current)) {
+            $this->_current = new SessionState(
+                $this->getEvent()->getRules(),
+                $this->getPlayersIds()
+            );
+        }
+        return $this->_current;
+    }
+
+    /**
+     * @param RoundPrimitive $round
+     * @return bool
+     */
+    public function updateCurrentState(RoundPrimitive $round)
+    {
+        return $this->getCurrentState()->update($round);
     }
 }

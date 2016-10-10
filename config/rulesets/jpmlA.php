@@ -18,34 +18,34 @@
 namespace Riichi;
 require_once __DIR__ . '/../../src/Ruleset.php';
 
-class RulesetEma extends Ruleset
+class RulesetJpmlA extends Ruleset
 {
-    public static $_title = 'ema';
+    public static $_name = 'jpmlA';
     protected static $_ruleset = [
-        'tenboDivider'          => 1,
-        'ratingDivider'         => 1,
-        'startRating'           => 0,
+        'tenboDivider'          => 100,
+        'ratingDivider'         => 10,
+        'startRating'           => 1500,
         'oka'                   => 0,
-        'startPoints'           => 30000,
-        'riichiGoesToWinner'    => true,
-        'extraChomboPayments'   => false,
-        'chomboPenalty'         => 20000,
-        'withAtamahane'         => false,
-        'withAbortives'         => false,
+        'startPoints'           => 300,
+        'riichiGoesToWinner'    => false,
+        'extraChomboPayments'   => true,
+        'chomboPenalty'         => 200,
+        'withAtamahane'         => true,
+        'withAbortives'         => true,
         'withKuitan'            => true,
-        'withKazoe'             => false,
-        'withButtobi'           => false,
+        'withKazoe'             => true,
+        'withButtobi'           => true,
         'withMultiYakumans'     => false,
         'withOpenRiichi'        => false,
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
-        'withLeadingDealerGameOver' => false,
+        'withLeadingDealerGameOver' => true,
         'uma' => [
-            1 => 15000,
-            2 => 5000,
-            3 => -5000,
-            4 => -15000
+            1 => 150,
+            2 => 50,
+            3 => -50,
+            4 => -150
         ],
     ];
 

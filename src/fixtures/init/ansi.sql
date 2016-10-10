@@ -80,11 +80,12 @@ CREATE TABLE "session" (
   "orig_link" text, -- original tenhou game link, for access to replay
   "play_date" timestamp,
   "players" varchar(255), -- comma-separated ordered list of player ids, east to north.
-  "state" varchar(255), -- planned / inprogress / finished
+  "status" varchar(255), -- planned / inprogress / finished
+  "intermediate_results" text, -- json-encoded results for in-progress sessions
   foreign key ("event_id") references "event" ("id")
 );
 CREATE INDEX "session_replay" ON "session"("replay_hash");
-CREATE INDEX "session_state" ON "session"("state");
+CREATE INDEX "session_status" ON "session"("status");
 CREATE INDEX "session_rephash" ON "session"("representational_hash");
 
 -- Session results, entry should exist only for finished sessions

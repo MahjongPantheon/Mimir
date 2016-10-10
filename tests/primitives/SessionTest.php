@@ -42,7 +42,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('');
+            ->setRuleset('jpmlA');
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {
@@ -59,7 +59,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
             ->setReplayHash('hash')
             ->setEvent($this->_event)
@@ -67,7 +67,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('test', $newSession->getOrigLink());
         $this->assertEquals('hash', $newSession->getReplayHash());
-        $this->assertEquals('inprogress', $newSession->getState());
+        $this->assertEquals('inprogress', $newSession->getStatus());
         $this->assertTrue($this->_event === $newSession->getEvent());
         $this->assertTrue($this->_players[1] === $newSession->getPlayers()[1]);
 
@@ -80,7 +80,8 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
+            ->setPlayers($this->_players)
             ->setOrigLink('test')
             ->setReplayHash('hash')
             ->setEvent($this->_event)
@@ -92,17 +93,18 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
-    public function testFindSessionByState()
+    public function testFindSessionByStatus()
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
 
-        $sessionCopy = SessionPrimitive::findByState($this->_db, [$newSession->getState()]);
+        $sessionCopy = SessionPrimitive::findByStatus($this->_db, [$newSession->getStatus()]);
         $this->assertEquals(1, count($sessionCopy));
         $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
         $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
@@ -112,15 +114,16 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
 
         $sessionCopy = SessionPrimitive::findByReplayHash($this->_db, [$newSession->getReplayHash()]);
         $this->assertEquals(1, count($sessionCopy));
-        $this->assertEquals('inprogress', $sessionCopy[0]->getState());
+        $this->assertEquals('inprogress', $sessionCopy[0]->getStatus());
         $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
@@ -128,8 +131,9 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -145,8 +149,9 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -164,8 +169,9 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->save();
@@ -181,8 +187,9 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
     {
         $newSession = new SessionPrimitive($this->_db);
         $newSession
-            ->setState('inprogress')
+            ->setStatus('inprogress')
             ->setOrigLink('test')
+            ->setPlayers($this->_players)
             ->setReplayHash('hash')
             ->setEvent($this->_event)
             ->setPlayers($this->_players)

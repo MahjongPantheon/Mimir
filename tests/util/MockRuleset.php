@@ -16,37 +16,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+
 require_once __DIR__ . '/../../src/Ruleset.php';
 
-class RulesetJpmlA extends Ruleset
+class MockRuleset extends Ruleset
 {
-    public static $_name = 'jpmlA';
-    protected static $_ruleset = [
-        'tenboDivider'          => 100,
-        'ratingDivider'         => 10,
-        'startRating'           => 1500,
+    public static $_title = 'mock';
+    protected static $_ruleset = [];
+
+    public static $defaultRuleset = [
+        'tenboDivider'          => 1,
+        'ratingDivider'         => 1,
+        'startRating'           => 0,
         'oka'                   => 0,
-        'startPoints'           => 300,
-        'riichiGoesToWinner'    => false,
-        'extraChomboPayments'   => true,
-        'chomboPenalty'         => 200,
-        'withAtamahane'         => true,
-        'withAbortives'         => true,
+        'startPoints'           => 30000,
+        'riichiGoesToWinner'    => true,
+        'extraChomboPayments'   => false,
+        'chomboPenalty'         => 20000,
+        'withAtamahane'         => false,
+        'withAbortives'         => false,
         'withKuitan'            => true,
-        'withKazoe'             => true,
-        'withButtobi'           => true,
+        'withKazoe'             => false,
+        'withButtobi'           => false,
         'withMultiYakumans'     => false,
         'withOpenRiichi'        => false,
         'withNagashiMangan'     => false,
+        'withKiriageMangan'     => false,
         'tonpuusen'             => false,
-        'withLeadingDealerGameOver' => true,
+        'withLeadingDealerGameOver' => false,
         'uma' => [
-            1 => 150,
-            2 => 50,
-            3 => -50,
-            4 => -150
+            1 => 15000,
+            2 => 5000,
+            3 => -5000,
+            4 => -15000
         ],
     ];
+
+    public function setRule($name, $value)
+    {
+        self::$_ruleset[$name] = $value;
+    }
 
     public function calcRating($currentRating, $place, $points)
     {
@@ -55,5 +64,3 @@ class RulesetJpmlA extends Ruleset
         );
     }
 }
-
-return RulesetJpmlA::instance();

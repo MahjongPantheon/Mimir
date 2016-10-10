@@ -136,4 +136,9 @@ abstract class Ruleset
     {
         return static::$_ruleset['withNagashiMangan'];
     }
+
+    public function withKiriageMangan()
+    {
+        return static::$_ruleset['withKiriageMangan'];
+    }
 }

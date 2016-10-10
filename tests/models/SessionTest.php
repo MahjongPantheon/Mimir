@@ -49,7 +49,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('');
+            ->setRuleset('jpmlA');
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {
@@ -77,7 +77,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
         $this->assertEquals(1, count($sessionPrimitive));
         $this->assertEquals($this->_event->getId(), $sessionPrimitive[0]->getEventId());
-        $this->assertEquals('inprogress', $sessionPrimitive[0]->getState());
+        $this->assertEquals('inprogress', $sessionPrimitive[0]->getStatus());
     }
 
     public function testEndGame()
@@ -95,7 +95,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
         $this->assertEquals(1, count($sessionPrimitive));
         $this->assertEquals($this->_event->getId(), $sessionPrimitive[0]->getEventId());
-        $this->assertEquals('finished', $sessionPrimitive[0]->getState());
+        $this->assertEquals('finished', $sessionPrimitive[0]->getStatus());
     }
 
     public function testAddRoundRon()
