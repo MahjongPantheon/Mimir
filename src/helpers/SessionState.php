@@ -28,6 +28,10 @@ require_once __DIR__ . '/PointsCalc.php';
 class SessionState
 {
     /**
+     * @var Ruleset
+     */
+    protected $_rules;
+    /**
      * @var int[] { player_id => score }
      */
     protected $_scores = [];
@@ -51,6 +55,7 @@ class SessionState
 
     public function __construct(Ruleset $rules, $playersIds)
     {
+        $this->_rules = $rules;
         $this->_scores = array_combine(
             $playersIds,
             array_fill(0, 4, $rules->startPoints())
@@ -65,6 +70,9 @@ class SessionState
     {
         $arr = [];
         foreach ($this as $key => $value) {
+            if ($key === '_rules') {
+                continue;
+            }
             if (!is_scalar($value) && !is_array($value)) {
                 throw new InvalidParametersException('No objects/functions allowed in session state');
             }
@@ -184,6 +192,10 @@ class SessionState
         return $this->_penalties;
     }
 
+    /**
+     * Return id of current dealer
+     * @return int|string
+     */
     public function getCurrentDealer()
     {
         $players = array_keys($this->_scores);
@@ -192,28 +204,27 @@ class SessionState
 
     /**
      * Register new round in current session
-     * @param Ruleset $rules
      * @param RoundPrimitive $round
      * @throws InvalidParametersException
      * @return bool
      */
-    public function update(Ruleset $rules, RoundPrimitive $round)
+    public function update(RoundPrimitive $round)
     {
         switch ($round->getOutcome()) {
             case 'ron':
-                $this->_updateAfterRon($rules, $round);
+                $this->_updateAfterRon($round);
                 break;
             case 'tsumo':
-                $this->_updateAfterTsumo($rules, $round);
+                $this->_updateAfterTsumo($round);
                 break;
             case 'draw':
                 $this->_updateAfterDraw($round);
                 break;
             case 'abort':
-                $this->_updateAfterAbort($rules, $round);
+                $this->_updateAfterAbort($round);
                 break;
             case 'chombo':
-                $this->_updateAfterChombo($rules, $round);
+                $this->_updateAfterChombo($round);
                 break;
             default:
                 ;
@@ -223,15 +234,14 @@ class SessionState
     }
 
     /**
-     * @param Ruleset $rules
      * @param RoundPrimitive $round
      */
-    protected function _updateAfterRon(Ruleset $rules, RoundPrimitive $round)
+    protected function _updateAfterRon(RoundPrimitive $round)
     {
-        $isDealer = $this->getCurrentDealer() === $round->getWinnerId();
+        $isDealer = $this->getCurrentDealer() == $round->getWinnerId();
 
         $this->_scores = PointsCalc::ron(
-            $rules,
+            $this->_rules,
             $isDealer,
             $this->getScores(),
             $round->getWinnerId(),
@@ -254,13 +264,12 @@ class SessionState
     }
 
     /**
-     * @param Ruleset $rules
      * @param RoundPrimitive $round
      */
-    protected function _updateAfterTsumo(Ruleset $rules, RoundPrimitive $round)
+    protected function _updateAfterTsumo(RoundPrimitive $round)
     {
         $this->_scores = PointsCalc::tsumo(
-            $rules,
+            $this->_rules,
             $this->getCurrentDealer(),
             $this->getScores(),
             $round->getWinnerId(),
@@ -271,7 +280,7 @@ class SessionState
             $this->getRiichiBets()
         );
 
-        if ($this->getCurrentDealer() === $round->getWinnerId()) {
+        if ($this->getCurrentDealer() == $round->getWinnerId()) {
             $this->_addHonba();
         } else {
             $this->_resetHonba()
@@ -301,13 +310,12 @@ class SessionState
     }
 
     /**
-     * @param Ruleset $rules
      * @param RoundPrimitive $round
      * @throws InvalidParametersException
      */
-    protected function _updateAfterAbort(Ruleset $rules, RoundPrimitive $round)
+    protected function _updateAfterAbort(RoundPrimitive $round)
     {
-        if (!$rules->withAbortives()) {
+        if (!$this->_rules->withAbortives()) {
             throw new InvalidParametersException('Current game rules do not allow abortive draws');
         }
 
@@ -321,13 +329,12 @@ class SessionState
     }
 
     /**
-     * @param Ruleset $rules
      * @param RoundPrimitive $round
      */
-    protected function _updateAfterChombo(Ruleset $rules, RoundPrimitive $round)
+    protected function _updateAfterChombo(RoundPrimitive $round)
     {
         $this->_scores = PointsCalc::chombo(
-            $rules,
+            $this->_rules,
             $this->getCurrentDealer(),
             $round->getLoserId(),
             $this->getScores()
@@ -336,6 +343,6 @@ class SessionState
         if (empty($this->_penalties[$round->getLoserId()])) {
             $this->_penalties[$round->getLoserId()] = 0;
         }
-        $this->_penalties[$round->getLoserId()] -= $rules->chomboPenalty();
+        $this->_penalties[$round->getLoserId()] -= $this->_rules->chomboPenalty();
     }
 }

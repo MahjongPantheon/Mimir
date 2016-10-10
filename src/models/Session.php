@@ -109,7 +109,10 @@ class SessionModel extends Model
         }
 
         $newRound = RoundPrimitive::createFromData($this->_db, $session[0], $roundData);
-        return $newRound->save();
+        $success = $newRound->save();
+        $success = $success && $session[0]->updateCurrentState($newRound);
+
+        return $success;
     }
 
     protected function _findGame($gameHash, $withStatus)

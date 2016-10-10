@@ -391,9 +391,6 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        return $this->getCurrentState()->update(
-            $this->getEvent()->getRules(),
-            $round
-        );
+        return $this->getCurrentState()->update($round);
     }
 }

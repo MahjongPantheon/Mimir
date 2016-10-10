@@ -264,15 +264,6 @@ class RoundPrimitive extends Primitive
         return (new RoundPrimitive($db))->_restore($roundData);
     }
 
-    public function save()
-    {
-        if ($r = parent::save()) {
-            $r = $r && $this->getSession()->updateCurrentState($this);
-        }
-
-        return $r;
-    }
-
     /**
      * @param int $dora
      * @return RoundPrimitive

@@ -68,7 +68,7 @@ class PointsCalc
         $honba,
         $riichiBetsCount
     ) {
-        $pointsDiff = self::_calcPoints($rules, $han, $fu, true, $currentDealer === $winnerId);
+        $pointsDiff = self::_calcPoints($rules, $han, $fu, true, $currentDealer == $winnerId);
 
         if (empty($winnerId)) {
             throw new InvalidParametersException('Tsumo must have winner');
@@ -76,19 +76,19 @@ class PointsCalc
 
         $currentScores[$winnerId] += $pointsDiff['winner'];
 
-        if ($currentDealer === $winnerId) { // dealer tsumo
+        if ($currentDealer == $winnerId) { // dealer tsumo
             foreach ($currentScores as $playerId => $value) {
-                if ($playerId === $winnerId) {
+                if ($playerId == $winnerId) {
                     continue;
                 }
                 $currentScores[$playerId] += $pointsDiff['dealer'];
             }
         } else {
             foreach ($currentScores as $playerId => $value) {
-                if ($playerId === $winnerId) {
+                if ($playerId == $winnerId) {
                     continue;
                 }
-                if ($playerId === $currentDealer) {
+                if ($playerId == $currentDealer) {
                     $currentScores[$playerId] += $pointsDiff['dealer'];
                 } else {
                     $currentScores[$playerId] += $pointsDiff['player'];
@@ -109,7 +109,7 @@ class PointsCalc
         $currentScores[$winnerId] += 300 * $honba;
 
         foreach ($currentScores as $playerId => $value) {
-            if ($playerId === $winnerId) {
+            if ($playerId == $winnerId) {
                 continue;
             }
             $currentScores[$playerId] -= 100 * $honba;
@@ -137,7 +137,7 @@ class PointsCalc
 
         if (count($tempaiIds) === 1) {
             foreach ($currentScores as $playerId => $value) {
-                if ($playerId === $tempaiIds[0]) {
+                if ($playerId == $tempaiIds[0]) {
                     $currentScores[$playerId] += 3000;
                 } else {
                     $currentScores[$playerId] -= 1000;
@@ -192,10 +192,14 @@ class PointsCalc
         $loserId,
         $currentScores
     ) {
+        if (empty($loserId)) {
+            throw new InvalidParametersException('Chombo must have loser');
+        }
+
         if ($rules->extraChomboPayments()) {
-            if ($currentDealer === $loserId) {
+            if ($currentDealer == $loserId) {
                 foreach ($currentScores as $playerId => $value) {
-                    if ($playerId === $loserId) {
+                    if ($playerId == $loserId) {
                         $currentScores[$playerId] -= 12000;
                     } else {
                         $currentScores[$playerId] += 4000;
@@ -203,9 +207,9 @@ class PointsCalc
                 }
             } else {
                 foreach ($currentScores as $playerId => $value) {
-                    if ($playerId === $loserId) {
+                    if ($playerId == $loserId) {
                         $currentScores[$playerId] -= 8000;
-                    } else if ($playerId === $currentDealer) {
+                    } else if ($playerId == $currentDealer) {
                         $currentScores[$playerId] += 4000;
                     } else {
                         $currentScores[$playerId] += 2000;
