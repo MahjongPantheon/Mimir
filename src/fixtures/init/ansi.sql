@@ -93,9 +93,11 @@ DROP TABLE
 -- IF EXISTS
    "session_results";
 CREATE TABLE "session_results" (
+  "id" integer, -- serial
+  primary key ("id"),
   "event_id" integer not null,
   "session_id" integer not null,
-  "user_id" integer not null,
+  "player_id" integer not null,
   "score" integer not null, -- how many points player has at the end, before any uma/oka calc
   "result_score" float not null, -- resulting score after uma/oka and starting points subtraction
   "place" integer not null,

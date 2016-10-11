@@ -360,6 +360,9 @@ class SessionPrimitive extends Primitive
     public function setStatus($status)
     {
         $this->_status = $status;
+        if ($status === 'finished') {
+            $this->_finalizeGame();
+        }
         return $this;
     }
 
@@ -391,6 +394,34 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        return $this->getCurrentState()->update($round);
+        $success = $this->getCurrentState()->update($round);
+        if ($this->getCurrentState()->isFinished()) {
+            $success = $success && $this->finish();
+        }
+
+        return $success;
+    }
+
+    /**
+     * @return bool
+     */
+    public function finish()
+    {
+        return $this->setStatus('finished')->save() && $this->_finalizeGame();
+    }
+
+    /**
+     * Generate session results
+     * @return bool
+     */
+    protected function _finalizeGame()
+    {
+        return array_reduce($this->getPlayers(), function($acc, PlayerPrimitive $player) {
+            return $acc && (new SessionResultsPrimitive($this->_db))
+                ->setPlayer($player)
+                ->setSession($this)
+                ->calc($this->getEvent()->getRules(), $this->getCurrentState(), $this->getPlayersIds())
+                ->save();
+        }, true);
     }
 }

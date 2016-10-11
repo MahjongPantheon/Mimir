@@ -28,6 +28,4 @@ abstract class Model
     {
         $this->_db = $db;
     }
-
-    abstract public function save();
 }

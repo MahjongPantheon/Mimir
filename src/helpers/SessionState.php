@@ -107,6 +107,24 @@ class SessionState
     }
 
     /**
+     * @return bool
+     */
+    protected function _buttobi()
+    {
+        $scores = $this->getScores();
+        return $scores[0] < 0 || $scores[1] < 0 || $scores[2] < 0 || $scores[3] < 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFinished()
+    {
+        return $this->getRound() > 8
+            || ($this->_rules->withButtobi() && $this->_buttobi());
+    }
+
+    /**
      * @return SessionState
      */
     protected function _addHonba()

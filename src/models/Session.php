@@ -36,17 +36,6 @@ require_once __DIR__ . '/../exceptions/Database.php';
 class SessionModel extends Model
 {
     /**
-     * @var SessionPrimitive
-     */
-    protected $_pSession;
-
-    public function __construct(Db $db)
-    {
-        parent::__construct($db);
-        $this->_pSession = new SessionPrimitive($this->_db);
-    }
-
-    /**
      * @throws InvalidParametersException
      * @throws InvalidUserException
      * @throws DatabaseException
@@ -68,7 +57,7 @@ class SessionModel extends Model
         }
 
         $players = PlayerPrimitive::findById($this->_db, $playerIds);
-        if (count($players) !== 4) { // TODO: hiroshima
+        if (count($players) !== 4) {
             throw new InvalidUserException('Some players do not exist in DB, check ids');
         }
 
@@ -87,11 +76,17 @@ class SessionModel extends Model
         return $newSession->getRepresentationalHash();
     }
 
+    /**
+     * This method is strictly for premature end of session (timeout, etc)
+     * Normal end should happen when final round is added.
+     *
+     * @param $gameHash
+     * @return bool
+     */
     public function endGame($gameHash)
     {
-        $game = $this->_findGame($gameHash, 'inprogress');
-        // TODO: fill session_results and make all last calculations
-        return $game->setStatus('finished')->save();
+        $session = $this->_findGame($gameHash, 'inprogress');
+        return $session->finish();
     }
 
     /**
@@ -103,18 +98,20 @@ class SessionModel extends Model
      */
     public function addRound($gameHashcode, $roundData)
     {
-        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$gameHashcode]);
-        if (empty($session)) {
-            throw new InvalidParametersException("Couldn't find session in DB");
-        }
+        $session = $this->_findGame($gameHashcode, 'inporgress');
+        $newRound = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
-        $newRound = RoundPrimitive::createFromData($this->_db, $session[0], $roundData);
-        $success = $newRound->save();
-        $success = $success && $session[0]->updateCurrentState($newRound);
-
-        return $success;
+        return $newRound->save()
+            && $session->updateCurrentState($newRound);
     }
 
+    /**
+     * @param $gameHash
+     * @param $withStatus
+     * @return SessionPrimitive
+     * @throws InvalidParametersException
+     * @throws BadActionException
+     */
     protected function _findGame($gameHash, $withStatus)
     {
         $game = SessionPrimitive::findByRepresentationalHash($this->_db, [$gameHash]);
@@ -127,10 +124,5 @@ class SessionModel extends Model
         }
 
         return $game[0];
-    }
-
-    public function save()
-    {
-        $this->_pSession->save();
     }
 }
