@@ -111,7 +111,7 @@ class SessionState
      */
     protected function _buttobi()
     {
-        $scores = $this->getScores();
+        $scores = array_values($this->getScores());
         return $scores[0] < 0 || $scores[1] < 0 || $scores[2] < 0 || $scores[3] < 0;
     }
 

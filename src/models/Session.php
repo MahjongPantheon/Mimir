@@ -98,7 +98,7 @@ class SessionModel extends Model
      */
     public function addRound($gameHashcode, $roundData)
     {
-        $session = $this->_findGame($gameHashcode, 'inporgress');
+        $session = $this->_findGame($gameHashcode, 'inprogress');
         $newRound = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         return $newRound->save()

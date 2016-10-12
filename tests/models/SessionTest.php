@@ -90,6 +90,12 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             }, $this->_players)
         );
 
+        $session->addRound($hash, [
+            'outcome' => 'draw',
+            'tempai' => '',
+            'riichi' => ''
+        ]);
+
         $session->endGame($hash);
 
         $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
@@ -110,7 +116,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'ron',
-            'round'     => 1,
             'riichi'    => '',
             'winner_id' => $this->_players[1]->getId(),
             'loser_id'  => $this->_players[2]->getId(),
@@ -139,7 +144,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'tsumo',
-            'round'     => 1,
             'riichi'    => '',
             'winner_id' => 2,
             'han'       => 2,
@@ -167,7 +171,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'draw',
-            'round'     => 1,
             'riichi'    => '',
             'tempai'    => ''
         ];
@@ -187,7 +190,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'abort',
-            'round'     => 1,
             'riichi'    => ''
         ];
 
@@ -206,7 +208,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'chombo',
-            'round'     => 1,
             'loser_id'  => 2,
         ];
 

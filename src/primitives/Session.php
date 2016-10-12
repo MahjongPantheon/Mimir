@@ -23,6 +23,7 @@ require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 require_once __DIR__ . '/../Primitive.php';
 require_once __DIR__ . '/../helpers/SessionState.php';
+require_once __DIR__ . '/SessionResults.php';
 
 /**
  * Class SessionPrimitive

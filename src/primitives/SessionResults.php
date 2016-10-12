@@ -302,7 +302,7 @@ class SessionResultsPrimitive extends Primitive
     {
         for ($i = 0; $i < count($playerIds); $i++) {
             if ($playerIds[$i] == $this->_playerId) {
-                $this->_score = $results->getScores()[$i];
+                $this->_score = $results->getScores()[$playerIds[$i]];
                 break;
             }
         }

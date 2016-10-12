@@ -103,7 +103,7 @@ CREATE TABLE "session_results" (
   "place" integer not null,
   foreign key ("event_id") references "event" ("id"),
   foreign key ("session_id") references "session" ("id"),
-  foreign key ("user_id") references "user" ("id")
+  foreign key ("player_id") references "user" ("id")
 );
 
 -- Session round results
