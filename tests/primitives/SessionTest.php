@@ -17,6 +17,7 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/primitives/Session.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
@@ -42,7 +43,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('jpmlA');
+            ->setRuleset(Ruleset::instance('jpmlA'));
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {

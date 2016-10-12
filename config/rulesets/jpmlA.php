@@ -20,7 +20,7 @@ require_once __DIR__ . '/../../src/Ruleset.php';
 
 class RulesetJpmlA extends Ruleset
 {
-    public static $_name = 'jpmlA';
+    public static $_title = 'jpmlA';
     protected static $_ruleset = [
         'tenboDivider'          => 100,
         'ratingDivider'         => 10,

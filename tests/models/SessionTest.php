@@ -19,6 +19,7 @@ namespace Riichi;
 
 use Idiorm\ORM;
 
+require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/Session.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
@@ -49,7 +50,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('jpmlA');
+            ->setRuleset(Ruleset::instance('jpmlA'));
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {

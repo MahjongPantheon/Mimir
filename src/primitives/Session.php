@@ -62,7 +62,7 @@ class SessionPrimitive extends Primitive
                 },
                 'deserialize' => function ($str) {
                     return SessionState::fromJson(
-                        $this->getEvent()->getRules(),
+                        $this->getEvent()->getRuleset(),
                         $this->getPlayersIds(),
                         $str
                     );
@@ -382,7 +382,7 @@ class SessionPrimitive extends Primitive
     {
         if (empty($this->_current)) {
             $this->_current = new SessionState(
-                $this->getEvent()->getRules(),
+                $this->getEvent()->getRuleset(),
                 $this->getPlayersIds()
             );
         }
@@ -421,7 +421,7 @@ class SessionPrimitive extends Primitive
             return $acc && (new SessionResultsPrimitive($this->_db))
                 ->setPlayer($player)
                 ->setSession($this)
-                ->calc($this->getEvent()->getRules(), $this->getCurrentState(), $this->getPlayersIds())
+                ->calc($this->getEvent()->getRuleset(), $this->getCurrentState(), $this->getPlayersIds())
                 ->save();
         }, true);
     }
