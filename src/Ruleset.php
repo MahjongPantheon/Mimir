@@ -74,9 +74,9 @@ abstract class Ruleset
     {
         if ($place === 1) {
             return static::$_ruleset['oka'];
+        } else {
+            return -(static::$_ruleset['oka'] / 4);
         }
-
-        return 0;
     }
 
     public function startPoints()

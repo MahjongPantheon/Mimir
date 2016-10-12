@@ -51,10 +51,10 @@ class EventPrimitive extends Primitive
             '_ownerUserId'        => $this->_integerTransform(),
             '_id'                 => $this->_nullableIntegerTransform(),
             '_ruleset'            => [
-                'serialize' => function(Ruleset $rules) {
+                'serialize' => function (Ruleset $rules) {
                     return $rules->title();
                 },
-                'deserialize' => function($rulesId) {
+                'deserialize' => function ($rulesId) {
                     return Ruleset::instance($rulesId);
                 }
             ]

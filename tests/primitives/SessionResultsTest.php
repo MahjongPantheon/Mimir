@@ -19,10 +19,11 @@ namespace Riichi;
 
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/primitives/SessionResults.php';
-require_once __DIR__ . '/../../src/helpers/SessionState.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
+require_once __DIR__ . '/../../src/primitives/Round.php';
 require_once __DIR__ . '/../../src/primitives/Session.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
+require_once __DIR__ . '/../util/MockRuleset.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
@@ -40,17 +41,14 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
      * @var SessionPrimitive
      */
     protected $_session;
+    /**
+     * @var MockRuleset
+     */
+    protected $_ruleset;
 
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
-
-        $this->_event = (new EventPrimitive($this->_db))
-            ->setTitle('title')
-            ->setDescription('desc')
-            ->setType('online')
-            ->setRuleset(Ruleset::instance('jpmlA'));
-        $this->_event->save();
 
         $this->_players = array_map(function ($i) {
             $p = (new PlayerPrimitive($this->_db))
@@ -60,6 +58,22 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
             $p->save();
             return $p;
         }, [1, 2, 3, 4]);
+
+        $this->_ruleset = new MockRuleset();
+        $this->_ruleset->setRule('withButtobi', false);
+        $this->_ruleset->setRule('startRating', 1500);
+        $this->_ruleset->setRule('tenboDivider', 1000.);
+        $this->_ruleset->setRule('ratingDivider', 1.);
+        $this->_ruleset->setRule('startPoints', 30000);
+        $this->_ruleset->setRule('uma', [1 => 15, 5, -5, -15]);
+        $this->_ruleset->setRule('oka', 0);
+
+        $this->_event = (new EventPrimitive($this->_db))
+            ->setTitle('title')
+            ->setDescription('desc')
+            ->setType('online')
+            ->setRuleset($this->_ruleset);
+        $this->_event->save();
 
         $this->_session = (new SessionPrimitive($this->_db))
             ->setEvent($this->_event)
@@ -83,4 +97,151 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(30000, $result->getScore());
     }
 
+    public function testUmaRule()
+    {
+        $result = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[1])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result->save();
+
+        $this->assertEquals(5, $result->getRatingDelta());
+    }
+
+    public function testOkaRule()
+    {
+        $this->_ruleset->setRule('startPoints', 25000);
+        $this->_ruleset->setRule('oka', 20);
+
+        $result = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[0])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result->save();
+
+        $this->assertEquals(35, $result->getRatingDelta());
+
+        $result = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[1])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result->save();
+
+        // oka = 20, means everybody pay 5 points, so final score of 2nd player will be
+        // ((25000 - 25000) / 1000) + 5 (for 2nd place) - 5 (for oka) = 0
+        $this->assertEquals(0, $result->getRatingDelta());
+    }
+
+    public function testTwoEqualScore()
+    {
+        $round = (new RoundPrimitive($this->_db))
+            ->setOutcome('draw')
+            ->setSession($this->_session)
+            ->setRoundIndex(1)
+            ->setTempaiUsers([$this->_players[1], $this->_players[2]])
+            ->setRiichiUsers([]);
+        $round->save();
+        $this->_session->updateCurrentState($round);
+
+        $result1 = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[1])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result1->save();
+
+        $result2 = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[2])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result2->save();
+
+        $this->assertEquals($result1->getScore(), $result2->getScore());
+        $this->assertEquals(16.5, $result1->getRatingDelta()); // 1st place
+        $this->assertEquals(6.5, $result2->getRatingDelta()); // 2nd place
+    }
+
+    public function testTwoEqualScoreWithEqualityRule()
+    {
+        $this->_ruleset = Ruleset::instance('ema');
+        $this->_event->setRuleset($this->_ruleset)->save();
+
+        $round = (new RoundPrimitive($this->_db))
+            ->setOutcome('draw')
+            ->setSession($this->_session)
+            ->setRoundIndex(1)
+            ->setTempaiUsers([$this->_players[1], $this->_players[2]])
+            ->setRiichiUsers([]);
+        $round->save();
+        $this->_session->updateCurrentState($round);
+
+        $result1 = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[1])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result1->save();
+
+        $result2 = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[2])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result2->save();
+
+        $this->assertEquals($result1->getScore(), $result2->getScore());
+        $this->assertEquals($result1->getRatingDelta(), $result2->getRatingDelta());
+        $this->assertEquals(31500, $result1->getScore());
+        $this->assertEquals(11500, $result2->getRatingDelta());
+    }
+
+    public function testChombo()
+    {
+        $this->_ruleset->setRule('extraChomboPayments', false);
+        $round = (new RoundPrimitive($this->_db))
+            ->setOutcome('chombo')
+            ->setSession($this->_session)
+            ->setLoser($this->_players[1])
+            ->setRoundIndex(1);
+        $round->save();
+        $this->_session->updateCurrentState($round);
+
+        $result1 = (new SessionResultsPrimitive($this->_db))
+            ->setPlayer($this->_players[1])
+            ->setSession($this->_session)
+            ->calc(
+                $this->_session->getEvent()->getRuleset(),
+                $this->_session->getCurrentState(),
+                $this->_session->getPlayersIds()
+            );
+        $result1->save();
+
+        $this->assertEquals(30000, $result1->getScore());
+        $this->assertEquals(-15, $result1->getRatingDelta()); // 2nd place = uma +5 + chombo -20
+    }
 }

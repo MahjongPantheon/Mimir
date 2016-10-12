@@ -287,7 +287,7 @@ class SessionResultsPrimitive extends Primitive
     /**
      * @return float
      */
-    public function getResultScore()
+    public function getRatingDelta()
     {
         return $this->_ratingDelta;
     }
@@ -309,8 +309,9 @@ class SessionResultsPrimitive extends Primitive
 
         $this->_place = $this->_calcPlace($results->getScores(), $playerIds);
         $this->_ratingDelta = $this->_calcRatingDelta($rules, $results->getScores());
+
         if (!empty($results->getPenalties()[$this->_playerId])) { // final chombing
-            $this->_ratingDelta -= $results->getPenalties()[$this->_playerId];
+            $this->_ratingDelta += $results->getPenalties()[$this->_playerId];
         }
 
         return $this;
@@ -324,8 +325,14 @@ class SessionResultsPrimitive extends Primitive
      */
     protected function _calcPlace($scoreList, $originalPlayersSequence)
     {
-        $playersMap = array_combine($originalPlayersSequence, $scoreList);
-        arsort($playersMap); // sorting should maintain players sequence if some scores equal, TODO check it
+        // Make equal scores go in reverse order to assign places properly
+        $playersMap = array_combine(
+            array_reverse($originalPlayersSequence),
+            array_reverse($scoreList)
+        );
+
+        // this sorting should maintain players sequence if some scores equal
+        arsort($playersMap);
 
         $i = 1;
         foreach ($playersMap as $k => $v) {

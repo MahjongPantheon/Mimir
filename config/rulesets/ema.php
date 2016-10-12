@@ -48,14 +48,14 @@ class RulesetEma extends Ruleset
      * @param array $scores
      * @return array
      */
-    public function uma($scores)
+    public function uma($scores = [])
     {
         // hint: stricter conditions should go first
 
         rsort($scores);
         $uniqScores = array_unique($scores);
         if (count($uniqScores) === 4) {
-            return [1 => 15, 5, -5, -15];
+            return [1 => 15000, 5000, -5000, -15000];
         }
 
         if (count($uniqScores) === 1) {
@@ -63,27 +63,27 @@ class RulesetEma extends Ruleset
         }
 
         if ($scores[0] == $scores[1] && $scores[1] == $scores[2]) {
-            return [1 => 5, 5, 5, -15];
+            return [1 => 5000, 5000, 5000, -15000];
         }
 
         if ($scores[1] == $scores[2] && $scores[2] == $scores[3]) {
-            return [1 => 15, -5, -5, -5];
+            return [1 => 15000, -5000, -5000, -5000];
         }
 
         if ($scores[0] == $scores[1] && $scores[2] == $scores[3]) {
-            return [1 => 10, 10, -10, -10];
+            return [1 => 10000, 10000, -10000, -10000];
         }
 
         if ($scores[0] == $scores[1]) {
-            return [1 => 10, 10, -5, -15];
+            return [1 => 10000, 10000, -5000, -15000];
         }
 
         if ($scores[1] == $scores[2]) {
-            return [1 => 15, 0, 0, -15];
+            return [1 => 15000, 0, 0, -15000];
         }
 
         if ($scores[2] == $scores[3]) {
-            return [1 => 15, 5, -10, -10];
+            return [1 => 15000, 5000, -10000, -10000];
         }
     }
 }
