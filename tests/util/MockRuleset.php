@@ -57,7 +57,7 @@ class MockRuleset extends Ruleset
         self::$_ruleset[$name] = $value;
     }
 
-    public function calcRating($currentRating, $place, $points)
+    public function calcRating($currentRating, $place, $points, $allScores)
     {
         return $currentRating + (
             ($points + $this->uma()[$place]) / (float)$this->ratingDivider()

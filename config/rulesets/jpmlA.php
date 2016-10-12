@@ -40,19 +40,31 @@ class RulesetJpmlA extends Ruleset
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
-        'withLeadingDealerGameOver' => true,
-        'uma' => [
-            1 => 150,
-            2 => 50,
-            3 => -50,
-            4 => -150
-        ],
+        'withLeadingDealerGameOver' => true
     ];
 
-    public function calcRating($currentRating, $place, $points)
+    /**
+     * JPML A uses complex uma bonus
+     *
+     * @param array $scores
+     * @return array
+     */
+    public function uma($scores)
     {
-        return $currentRating + (
-            ($points + $this->uma()[$place]) / (float)$this->ratingDivider()
-        );
+        rsort($scores);
+        $minusedPlayers = array_reduce($scores, function($el) {
+            return $el < $this->startPoints() ? 1 : 0;
+        }, 0);
+
+        switch($minusedPlayers) {
+            case 4:
+            case 2:
+            case 0:
+                return [1 => 8, 4, -4, -8];
+            case 3:
+                return [1 => 12, -1, -3, -8];
+            case 1:
+                return [1 => 8, 3, 1, -12];
+        }
     }
 }

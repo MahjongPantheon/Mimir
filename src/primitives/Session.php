@@ -416,7 +416,7 @@ class SessionPrimitive extends Primitive
      */
     protected function _finalizeGame()
     {
-        return array_reduce($this->getPlayers(), function($acc, PlayerPrimitive $player) {
+        return array_reduce($this->getPlayers(), function ($acc, PlayerPrimitive $player) {
             return $acc && (new SessionResultsPrimitive($this->_db))
                 ->setPlayer($player)
                 ->setSession($this)

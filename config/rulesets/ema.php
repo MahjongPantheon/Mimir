@@ -40,19 +40,50 @@ class RulesetEma extends Ruleset
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
-        'withLeadingDealerGameOver' => false,
-        'uma' => [
-            1 => 15000,
-            2 => 5000,
-            3 => -5000,
-            4 => -15000
-        ],
+        'withLeadingDealerGameOver' => false
     ];
 
-    public function calcRating($currentRating, $place, $points)
+    /**
+     * EMA uses equalized uma in case of equal scores
+     * @param array $scores
+     * @return array
+     */
+    public function uma($scores)
     {
-        return $currentRating + (
-            ($points + $this->uma()[$place]) / (float)$this->ratingDivider()
-        );
+        // hint: stricter conditions should go first
+
+        rsort($scores);
+        $uniqScores = array_unique($scores);
+        if (count($uniqScores) === 4) {
+            return [1 => 15, 5, -5, -15];
+        }
+
+        if (count($uniqScores) === 1) {
+            return [1 => 0, 0, 0, 0];
+        }
+
+        if ($scores[0] == $scores[1] && $scores[1] == $scores[2]) {
+            return [1 => 5, 5, 5, -15];
+        }
+
+        if ($scores[1] == $scores[2] && $scores[2] == $scores[3]) {
+            return [1 => 15, -5, -5, -5];
+        }
+
+        if ($scores[0] == $scores[1] && $scores[2] == $scores[3]) {
+            return [1 => 10, 10, -10, -10];
+        }
+
+        if ($scores[0] == $scores[1]) {
+            return [1 => 10, 10, -5, -15];
+        }
+
+        if ($scores[1] == $scores[2]) {
+            return [1 => 15, 0, 0, -15];
+        }
+
+        if ($scores[2] == $scores[3]) {
+            return [1 => 15, 5, -10, -10];
+        }
     }
 }

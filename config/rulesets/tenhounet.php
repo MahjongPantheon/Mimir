@@ -54,11 +54,4 @@ class RulesetTenhounet extends Ruleset
             4 => -15
         ],
     ];
-
-    public function calcRating($currentRating, $place, $points)
-    {
-        return $currentRating + (
-            ($points + $this->uma()[$place]) / (float)$this->ratingDivider()
-        );
-    }
 }

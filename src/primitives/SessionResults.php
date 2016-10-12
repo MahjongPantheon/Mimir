@@ -40,7 +40,7 @@ class SessionResultsPrimitive extends Primitive
         'session_id'            => '_sessionId',
         'player_id'             => '_playerId',
         'score'                 => '_score',
-        'result_score'          => '_resultScore',
+        'rating_delta'          => '_ratingDelta',
         'place'                 => '_place'
     ];
 
@@ -96,7 +96,7 @@ class SessionResultsPrimitive extends Primitive
     /**
      * @var float
      */
-    protected $_resultScore;
+    protected $_ratingDelta;
 
     /**
      * @var int
@@ -289,7 +289,7 @@ class SessionResultsPrimitive extends Primitive
      */
     public function getResultScore()
     {
-        return $this->_resultScore;
+        return $this->_ratingDelta;
     }
 
     /**
@@ -307,37 +307,50 @@ class SessionResultsPrimitive extends Primitive
             }
         }
 
-        list($place, $playerBonus) = $this->_calcPlaceAndBonus(
-            $this->_score,
-            $results->getScores(),
-            $playerIds,
-            $rules
-        );
-
-        $this->_place = $place;
-
-        $this->_resultScore = ($this->_score / (float)$rules->tenboDivider()) + $playerBonus;
-        if ($this->_place === 1) {
-            $this->_resultScore += $rules->oka();
+        $this->_place = $this->_calcPlace($results->getScores(), $playerIds);
+        $this->_ratingDelta = $this->_calcRatingDelta($rules, $results->getScores());
+        if (!empty($results->getPenalties()[$this->_playerId])) { // final chombing
+            $this->_ratingDelta -= $results->getPenalties()[$this->_playerId];
         }
 
         return $this;
     }
 
     /**
-     * Calculates place and rank bonus (uma)
-     * Should depend on ruleset (in some rules equal score result in equal bonus)
+     * Calculates player place
      *
-     * @param $score
      * @param $scoreList
      * @param $originalPlayersSequence
-     * @param Ruleset $rules
      */
-    protected function _calcPlaceAndBonus($score, $scoreList, $originalPlayersSequence, Ruleset $rules)
+    protected function _calcPlace($scoreList, $originalPlayersSequence)
     {
-        // 1) no equal
-        // 2) two equals
-        // 3) three equals
-        // 4) all equal
+        $playersMap = array_combine($originalPlayersSequence, $scoreList);
+        arsort($playersMap); // sorting should maintain players sequence if some scores equal, TODO check it
+
+        $i = 1;
+        foreach ($playersMap as $k => $v) {
+            $playersMap[$k] = [
+                'score' => $v,
+                'place' => $i++
+            ];
+        }
+
+        return $playersMap[$this->_playerId]['place'];
+    }
+
+    /**
+     * Calculates rating change
+     *
+     * @param Ruleset $rules
+     * @param $allScores
+     * @return float
+     */
+    protected function _calcRatingDelta(Ruleset $rules, $allScores)
+    {
+        return (
+            ($this->_score - $rules->startPoints()) / (float)$rules->tenboDivider()
+            + $rules->oka($this->_place)
+            + $rules->uma($allScores)[$this->_place]
+        ) / (float)$rules->ratingDivider();
     }
 }

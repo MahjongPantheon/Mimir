@@ -35,7 +35,6 @@ abstract class Ruleset
 
     protected static $_title;
     protected static $_ruleset;
-    abstract public function calcRating($currentRating, $place, $points);
 
     public function title()
     {
@@ -62,14 +61,18 @@ abstract class Ruleset
         return static::$_ruleset['startRating'];
     }
 
-    public function uma()
+    public function uma($scores = [])
     {
         return static::$_ruleset['uma'];
     }
 
-    public function oka()
+    public function oka($place)
     {
-        return static::$_ruleset['oka'];
+        if ($place === 1) {
+            return static::$_ruleset['oka'];
+        }
+
+        return 0;
     }
 
     public function startPoints()
