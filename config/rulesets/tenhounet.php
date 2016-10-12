@@ -32,7 +32,7 @@ class RulesetTenhounet extends Ruleset
         'ratingDivider'         => 1,
         'startRating'           => 1500,
         'oka'                   => 20,
-        'startPoints'           => 25,
+        'startPoints'           => 25000,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => true,
         'chomboPenalty'         => 0,

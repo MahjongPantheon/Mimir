@@ -318,7 +318,7 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * @return string
+     * @return int[]
      */
     public function getPlayersIds()
     {

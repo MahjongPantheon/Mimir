@@ -26,7 +26,7 @@ class RulesetJpmlA extends Ruleset
         'ratingDivider'         => 10,
         'startRating'           => 1500,
         'oka'                   => 0,
-        'startPoints'           => 300,
+        'startPoints'           => 30000,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => true,
         'chomboPenalty'         => 200,
