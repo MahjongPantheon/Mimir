@@ -139,8 +139,8 @@ CREATE INDEX "round_outcome" ON "round"("outcome");
 -- User rating history in context of every event
 DROP TABLE
 -- IF EXISTS
-   "user_history";
-CREATE TABLE "user_history" (
+   "player_history";
+CREATE TABLE "player_history" (
   "id" integer, -- serial
   primary key ("id"),
   "user_id" integer not null,

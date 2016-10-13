@@ -82,6 +82,19 @@ abstract class Primitive
     }
 
     /**
+     * Default float cast transform
+     * @return array
+     */
+    protected function _floatTransform()
+    {
+        return [
+            'serialize' => function ($obj) {
+                return (float)$obj;
+            }
+        ];
+    }
+
+    /**
      * Default integer cast transform
      * Return null if empty
      * @return array
