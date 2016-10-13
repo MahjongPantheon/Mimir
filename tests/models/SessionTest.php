@@ -277,4 +277,41 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($caught, "Finished game throws exception");
     }
+
+    public function testAutoEndGameWhenHanchanFinishes()
+    {
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+                }, $this->_players)
+        );
+
+        $roundData = [
+            'outcome'   => 'draw',
+            'riichi'    => '',
+            'tempai'    => ''
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData)); // 1e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 2e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 3e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 4e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 1s
+        $this->assertTrue($session->addRound($hash, $roundData)); // 2s
+        $this->assertTrue($session->addRound($hash, $roundData)); // 3s
+        $this->assertTrue($session->addRound($hash, $roundData)); // 4s, should auto-finish here
+
+        $caught = false;
+        try {
+            $session->endGame($hash); // Try to finish again
+        } catch (BadActionException $e) {
+            // We do try/catch here to avoid catching same exception from
+            // upper clauses, as it might give some false positives in that case.
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, "Game should be already finished");
+    }
 }

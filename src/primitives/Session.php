@@ -396,6 +396,7 @@ class SessionPrimitive extends Primitive
     public function updateCurrentState(RoundPrimitive $round)
     {
         $success = $this->getCurrentState()->update($round);
+        $success = $success && $this->save();
         if ($this->getCurrentState()->isFinished()) {
             $success = $success && $this->finish();
         }

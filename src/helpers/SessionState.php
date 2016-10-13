@@ -85,12 +85,12 @@ class SessionState
      * @param Ruleset $rules
      * @param $playersIds
      * @param $json
-     * @return SessionState
      * @throws InvalidParametersException
+     * @return SessionState
      */
     public static function fromJson(Ruleset $rules, $playersIds, $json)
     {
-        if (empty($ret)) {
+        if (empty($json)) {
             $ret = [];
         } else {
             $ret = json_decode($json, true);
@@ -99,6 +99,7 @@ class SessionState
             }
         }
         $instance = new self($rules, $playersIds);
+
         foreach ($ret as $key => $value) {
             $instance->$key = $value;
         }
@@ -217,7 +218,7 @@ class SessionState
     public function getCurrentDealer()
     {
         $players = array_keys($this->_scores);
-        return $players[($this->_round % 4) - 1];
+        return $players[($this->_round - 1) % 4];
     }
 
     /**

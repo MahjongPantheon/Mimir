@@ -19,6 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/primitives/Session.php';
+require_once __DIR__ . '/../../src/primitives/Round.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/Db.php';
@@ -164,6 +165,30 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $anotherSessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
         $this->assertEquals('someanotherhash', $anotherSessionCopy[0]->getReplayHash());
         $this->assertEquals($newSession->getRepresentationalHash(), $anotherSessionCopy[0]->getRepresentationalHash());
+    }
+
+    public function testUpdateSessionStateAfterSave()
+    {
+        $newSession = new SessionPrimitive($this->_db);
+        $newSession
+            ->setStatus('inprogress')
+            ->setOrigLink('test')
+            ->setPlayers($this->_players)
+            ->setReplayHash('hash')
+            ->setEvent($this->_event)
+            ->save();
+
+        $round = new RoundPrimitive($this->_db);
+        $round
+            ->setOutcome('draw')
+            ->setTempaiUsers([])
+            ->setRiichiUsers([]);
+
+        $newSession->updateCurrentState($round);
+        $newSession->save();
+
+        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()]);
+        $this->assertEquals(2, $sessionCopy[0]->getCurrentState()->getRound());
     }
 
     public function testRelationEvent()
