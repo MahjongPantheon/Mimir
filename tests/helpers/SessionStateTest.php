@@ -391,7 +391,9 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
 
         $state = SessionState::fromJson(
             $this->_ruleset,
-            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players),
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players),
             $json1
         );
 
@@ -403,7 +405,9 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
 
         $state = SessionState::fromJson(
             $this->_ruleset,
-            array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $this->_players),
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players),
             $json2
         );
 

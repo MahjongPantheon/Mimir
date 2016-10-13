@@ -285,7 +285,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
                     return $p->getId();
-                }, $this->_players)
+            }, $this->_players)
         );
 
         $roundData = [
