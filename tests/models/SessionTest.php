@@ -313,5 +313,14 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertTrue($caught, "Game should be already finished");
+
+        // Check that results exist in db
+        $results = SessionResultsPrimitive::findByEventId($this->_db, [$this->_event->getId()]);
+        $this->assertEquals(4, count($results));
+        // See jpmlA ruleset to find out why these numbers are ok
+        $this->assertEquals(8, $results[0]->getRatingDelta());
+        $this->assertEquals(4, $results[1]->getRatingDelta());
+        $this->assertEquals(-4, $results[2]->getRatingDelta());
+        $this->assertEquals(-8, $results[3]->getRatingDelta());
     }
 }

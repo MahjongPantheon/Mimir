@@ -361,9 +361,6 @@ class SessionPrimitive extends Primitive
     public function setStatus($status)
     {
         $this->_status = $status;
-        if ($status === 'finished') {
-            $this->_finalizeGame();
-        }
         return $this;
     }
 
