@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../src/primitives/Round.php';
 require_once __DIR__ . '/../../src/primitives/Session.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
+require_once __DIR__ . '/../../src/primitives/PlayerHistory.php';
 require_once __DIR__ . '/../util/Db.php';
 
 class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
@@ -31,6 +32,10 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
      * @var SessionPrimitive
      */
     protected $_session;
+    /**
+     * @var SessionPrimitive
+     */
+    protected $_anotherSession;
     /**
      * @var EventPrimitive
      */
@@ -67,161 +72,200 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setReplayHash('')
             ->setOrigLink('');
         $this->_session->save();
+
+        $this->_anotherSession = (new SessionPrimitive($this->_db))
+            ->setEvent($this->_event)
+            ->setPlayers($this->_players)
+            ->setStatus('inprogress')
+            ->setReplayHash('')
+            ->setOrigLink('');
+        $this->_anotherSession->save();
     }
 
     public function testNewHistoryItem()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[1])
-//            ->setLoser($this->_players[2])
-//            ->setYaku('');
-//
-//        $this->assertEquals($this->_session->getId(), $newRound->getSessionId());
-//        $this->assertTrue($this->_session === $newRound->getSession());
-//        $this->assertTrue($this->_players[1] === $newRound->getWinner());
-//        $this->assertTrue($this->_players[2] === $newRound->getLoser());
-//        $this->assertEquals(1, count($newRound->getRiichiUsers()));
-//        $this->assertTrue($this->_players[1] === $newRound->getRiichiUsers()[0]);
-//
-//        $success = $newRound->save();
-//        $this->assertTrue($success, "Saved round");
-//        $this->assertGreaterThan(0, $newRound->getId());
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500);
+
+        $this->assertEquals($this->_session->getId(), $item->getSessionId());
+        $this->assertTrue($this->_session === $item->getSession());
+        $this->assertEquals($this->_players[0]->getId(), $item->getPlayerId());
+        $this->assertTrue($this->_players[0] === $item->getPlayer());
+        $this->assertEquals(1500, $item->getRating());
+
+        $success = $item->save();
+        $this->assertTrue($success, "Saved round");
+        $this->assertGreaterThan(0, $item->getId());
     }
 
     public function testFindLastItemByPlayerAndEvent()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[2])
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundsCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()]);
-//        $this->assertEquals(1, count($roundsCopy));
-//        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
-//        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+        $item2 = new PlayerHistoryPrimitive($this->_db);
+        $item2
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[1])
+            ->setRating(1600)
+            ->save();
+        $item3 = new PlayerHistoryPrimitive($this->_db);
+        $item3
+            ->setSession($this->_anotherSession)
+            ->setPlayer($this->_players[0])
+            ->setRating(1700)
+            ->save();
+
+        $itemCopy = PlayerHistoryPrimitive::findLastByEvent(
+            $this->_db,
+            $this->_players[0]->getId(),
+            $this->_event->getId()
+        );
+
+        $this->assertTrue($itemCopy instanceof PlayerHistoryPrimitive);
+        $this->assertEquals(1700, $itemCopy->getRating());
+        $this->assertEquals($this->_players[0]->getId(), $itemCopy->getPlayerId());
+        $this->assertTrue($itemCopy !== $item); // different objects!
     }
 
     public function testFindAllItemsByPlayerAndEvent()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[2])
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundsCopy = RoundPrimitive::findBySessionIds($this->_db, [$this->_session->getId()]);
-//        $this->assertEquals(1, count($roundsCopy));
-//        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
-//        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
+        $item1 = new PlayerHistoryPrimitive($this->_db);
+        $item1
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+        $item2 = new PlayerHistoryPrimitive($this->_db);
+        $item2
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[1])
+            ->setRating(1600)
+            ->save();
+        $item3 = new PlayerHistoryPrimitive($this->_db);
+        $item3
+            ->setSession($this->_anotherSession)
+            ->setPlayer($this->_players[0])
+            ->setRating(1700)
+            ->save();
+
+        $items = PlayerHistoryPrimitive::findAllByEvent(
+            $this->_db,
+            $this->_players[0]->getId(),
+            $this->_event->getId()
+        );
+
+        $this->assertEquals(2, count($items));
+        $this->assertEquals(1500, $items[0]->getRating());
+        $this->assertEquals(1700, $items[1]->getRating()); // TODO: probably will fail when sorting is introduced
+
+        $this->assertEquals($this->_players[0]->getId(), $items[0]->getPlayerId());
+        $this->assertEquals($this->_players[0]->getId(), $items[1]->getPlayerId());
+
+        $this->assertTrue($items[0] !== $item1); // different objects!
+        $this->assertTrue($items[1] !== $item3); // different objects!
     }
 
     public function testFindItemByPlayerAndSession()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[2])
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundsCopy = RoundPrimitive::findByEventIds($this->_db, [$this->_event->getId()]);
-//        $this->assertEquals(1, count($roundsCopy));
-//        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
-//        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+        $item2 = new PlayerHistoryPrimitive($this->_db);
+        $item2
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[1])
+            ->setRating(1600)
+            ->save();
+        $item3 = new PlayerHistoryPrimitive($this->_db);
+        $item3
+            ->setSession($this->_anotherSession)
+            ->setPlayer($this->_players[0])
+            ->setRating(1700)
+            ->save();
+
+        $itemCopy = PlayerHistoryPrimitive::findBySession(
+            $this->_db,
+            $this->_players[0]->getId(),
+            $this->_session->getId()
+        );
+
+        $this->assertTrue($itemCopy instanceof PlayerHistoryPrimitive);
+        $this->assertEquals(1500, $itemCopy->getRating());
+        $this->assertEquals($this->_players[0]->getId(), $itemCopy->getPlayerId());
+        $this->assertTrue($itemCopy !== $item); // different objects!
     }
 
     public function testUpdateHistoryItem()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[2])
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()]);
-//        $roundCopy[0]->setOutcome('tsumo')->save();
-//
-//        $anotherRoundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()]);
-//        $this->assertEquals('tsumo', $anotherRoundCopy[0]->getOutcome());
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+
+        $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()]);
+        $itemCopy[0]->setRating(1000)->save();
+
+        $anotherItemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()]);
+        $this->assertEquals(1000, $anotherItemCopy[0]->getRating());
     }
 
     public function testRelationSession()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[2])
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()])[0];
-//        $this->assertEquals($this->_session->getId(), $roundCopy->getSessionId()); // before fetch
-//        $this->assertNotEmpty($roundCopy->getSession());
-//        $this->assertEquals($this->_session->getId(), $roundCopy->getSession()->getId());
-//        $this->assertTrue($this->_session !== $roundCopy->getSession()); // different objects!
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+
+        $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()])[0];
+        $this->assertEquals($this->_session->getId(), $itemCopy->getSessionId()); // before fetch
+        $this->assertNotEmpty($itemCopy->getSession());
+        $this->assertEquals($this->_session->getId(), $itemCopy->getSession()->getId());
+        $this->assertTrue($this->_session !== $itemCopy->getSession()); // different objects!
     }
 
     public function testRelationEvent()
     {
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($this->_players[2])
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()])[0];
-//        $this->assertEquals($this->_event->getId(), $roundCopy->getEventId()); // before fetch
-//        $this->assertNotEmpty($roundCopy->getEvent());
-//        $this->assertEquals($this->_event->getId(), $roundCopy->getEvent()->getId());
-//        $this->assertTrue($this->_event !== $roundCopy->getEvent()); // different objects!
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+
+        $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()])[0];
+        $this->assertEquals($this->_event->getId(), $itemCopy->getEventId()); // before fetch
+        $this->assertNotEmpty($itemCopy->getEvent());
+        $this->assertEquals($this->_event->getId(), $itemCopy->getEvent()->getId());
+        $this->assertTrue($this->_event !== $itemCopy->getEvent()); // different objects!
     }
 
     public function testRelationPlayer()
     {
-//        $newUser = new PlayerPrimitive($this->_db);
-//        $newUser
-//            ->setDisplayName('user1')
-//            ->setIdent('someident')
-//            ->setTenhouId('someid');
-//        $newUser->save();
-//
-//        $this->_players[1] = $newUser;
-//        $this->_session->setPlayers($this->_players)->save();
-//
-//        $newRound = new RoundPrimitive($this->_db);
-//        $newRound
-//            ->setSession($this->_session)
-//            ->setOutcome('ron')
-//            ->setWinner($newUser)
-//            ->setLoser($this->_players[3])
-//            ->setRoundIndex(1);
-//        $newRound->save();
-//
-//        $roundCopy = RoundPrimitive::findById($this->_db, [$newRound->getId()])[0];
-//        $this->assertEquals($newUser->getId(), $roundCopy->getWinnerId()); // before fetch
-//
-//        $this->assertNotEmpty($roundCopy->getWinner());
-//        $this->assertEquals($newUser->getId(), $roundCopy->getWinner()->getId());
-//        $this->assertTrue($newUser !== $roundCopy->getWinner()); // different objects!
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->setRating(1500)
+            ->save();
+
+        $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()])[0];
+        $this->assertEquals($this->_players[0]->getId(), $itemCopy->getPlayerId()); // before fetch
+        $this->assertNotEmpty($itemCopy->getPlayer());
+        $this->assertEquals($this->_players[0]->getId(), $itemCopy->getPlayer()->getId());
+        $this->assertTrue($this->_players[0] !== $itemCopy->getPlayer()); // different objects!
     }
 }

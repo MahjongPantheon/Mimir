@@ -82,6 +82,19 @@ class PlayerHistoryPrimitive extends Primitive
     protected $_rating;
 
     /**
+     * Find history items by local ids (primary key)
+     *
+     * @param IDb $db
+     * @param int[] $ids
+     * @throws \Exception
+     * @return PlayerHistoryPrimitive[]
+     */
+    public static function findById(IDb $db, $ids)
+    {
+        return self::_findBy($db, 'id', $ids);
+    }
+
+    /**
      * @param IDb $db
      * @param $playerId
      * @param $eventId
@@ -145,14 +158,13 @@ class PlayerHistoryPrimitive extends Primitive
     }
 
     /**
-     * @param \Riichi\EventPrimitive $event
-     * @return PlayerHistoryPrimitive
+     * @deprecated
+     * @param EventPrimitive $event
+     * @throws InvalidParametersException
      */
-    public function setEvent(EventPrimitive $event)
+    public function _setEvent(EventPrimitive $event)
     {
-        $this->_event = $event;
-        $this->_eventId = $event->getId();
-        return $this;
+        throw new InvalidParametersException('Event should not be set directly to round. Set session instead!');
     }
 
     /**
@@ -239,6 +251,7 @@ class PlayerHistoryPrimitive extends Primitive
     {
         $this->_session = $session;
         $this->_sessionId = $session->getId();
+        $this->_eventId = $session->getEventId();
         return $this;
     }
 
