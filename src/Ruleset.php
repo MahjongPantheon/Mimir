@@ -19,23 +19,26 @@ namespace Riichi;
 
 abstract class Ruleset
 {
-    protected static $_instance;
+    private static $_instances = [];
 
     /**
-     * @return self
+     * @param $title
+     * @return Ruleset
      */
-    public static function instance()
+    public static function instance($title)
     {
-        if (!static::$_instance) {
-            static::$_instance = new static();
+        if (empty(self::$_instances[$title])) {
+            require_once __DIR__ . '/../config/rulesets/' . $title . '.php';
+            /** @var Ruleset $className */
+            $className = 'Riichi\Ruleset' . ucfirst($title);
+            self::$_instances[$title] = new $className();
         }
 
-        return static::$_instance;
+        return static::$_instances[$title];
     }
 
     protected static $_title;
     protected static $_ruleset;
-    abstract public function calcRating($currentRating, $place, $points);
 
     public function title()
     {
@@ -62,14 +65,18 @@ abstract class Ruleset
         return static::$_ruleset['startRating'];
     }
 
-    public function uma()
+    public function uma($scores = [])
     {
         return static::$_ruleset['uma'];
     }
 
-    public function oka()
+    public function oka($place)
     {
-        return static::$_ruleset['oka'];
+        if ($place === 1) {
+            return static::$_ruleset['oka'];
+        } else {
+            return -(static::$_ruleset['oka'] / 4);
+        }
     }
 
     public function startPoints()

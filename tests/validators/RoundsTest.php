@@ -93,7 +93,6 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
             '1,2,3,4',
             [],
             [
-                'round'     => 1,
                 'riichi'    => '',
                 'winner_id' => 2,
                 'loser_id'  => 3,
@@ -118,7 +117,6 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
             '1,2,3,4',
             [],
             [
-                'round'     => 1,
                 'riichi'    => '1',
                 'winner_id' => 2,
                 'han'       => 2,
@@ -140,7 +138,6 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $checkDraw->invokeArgs(null, [
             '1,2,3,4',
             [
-                'round'     => 1,
                 'riichi'    => '1',
                 'tempai'    => '1,2'
             ]
@@ -155,7 +152,6 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $checkAbort->invokeArgs(null, [
             '1,2,3,4',
             [
-                'round'     => 1,
                 'riichi'    => '1'
             ]
         ]); // no exception == ok
@@ -169,7 +165,6 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $checkChombo->invokeArgs(null, [
             '1,2,3,4',
             [
-                'round'     => 1,
                 'loser_id'  => 2
             ]
         ]); // no exception == ok

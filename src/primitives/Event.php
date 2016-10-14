@@ -50,6 +50,14 @@ class EventPrimitive extends Primitive
             '_ownerFormationId'   => $this->_integerTransform(),
             '_ownerUserId'        => $this->_integerTransform(),
             '_id'                 => $this->_nullableIntegerTransform(),
+            '_ruleset'            => [
+                'serialize' => function (Ruleset $rules) {
+                    return $rules->title();
+                },
+                'deserialize' => function ($rulesId) {
+                    return Ruleset::instance($rulesId);
+                }
+            ]
         ];
     }
 
@@ -110,15 +118,10 @@ class EventPrimitive extends Primitive
      */
     protected $_lobbyId;
     /**
-     * Identifier of rules to apply to the event
-     * @var string
-     */
-    protected $_ruleset;
-    /**
-     * Ruleset details
+     * Rules to apply to the event
      * @var Ruleset
      */
-    protected $_rulesetDetails;
+    protected $_ruleset;
 
     public function __construct(Db $db)
     {
@@ -209,6 +212,24 @@ class EventPrimitive extends Primitive
     }
 
     /**
+     * @return Ruleset
+     */
+    public function getRuleset()
+    {
+        return $this->_ruleset;
+    }
+
+    /**
+     * @param Ruleset $rules
+     * @return EventPrimitive
+     */
+    public function setRuleset(Ruleset $rules)
+    {
+        $this->_ruleset = $rules;
+        return $this;
+    }
+
+    /**
      * @param string $lobbyId
      * @return EventPrimitive
      */
@@ -294,38 +315,6 @@ class EventPrimitive extends Primitive
     public function getOwnerUserId()
     {
         return $this->_ownerUserId;
-    }
-
-    /**
-     * @param mixed $ruleset
-     * @return EventPrimitive
-     */
-    public function setRuleset($ruleset)
-    {
-        $this->_ruleset = $ruleset;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRuleset()
-    {
-        return $this->_ruleset;
-    }
-
-    /**
-     * @return Ruleset
-     */
-    public function getRules()
-    {
-        if (empty($this->_rulesetDetails) || $this->_rulesetDetails->title() != $this->_ruleset) {
-            require_once __DIR__ . '/../../config/rulesets/' . $this->_ruleset . '.php';
-            /** @var Ruleset $className */
-            $className = 'Riichi\Ruleset' . ucfirst($this->_ruleset);
-            $this->_rulesetDetails = $className::instance();
-        }
-        return $this->_rulesetDetails;
     }
 
     /**

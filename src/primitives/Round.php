@@ -530,6 +530,7 @@ class RoundPrimitive extends Primitive
     {
         $this->_session = $session;
         $this->_sessionId = $session->getId();
+        $this->_eventId = $session->getEventId();
         return $this;
     }
 
@@ -541,7 +542,7 @@ class RoundPrimitive extends Primitive
         if (!$this->_session) {
             $foundSessions = SessionPrimitive::findById($this->_db, [$this->_sessionId]);
             if (empty($foundSessions)) {
-                throw new EntityNotFoundException("Entity SessionPrimitive with id#" . $this->_winnerId . ' not found in DB');
+                throw new EntityNotFoundException("Entity SessionPrimitive with id#" . $this->_sessionId . ' not found in DB');
             }
             $this->_session = $foundSessions[0];
         }

@@ -337,4 +337,82 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
                  33000 - 1000
         ], $this->_state->getScores());
     }
+
+    public function testSerialDraw()
+    {
+        $round = new RoundPrimitive($this->_db);
+        $round
+            ->setOutcome('draw')
+            ->setTempaiUsers([])
+            ->setRiichiUsers([]);
+        $this->_state->update($round);
+        $this->_state->update($round);
+        $this->_state->update($round);
+        $this->_state->update($round);
+        $this->_state->update($round);
+        $this->_state->update($round);
+        $this->_state->update($round);
+
+        $this->assertEquals($this->_players[3]->getId(), $this->_state->getCurrentDealer());
+        $this->assertEquals(8, $this->_state->getRound());
+        $this->assertEquals(7, $this->_state->getHonba());
+        $this->assertEquals(0, $this->_state->getRiichiBets());
+        $this->assertEquals([
+                1 => 30000,
+                30000,
+                30000,
+                30000
+            ], $this->_state->getScores());
+    }
+
+    public function testSessionStateToJson()
+    {
+        $this->assertEquals(
+            '{"_scores":{"1":30000,"2":30000,"3":30000,"4":30000},"_penalties":[],"_round":1,"_honba":0,"_riichiBets":0}',
+            $this->_state->toJson()
+        );
+
+        $round = new RoundPrimitive($this->_db);
+        $round
+            ->setOutcome('draw')
+            ->setTempaiUsers([])
+            ->setRiichiUsers([]);
+        $this->_state->update($round);
+
+        $this->assertEquals(
+            '{"_scores":{"1":30000,"2":30000,"3":30000,"4":30000},"_penalties":[],"_round":2,"_honba":1,"_riichiBets":0}',
+            $this->_state->toJson()
+        );
+    }
+
+    public function testSessionStateFromJson()
+    {
+        $json1 = '{"_scores":{"1":30000,"2":30000,"3":30000,"4":30000},"_penalties":[],"_round":1,"_honba":0,"_riichiBets":0}';
+
+        $state = SessionState::fromJson(
+            $this->_ruleset,
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players),
+            $json1
+        );
+
+        $this->assertEquals([1 => 30000, 30000, 30000, 30000], $state->getScores());
+        $this->assertEquals(1, $state->getRound());
+        $this->assertEquals(0, $state->getHonba());
+
+        $json2 = '{"_scores":{"1":30000,"2":30000,"3":30000,"4":30000},"_penalties":[],"_round":2,"_honba":1,"_riichiBets":0}';
+
+        $state = SessionState::fromJson(
+            $this->_ruleset,
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players),
+            $json2
+        );
+
+        $this->assertEquals([1 => 30000, 30000, 30000, 30000], $state->getScores());
+        $this->assertEquals(2, $state->getRound());
+        $this->assertEquals(1, $state->getHonba());
+    }
 }

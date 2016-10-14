@@ -57,7 +57,6 @@ class RoundsHelper
 
     protected static function _checkRon($players, $yakuList, $roundData)
     {
-        self::_checkOneOf($roundData, 'round', [1, 2, 3, 4, 5, 6, 7, 8]); // TODO: wests? Also, should depend on rules
         self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $players);
         self::_checkOneOf($roundData, 'winner_id', explode(',', $players));
         self::_checkOneOf($roundData, 'loser_id', explode(',', $players));
@@ -76,7 +75,6 @@ class RoundsHelper
 
     protected static function _checkTsumo($players, $yakuList, $roundData)
     {
-        self::_checkOneOf($roundData, 'round', [1, 2, 3, 4, 5, 6, 7, 8]); // TODO: wests? Also, should depend on rules
         self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $players);
         self::_checkOneOf($roundData, 'winner_id', explode(',', $players));
         // -1 to -5 stand for one to five yakumans
@@ -93,20 +91,17 @@ class RoundsHelper
 
     protected static function _checkDraw($players, $roundData)
     {
-        self::_checkOneOf($roundData, 'round', [1, 2, 3, 4, 5, 6, 7, 8]); // TODO: wests? Also, should depend on rules
         self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $players);
         self::_csvCheckZeroOrMoreOf($roundData, 'tempai', $players);
     }
 
     protected static function _checkAbortiveDraw($players, $roundData)
     {
-        self::_checkOneOf($roundData, 'round', [1, 2, 3, 4, 5, 6, 7, 8]); // TODO: wests? Also, should depend on rules
         self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $players);
     }
 
     protected static function _checkChombo($players, $roundData)
     {
-        self::_checkOneOf($roundData, 'round', [1, 2, 3, 4, 5, 6, 7, 8]); // TODO: wests? Also, should depend on rules
         self::_checkOneOf($roundData, 'loser_id', explode(',', $players));
     }
 

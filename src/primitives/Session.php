@@ -23,6 +23,7 @@ require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 require_once __DIR__ . '/../Primitive.php';
 require_once __DIR__ . '/../helpers/SessionState.php';
+require_once __DIR__ . '/SessionResults.php';
 
 /**
  * Class SessionPrimitive
@@ -61,7 +62,7 @@ class SessionPrimitive extends Primitive
                 },
                 'deserialize' => function ($str) {
                     return SessionState::fromJson(
-                        $this->getEvent()->getRules(),
+                        $this->getEvent()->getRuleset(),
                         $this->getPlayersIds(),
                         $str
                     );
@@ -317,7 +318,7 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * @return string
+     * @return int[]
      */
     public function getPlayersIds()
     {
@@ -378,7 +379,7 @@ class SessionPrimitive extends Primitive
     {
         if (empty($this->_current)) {
             $this->_current = new SessionState(
-                $this->getEvent()->getRules(),
+                $this->getEvent()->getRuleset(),
                 $this->getPlayersIds()
             );
         }
@@ -391,6 +392,41 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        return $this->getCurrentState()->update($round);
+        $success = $this->getCurrentState()->update($round);
+        $success = $success && $this->save();
+        if ($this->getCurrentState()->isFinished()) {
+            $success = $success && $this->finish();
+        }
+
+        return $success;
+    }
+
+    /**
+     * @return bool
+     */
+    public function finish()
+    {
+        return $this->setStatus('finished')->save() && $this->_finalizeGame();
+    }
+
+    /**
+     * Generate session results
+     * @return bool
+     */
+    protected function _finalizeGame()
+    {
+        return array_reduce($this->getPlayers(), function ($acc, PlayerPrimitive $player) {
+            $result = (new SessionResultsPrimitive($this->_db))
+                ->setPlayer($player)
+                ->setSession($this)
+                ->calc($this->getEvent()->getRuleset(), $this->getCurrentState(), $this->getPlayersIds());
+
+            $userHistoryItem = (new PlayerHistoryPrimitive($this->_db))
+                ->setPlayer($player)
+                ->setSession($this)
+                ->changeRating($result->getRatingDelta());
+
+            return $acc && $result->save() && $userHistoryItem->save();
+        }, true);
     }
 }

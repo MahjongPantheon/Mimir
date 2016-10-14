@@ -93,15 +93,17 @@ DROP TABLE
 -- IF EXISTS
    "session_results";
 CREATE TABLE "session_results" (
+  "id" integer, -- serial
+  primary key ("id"),
   "event_id" integer not null,
   "session_id" integer not null,
-  "user_id" integer not null,
+  "player_id" integer not null,
   "score" integer not null, -- how many points player has at the end, before any uma/oka calc
-  "result_score" float not null, -- resulting score after uma/oka and starting points subtraction
+  "rating_delta" float not null, -- resulting score after uma/oka and starting points subtraction
   "place" integer not null,
   foreign key ("event_id") references "event" ("id"),
   foreign key ("session_id") references "session" ("id"),
-  foreign key ("user_id") references "user" ("id")
+  foreign key ("player_id") references "user" ("id")
 );
 
 -- Session round results
@@ -137,8 +139,8 @@ CREATE INDEX "round_outcome" ON "round"("outcome");
 -- User rating history in context of every event
 DROP TABLE
 -- IF EXISTS
-   "user_history";
-CREATE TABLE "user_history" (
+   "player_history";
+CREATE TABLE "player_history" (
   "id" integer, -- serial
   primary key ("id"),
   "user_id" integer not null,

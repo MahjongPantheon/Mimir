@@ -32,7 +32,7 @@ class RulesetTenhounet extends Ruleset
         'ratingDivider'         => 1,
         'startRating'           => 1500,
         'oka'                   => 20,
-        'startPoints'           => 25,
+        'startPoints'           => 25000,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => true,
         'chomboPenalty'         => 0,
@@ -54,11 +54,4 @@ class RulesetTenhounet extends Ruleset
             4 => -15
         ],
     ];
-
-    public function calcRating($currentRating, $place, $points)
-    {
-        return $currentRating + (
-            ($points + $this->uma()[$place]) / (float)$this->ratingDivider()
-        );
-    }
 }

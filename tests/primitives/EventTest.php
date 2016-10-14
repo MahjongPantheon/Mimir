@@ -17,6 +17,7 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/primitives/Formation.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
@@ -37,7 +38,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setDescription('eventdesc1')
             ->setType('online')
-            ->setRuleset('');
+            ->setRuleset(Ruleset::instance('jpmlA'));
 
         $this->assertEquals('event1', $newEvent->getTitle());
         $this->assertEquals('eventdesc1', $newEvent->getDescription());
@@ -55,7 +56,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setDescription('eventdesc1')
             ->setType('online')
-            ->setRuleset('')
+            ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
 
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
@@ -71,7 +72,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setDescription('eventdesc1')
             ->setType('online')
-            ->setRuleset('')
+            ->setRuleset(Ruleset::instance('jpmlA'))
             ->setLobbyId('some_lobby')
             ->save();
 
@@ -88,7 +89,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setDescription('eventdesc1')
             ->setType('online')
-            ->setRuleset('')
+            ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
 
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()]);
@@ -113,7 +114,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setOwnerUser($newUser)
             ->setDescription('eventdesc1')
             ->setType('online')
-            ->setRuleset('')
+            ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
 
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()])[0];
@@ -147,7 +148,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setOwnerFormation($newFormation)
             ->setDescription('eventdesc1')
             ->setType('online')
-            ->setRuleset('')
+            ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
 
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()])[0];

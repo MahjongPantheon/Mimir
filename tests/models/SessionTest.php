@@ -19,6 +19,7 @@ namespace Riichi;
 
 use Idiorm\ORM;
 
+require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/Session.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
@@ -49,7 +50,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('online')
-            ->setRuleset('jpmlA');
+            ->setRuleset(Ruleset::instance('jpmlA'));
         $this->_event->save();
 
         $this->_players = array_map(function ($i) {
@@ -90,6 +91,12 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             }, $this->_players)
         );
 
+        $session->addRound($hash, [
+            'outcome' => 'draw',
+            'tempai' => '',
+            'riichi' => ''
+        ]);
+
         $session->endGame($hash);
 
         $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
@@ -110,7 +117,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'ron',
-            'round'     => 1,
             'riichi'    => '',
             'winner_id' => $this->_players[1]->getId(),
             'loser_id'  => $this->_players[2]->getId(),
@@ -139,7 +145,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'tsumo',
-            'round'     => 1,
             'riichi'    => '',
             'winner_id' => 2,
             'han'       => 2,
@@ -167,7 +172,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'draw',
-            'round'     => 1,
             'riichi'    => '',
             'tempai'    => ''
         ];
@@ -187,7 +191,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'abort',
-            'round'     => 1,
             'riichi'    => ''
         ];
 
@@ -206,7 +209,6 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
         $roundData = [
             'outcome'   => 'chombo',
-            'round'     => 1,
             'loser_id'  => 2,
         ];
 
@@ -274,5 +276,62 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertTrue($caught, "Finished game throws exception");
+    }
+
+    public function testAutoEndGameWhenHanchanFinishes()
+    {
+        $session = new SessionModel($this->_db);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+            }, $this->_players)
+        );
+
+        $roundData = [
+            'outcome'   => 'draw',
+            'riichi'    => '',
+            'tempai'    => ''
+        ];
+
+        $this->assertTrue($session->addRound($hash, $roundData)); // 1e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 2e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 3e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 4e
+        $this->assertTrue($session->addRound($hash, $roundData)); // 1s
+        $this->assertTrue($session->addRound($hash, $roundData)); // 2s
+        $this->assertTrue($session->addRound($hash, $roundData)); // 3s
+        $this->assertTrue($session->addRound($hash, $roundData)); // 4s, should auto-finish here
+
+        $caught = false;
+        try {
+            $session->endGame($hash); // Try to finish again
+        } catch (BadActionException $e) {
+            // We do try/catch here to avoid catching same exception from
+            // upper clauses, as it might give some false positives in that case.
+            $caught = true;
+        }
+
+        $this->assertTrue($caught, "Game should be already finished");
+
+        // Check that results exist in db
+        $results = SessionResultsPrimitive::findByEventId($this->_db, [$this->_event->getId()]);
+        $this->assertEquals(4, count($results));
+        // See jpmlA ruleset to find out why these numbers are ok
+        $this->assertEquals(8, $results[0]->getRatingDelta());
+        $this->assertEquals(4, $results[1]->getRatingDelta());
+        $this->assertEquals(-4, $results[2]->getRatingDelta());
+        $this->assertEquals(-8, $results[3]->getRatingDelta());
+
+        // Check that user history items exist in db
+        /** @var PlayerHistoryPrimitive[] $items */
+        $items = array_map(function (PlayerPrimitive $player) {
+            return PlayerHistoryPrimitive::findLastByEvent($this->_db, $player->getId(), $this->_event->getId());
+        }, $this->_players);
+
+        $this->assertEquals(1508, $items[0]->getRating());
+        $this->assertEquals(1504, $items[1]->getRating());
+        $this->assertEquals(1496, $items[2]->getRating());
+        $this->assertEquals(1492, $items[3]->getRating());
     }
 }

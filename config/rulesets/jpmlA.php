@@ -20,13 +20,13 @@ require_once __DIR__ . '/../../src/Ruleset.php';
 
 class RulesetJpmlA extends Ruleset
 {
-    public static $_name = 'jpmlA';
+    public static $_title = 'jpmlA';
     protected static $_ruleset = [
         'tenboDivider'          => 100,
         'ratingDivider'         => 10,
         'startRating'           => 1500,
         'oka'                   => 0,
-        'startPoints'           => 300,
+        'startPoints'           => 30000,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => true,
         'chomboPenalty'         => 200,
@@ -40,19 +40,31 @@ class RulesetJpmlA extends Ruleset
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
-        'withLeadingDealerGameOver' => true,
-        'uma' => [
-            1 => 150,
-            2 => 50,
-            3 => -50,
-            4 => -150
-        ],
+        'withLeadingDealerGameOver' => true
     ];
 
-    public function calcRating($currentRating, $place, $points)
+    /**
+     * JPML A uses complex uma bonus
+     *
+     * @param array $scores
+     * @return array
+     */
+    public function uma($scores = [])
     {
-        return $currentRating + (
-            ($points + $this->uma()[$place]) / (float)$this->ratingDivider()
-        );
+        rsort($scores);
+        $minusedPlayers = array_reduce($scores, function($idx, $score) {
+            return $score < $this->startPoints() ? 1 : 0;
+        }, 0);
+
+        switch($minusedPlayers) {
+            case 4:
+            case 2:
+            case 0:
+                return [1 => 80, 40, -40, -80];
+            case 3:
+                return [1 => 120, -10, -30, -80];
+            case 1:
+                return [1 => 80, 30, 10, -120];
+        }
     }
 }
