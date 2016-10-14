@@ -212,7 +212,7 @@ abstract class Primitive
      * @param string $key
      * @param array $identifiers
      * @throws \Exception
-     * @return PlayerPrimitive[]
+     * @return Primitive[]
      */
     protected static function _findBy(IDb $db, $key, $identifiers)
     {
@@ -221,6 +221,46 @@ abstract class Primitive
         }
 
         $result = $db->table(static::$_table)->whereIn($key, $identifiers)->findArray();
+        if (empty($result)) {
+            return [];
+        }
+
+        return array_map(function ($data) use ($db) {
+            return self::_recreateInstance($db, $data);
+        }, $result);
+    }
+
+    /**
+     * Find items by indexed search by several fields
+     *
+     * @param IDb $db
+     * @param array $conditions
+     * @param bool $onlyLast return only last item (when sorted by primary key)
+     * @throws \Exception
+     * @return Primitive|Primitive[]
+     */
+    protected static function _findBySeveral(IDb $db, $conditions, $onlyLast = false)
+    {
+        if (!is_array($conditions)) {
+            throw new \Exception("Conditions should be assoc array: key => [values...]");
+        }
+
+        $orm = $db->table(static::$_table);
+        foreach ($conditions as $key => $identifiers) {
+            $orm = $orm->whereIn($key, $identifiers);
+        }
+
+        if ($onlyLast) {
+            $orm = $orm->orderByDesc('id'); // primary key
+            $item = $orm->findOne();
+            if (!empty($item)) {
+                $item = $item->asArray();
+            }
+
+            return self::_recreateInstance($db, $item);
+        }
+
+        $result = $orm->findArray();
         if (empty($result)) {
             return [];
         }

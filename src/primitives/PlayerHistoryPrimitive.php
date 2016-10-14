@@ -81,19 +81,48 @@ class PlayerHistoryPrimitive extends Primitive
      */
     protected $_rating;
 
+    /**
+     * @param IDb $db
+     * @param $playerId
+     * @param $eventId
+     * @return PlayerHistoryPrimitive[]
+     */
     public static function findAllByEvent(IDb $db, $playerId, $eventId)
     {
-        // todo
+        // todo: optional pagination and sorting
+
+        return self::_findBySeveral($db, [
+            'user_id'  => [$playerId],
+            'event_id' => [$eventId]
+        ]);
     }
 
+    /**
+     * @param IDb $db
+     * @param $playerId
+     * @param $eventId
+     * @return PlayerHistoryPrimitive
+     */
     public static function findLastByEvent(IDb $db, $playerId, $eventId)
     {
-        // todo
+        return self::_findBySeveral($db, [
+            'user_id'  => [$playerId],
+            'event_id' => [$eventId]
+        ], true);
     }
 
+    /**
+     * @param IDb $db
+     * @param $playerId
+     * @param $sessionId
+     * @return PlayerHistoryPrimitive
+     */
     public static function findBySession(IDb $db, $playerId, $sessionId)
     {
-        // todo
+        return self::_findBySeveral($db, [
+            'user_id'    => [$playerId],
+            'session_id' => [$sessionId]
+        ], true); // should be only one or none, getting last is ok
     }
 
     protected function _create()
