@@ -416,11 +416,17 @@ class SessionPrimitive extends Primitive
     protected function _finalizeGame()
     {
         return array_reduce($this->getPlayers(), function ($acc, PlayerPrimitive $player) {
-            return $acc && (new SessionResultsPrimitive($this->_db))
+            $result = (new SessionResultsPrimitive($this->_db))
                 ->setPlayer($player)
                 ->setSession($this)
-                ->calc($this->getEvent()->getRuleset(), $this->getCurrentState(), $this->getPlayersIds())
-                ->save();
+                ->calc($this->getEvent()->getRuleset(), $this->getCurrentState(), $this->getPlayersIds());
+
+            $userHistoryItem = (new PlayerHistoryPrimitive($this->_db))
+                ->setPlayer($player)
+                ->setSession($this)
+                ->changeRating($result->getRatingDelta());
+
+            return $acc && $result->save() && $userHistoryItem->save();
         }, true);
     }
 }

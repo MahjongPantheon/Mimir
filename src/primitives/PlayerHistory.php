@@ -236,6 +236,31 @@ class PlayerHistoryPrimitive extends Primitive
     }
 
     /**
+     * @param float $ratingDelta
+     * @throws InvalidParametersException
+     * @return PlayerHistoryPrimitive
+     */
+    public function changeRating($ratingDelta)
+    {
+        if (empty($this->_playerId) || empty($this->_sessionId)) {
+            throw new InvalidParametersException('You should set player and session before changing rating');
+        }
+        try {
+            $previousItem = self::findBySession($this->_db, $this->getPlayerId(), $this->getSession());
+        } catch (\Exception $e) {
+            // This may happen if player has just started to participate in event and has no previous results
+            $previousItem = (new self($this->_db))
+                ->setPlayer($this->_player)
+                ->setSession($this->_session)
+                ->setRating($this->getSession()->getEvent()->getRuleset()->startRating()); // TODO: omg :(
+            $previousItem->save();
+        }
+
+        $this->setRating($previousItem->getRating() + $ratingDelta);
+        return $this;
+    }
+
+    /**
      * @return float
      */
     public function getRating()

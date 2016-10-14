@@ -322,5 +322,16 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(4, $results[1]->getRatingDelta());
         $this->assertEquals(-4, $results[2]->getRatingDelta());
         $this->assertEquals(-8, $results[3]->getRatingDelta());
+
+        // Check that user history items exist in db
+        /** @var PlayerHistoryPrimitive[] $items */
+        $items = array_map(function (PlayerPrimitive $player) {
+            return PlayerHistoryPrimitive::findLastByEvent($this->_db, $player->getId(), $this->_event->getId());
+        }, $this->_players);
+
+        $this->assertEquals(1508, $items[0]->getRating());
+        $this->assertEquals(1504, $items[1]->getRating());
+        $this->assertEquals(1496, $items[2]->getRating());
+        $this->assertEquals(1492, $items[3]->getRating());
     }
 }
