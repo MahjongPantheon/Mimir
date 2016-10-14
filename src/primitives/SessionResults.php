@@ -318,6 +318,37 @@ class SessionResultsPrimitive extends Primitive
     }
 
     /**
+     * Sort scores while maintaining sequence of equally scored players
+     *
+     * @param $playersSeq
+     * @param $scores
+     * @return array
+     */
+    protected function _sort($playersSeq, $scores)
+    {
+        $map = array_combine(
+            array_values($playersSeq),
+            array_values($scores)
+        );
+
+        $result = [];
+        while (count($result) < 4) {
+            $best = -1;
+            $bestId = -1;
+            foreach ($map as $id => $score) {
+                if ($score > $best && empty($result[$id])) {
+                    $bestId = $id;
+                    $best = $score;
+                }
+            }
+
+            $result[$bestId] = $best;
+        }
+
+        return $result;
+    }
+
+    /**
      * Calculates player place
      *
      * @param $scoreList
@@ -325,14 +356,7 @@ class SessionResultsPrimitive extends Primitive
      */
     protected function _calcPlace($scoreList, $originalPlayersSequence)
     {
-        // Make equal scores go in reverse order to assign places properly
-        $playersMap = array_combine(
-            array_reverse($originalPlayersSequence),
-            array_reverse($scoreList)
-        );
-
-        // this sorting should maintain players sequence if some scores equal
-        arsort($playersMap);
+        $playersMap = $this->_sort($originalPlayersSequence, $scoreList);
 
         $i = 1;
         foreach ($playersMap as $k => $v) {
