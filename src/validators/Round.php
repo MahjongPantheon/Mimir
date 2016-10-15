@@ -21,27 +21,28 @@ use \Idiorm\ORM;
 
 require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../exceptions/MalformedPayload.php';
+require_once __DIR__ . '/../helpers/YakuMap.php';
 
 class RoundsHelper
 {
     /**
      * Check if round data is valid
      *
-     * @param Db $db
      * @param SessionPrimitive $game
      * @throws MalformedPayloadException
      * @param $roundData
      */
-    public static function checkRound(Db $db, SessionPrimitive $game, $roundData)
+    public static function checkRound(SessionPrimitive $game, $roundData)
     {
         self::_checkOneOf($roundData, 'outcome', ['ron', 'tsumo', 'draw', 'abort', 'chombo']);
         $playerIds = implode(',', $game->getPlayersIds());
+        $yakuList = $game->getEvent()->getRuleset()->allowedYaku(); // omg :(
         switch ($roundData['outcome']) {
             case 'ron':
-                self::_checkRon($playerIds, self::_getYakuList($db), $roundData);
+                self::_checkRon($playerIds, $yakuList, $roundData);
                 break;
             case 'tsumo':
-                self::_checkTsumo($playerIds, self::_getYakuList($db), $roundData);
+                self::_checkTsumo($playerIds, $yakuList, $roundData);
                 break;
             case 'draw':
                 self::_checkDraw($playerIds, $roundData);
@@ -65,6 +66,10 @@ class RoundsHelper
         // 0 for 5+ han
         self::_checkOneOf($roundData, 'fu', [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 0]);
         self::_checkOneOf($roundData, 'multi_ron', [null, 2, 3]);
+
+        if (empty($roundData['yaku'])) {
+            throw new MalformedPayloadException('Field #yaku should contain comma-separated ids of yaku as string');
+        }
         self::_checkYaku($roundData['yaku'], $yakuList);
 
         self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4]);
@@ -81,6 +86,10 @@ class RoundsHelper
         self::_checkOneOf($roundData, 'han', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2, -3, -4, -5]);
         // 0 for 5+ han
         self::_checkOneOf($roundData, 'fu', [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 0]);
+
+        if (empty($roundData['yaku'])) {
+            throw new MalformedPayloadException('Field #yaku should contain comma-separated ids of yaku as string');
+        }
         self::_checkYaku($roundData['yaku'], $yakuList);
 
         self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4]);
@@ -131,13 +140,17 @@ class RoundsHelper
         }
     }
 
-    protected static function _getYakuList(Db $db)
-    {
-        // TODO
-    }
-
     protected static function _checkYaku($yakuList, $possibleYakuList)
     {
-        // TODO
+        if (!is_string($yakuList) || !preg_match('#[0-9,]*#', $yakuList)) {
+            throw new MalformedPayloadException('Field #yaku should contain comma-separated ids of yaku as string');
+        }
+
+        if (!empty($yakuList)) {
+            $result = array_diff(array_map('intval', explode(',', $yakuList)), $possibleYakuList);
+            if (!empty($result)) {
+                throw new MalformedPayloadException('Some yaku are not allowed in current game rules! ' . json_encode($result));
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../src/Ruleset.php';
+require_once __DIR__ . '/../../src/helpers/YakuMap.php';
 
 class MockRuleset extends Ruleset
 {
@@ -51,6 +52,11 @@ class MockRuleset extends Ruleset
             4 => -15000
         ],
     ];
+
+    public function allowedYaku()
+    {
+        return YakuMap::allYaku();
+    }
 
     public function setRule($name, $value)
     {

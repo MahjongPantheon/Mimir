@@ -84,6 +84,26 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(true); // no exception == ok
     }
 
+    public function testCheckYakuEmpty()
+    {
+        $checkYaku = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkYaku');
+        $checkYaku->setAccessible(true);
+
+        $data = '';
+        $possibleVals = [1, 2, 3];
+        $checkYaku->invokeArgs(null, [$data, $possibleVals]); // no exception == ok
+    }
+
+    public function testCheckYakuAllowed()
+    {
+        $checkYaku = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkYaku');
+        $checkYaku->setAccessible(true);
+
+        $data = '1,3';
+        $possibleVals = [1, 2, 3];
+        $checkYaku->invokeArgs(null, [$data, $possibleVals]); // no exception == ok
+    }
+
     public function testCheckRonValid()
     {
         $checkRon = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkRon');
@@ -91,7 +111,7 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
 
         $checkRon->invokeArgs(null, [
             '1,2,3,4',
-            [],
+            [1, 2, 3],
             [
                 'riichi'    => '',
                 'winner_id' => 2,
@@ -99,7 +119,7 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
                 'han'       => 2,
                 'fu'        => 20,
                 'multi_ron' => null,
-                'yaku'      => '',
+                'yaku'      => '3',
                 'dora'      => 0,
                 'uradora'   => 0,
                 'kandora'   => 0,
@@ -115,13 +135,13 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
 
         $checkTsumo->invokeArgs(null, [
             '1,2,3,4',
-            [],
+            [1, 2, 3],
             [
                 'riichi'    => '1',
                 'winner_id' => 2,
                 'han'       => 2,
                 'fu'        => 20,
-                'yaku'      => '',
+                'yaku'      => '2',
                 'dora'      => 0,
                 'uradora'   => 0,
                 'kandora'   => 0,
@@ -183,6 +203,32 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         $data = ['test' => 'notokval'];
         $possibleVals = ['okval3', 'okval', 'okval2'];
         $checkOneOf->invokeArgs(null, [$data, 'test', $possibleVals]);
+    }
+
+    /**
+     * @expectedException \Riichi\MalformedPayloadException
+     */
+    public function testCheckYakuWrongDataFail()
+    {
+        $checkYaku = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkYaku');
+        $checkYaku->setAccessible(true);
+
+        $data = 'wat';
+        $possibleVals = [1, 2, 3];
+        $checkYaku->invokeArgs(null, [$data, $possibleVals]);
+    }
+
+    /**
+     * @expectedException \Riichi\MalformedPayloadException
+     */
+    public function testCheckYakuNotAllowedFail()
+    {
+        $checkYaku = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkYaku');
+        $checkYaku->setAccessible(true);
+
+        $data = '1,4';
+        $possibleVals = [1, 2, 3];
+        $checkYaku->invokeArgs(null, [$data, $possibleVals]);
     }
 
     public function testCheckZeroOrMoreOfFail()
