@@ -21,27 +21,28 @@ use \Idiorm\ORM;
 
 require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../exceptions/MalformedPayload.php';
+require_once __DIR__ . '/../helpers/YakuMap.php';
 
 class RoundsHelper
 {
     /**
      * Check if round data is valid
      *
-     * @param Db $db
      * @param SessionPrimitive $game
      * @throws MalformedPayloadException
      * @param $roundData
      */
-    public static function checkRound(Db $db, SessionPrimitive $game, $roundData)
+    public static function checkRound(SessionPrimitive $game, $roundData)
     {
         self::_checkOneOf($roundData, 'outcome', ['ron', 'tsumo', 'draw', 'abort', 'chombo']);
         $playerIds = implode(',', $game->getPlayersIds());
+        $yakuList = $game->getEvent()->getRuleset()->allowedYaku(); // omg :(
         switch ($roundData['outcome']) {
             case 'ron':
-                self::_checkRon($playerIds, self::_getYakuList($db), $roundData);
+                self::_checkRon($playerIds, $yakuList, $roundData);
                 break;
             case 'tsumo':
-                self::_checkTsumo($playerIds, self::_getYakuList($db), $roundData);
+                self::_checkTsumo($playerIds, $yakuList, $roundData);
                 break;
             case 'draw':
                 self::_checkDraw($playerIds, $roundData);
@@ -129,11 +130,6 @@ class RoundsHelper
             throw new MalformedPayloadException('Field #' . $key . ' should contain zero or more of [' . $data[$key]
                 . '], but also contains [' . implode(',', $redundantVals) . ']');
         }
-    }
-
-    protected static function _getYakuList(Db $db)
-    {
-        // TODO
     }
 
     protected static function _checkYaku($yakuList, $possibleYakuList)

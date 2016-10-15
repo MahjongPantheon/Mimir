@@ -255,7 +255,7 @@ class RoundPrimitive extends Primitive
 
     public static function createFromData(Db $db, SessionPrimitive $session, $roundData)
     {
-        RoundsHelper::checkRound($db, $session, $roundData);
+        RoundsHelper::checkRound($session, $roundData);
         $roundData['session_id'] = $session->getId();
         $roundData['event_id'] = $session->getEventId();
         $roundData['id'] = null;
