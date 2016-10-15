@@ -36,6 +36,29 @@ require_once __DIR__ . '/../exceptions/Database.php';
 class SessionModel extends Model
 {
     /**
+     * @param $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getGameConfig($eventId)
+    {
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $rules = $event[0]->getRuleset();
+        return [
+            'allowedYaku' => $rules->allowedYaku(),
+            'startPoints' => $rules->startPoints(),
+            'withKazoe' => $rules->withKazoe(),
+            'withKiriageMangan' => $rules->withKiriageMangan(),
+            'withAbortives' => $rules->withAbortives(),
+            'withNagashiMangan' => $rules->withNagashiMangan()
+        ];
+    }
+
+    /**
      * @throws InvalidParametersException
      * @throws InvalidUserException
      * @throws DatabaseException

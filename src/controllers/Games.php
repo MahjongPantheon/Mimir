@@ -35,6 +35,20 @@ class GamesController extends Controller
     }
 
     /**
+     * Get event rules configuration
+     *
+     * @param $eventId
+     * @return InvalidParametersException
+     */
+    public function getGameConfig($eventId)
+    {
+        $this->_log->addInfo('Getting config for event id# ' . $eventId);
+        $data = $this->_sessionModel->getGameConfig($eventId);
+        $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
+        return $data;
+    }
+
+    /**
      * Start new game and return its hash
      *
      * @param int $eventId Event this session belongs to
