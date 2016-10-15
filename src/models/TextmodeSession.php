@@ -41,75 +41,33 @@ class ParseException extends \Exception {}
 
 class TextmodeSessionModel
 {
-    protected $_players;
-
     /**
-     * Количество разнообразных исходов
-     * @var array
+     * @var $db
      */
-    protected $_counts = [];
+    protected $_db;
 
-    /**
-     * Коллбэки
-     */
-    protected $_usualWin;
-    protected $_yakuman;
-    protected $_draw;
-    protected $_chombo;
-
-    /**
-     * @var Tokenizer
-     */
-    protected $_tokenizer;
-
-    /**
-     * Список ВСЕХ зарегистрированных юзеров вида alias => name
-     *
-     * @var array
-     */
-    protected $_registeredUsers;
-
-    public function __construct($usualWinCallback, $yakumanCallback, $drawCallback, $chomboCallback, $registeredUsers)
+    public function __construct(Db $db)
     {
-        $this->_usualWin = $usualWinCallback;
-        $this->_yakuman = $yakumanCallback;
-        $this->_draw = $drawCallback;
-        $this->_chombo = $chomboCallback;
-        $this->_registeredUsers = $registeredUsers;
-        $this->_tokenizer = new Tokenizer(function($statement) {
-            $this->_parseStatement($statement);
-        });
+        $this->_db = $db;
     }
 
-    /**
-     * some basic preparations to simplify tokenizer...
-     * @param $text
-     * @return string
-     */
-    protected function _prepareTokens($text)
-    {
-        return str_replace([
-            ':', // scoring
-            '(', ')' // yaku delimiters
-        ], [
-            ' : ',
-            ' ( ', ' ) '
-        ], $text);
-    }
 
     public function addGame($eventId, $gameLog)
     {
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
         $gameLog = trim($gameLog);
         if (empty($gameLog)) {
             throw new MalformedPayloadException('Game log is empty');
         }
 
-        $tokens = preg_split('#\s+#is', trim($this->_prepareTokens($gameLog)));
-        foreach ($tokens as $k => $token) {
-            $ctx = array_slice($tokens, $k > 1 ? $k - 2 : $k, 5); // also pass some next tokens for better debug info
-            $this->_tokenizer->nextToken($token, implode(' ', $ctx));
+        $tokenizer = new Tokenizer();
+        foreach ($tokenizer->tokenize($gameLog) as $statement) {
+            $this->_parseStatement($statement);
         }
-        $this->_tokenizer->callTokenEof();
 
         return [
             'scores' => $this->_resultScores,
@@ -615,6 +573,7 @@ class TextmodeSessionModel
      * @param $tokens Token[]
      * @return array
      * @throws ParseException
+     * @throws TokenizerException
      */
     protected function _parseYaku($tokens)
     {
@@ -657,8 +616,18 @@ class TextmodeSessionModel
         }
 
         return [
-            'yaku' => array_map(function(Token $el) {
-                return $this->_tokenizer->getYakuId($el);
+            'yaku' => array_map(function(Token $yaku) {
+                if ($yaku->type() != Tokenizer::YAKU) {
+                    throw new TokenizerException('Requested token #' . $yaku->token() . ' is not yaku', 211);
+                }
+
+                $id = Tokenizer::identifyYakuByName($yaku->token());
+                if (!$id) {
+                    throw new TokenizerException('No id found for requested yaku #' . $yaku->token() .
+                        ', this should not happen!', 212);
+                }
+
+                return $id;
             }, $yaku), 
             'dora' => $doraCount ? $doraCount : '0'
         ];
