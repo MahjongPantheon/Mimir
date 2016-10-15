@@ -155,33 +155,23 @@ class TextmodeSessionModel
             throw new ParseException("Не удалось разобрать исход ({$statement[0]->token()}: {$methodName})", 106);
         }
 
+        $playersAliases = array_map(function(PlayerPrimitive $player) {
+            return $player->getAlias();
+        }, $session->getPlayers());
+
         return RoundPrimitive::createFromData(
             $this->_db,
             $session,
-            $this->$methodName($statement, $session->getPlayersIds()) // TODO: all outcome methods should return valid round data
+            $this->$methodName($statement, array_combine($playersAliases, $session->getPlayers())
+            // TODO: all outcome methods should return valid round data
             // TODO TODO
         );
     }
 
     /**
      * @param $tokens Token[]
-     * @param $type
-     * @return Token
-     */
-    protected function _findByType($tokens, $type) {
-        foreach ($tokens as $v) {
-            if ($v->type() == $type) {
-                return $v;
-            }
-        }
-
-        return new Token(null, Tokenizer::UNKNOWN_TOKEN, [], null);
-    }
-
-    /**
-     * @param $tokens Token[]
-     * @param $participants string[]
-     * @return Token[]
+     * @param $participants PlayerPrimitive[] [alias => PlayerPrimitive]
+     * @return string comma-separated riichi-players ids
      * @throws ParseException
      */
     protected function _getRiichi($tokens, $participants) {
@@ -196,25 +186,25 @@ class TextmodeSessionModel
             if ($started) {
                 if ($v->type() == Tokenizer::USER_ALIAS) {
                     if (empty($participants[$v->token()])) {
-                        throw new ParseException("Не удалось распарсить риичи. Игрок {$v->token()} не указан в заголовке лога. Опечатка?", 107);
+                        throw new ParseException("Failed to parse riichi statement. Player {$v->token()} not found. Typo?", 107);
                     }
-                    $riichi []= $v->token();
+                    $riichi []= $participants[$v->token()]->getId();
                 } else {
-                    return $riichi;
+                    return implode(',', $riichi);
                 }
             }
         }
 
         if ($started && empty($riichi)) {
-            throw new ParseException('Не удалось распознать риичи.', 108);
+            throw new ParseException('Failed to prase riichi statement.', 108);
         }
-        return $riichi;
+        return implode(',', $riichi);
     }
 
     /**
      * @param $tokens Token[]
-     * @param $participants string[]
-     * @return Token[]
+     * @param $participants PlayerPrimitive[] [alias => PlayerPrimitive]
+     * @return string comma-separated tempai players ids
      * @throws ParseException
      */
     protected function _getTempai($tokens, $participants) {
@@ -226,34 +216,56 @@ class TextmodeSessionModel
                 continue;
             }
 
-            if ($started) {
-                if ($v->type() == Tokenizer::USER_ALIAS) {
+            if (!$started) {
+                continue;
+            }
+
+            switch ($v->type()) {
+                case Tokenizer::USER_ALIAS:
                     if (empty($participants[$v->token()])) {
-                        throw new ParseException("Не удалось распарсить темпай. Игрок {$v->token()} не указан в заголовке лога. Опечатка?", 117);
+                        throw new ParseException("Failed to parse tempai statement. Player {$v->token()} not found. Typo?", 117);
                     }
-                    $tempai []= $v->token();
-                } else if ($v->type() == Tokenizer::ALL) {
+                    $tempai [] = $participants[$v->token()]->getId();
+                    break;
+                case Tokenizer::ALL:
                     if (!empty($tempai)) {
-                        throw new ParseException("Не удалось распарсить темпай. Неожиданное ключевое слово 'all'. Опечатка?", 119);
+                        throw new ParseException("Failed to parse riichi statement. Unexpected keyword 'all'. Typo?", 119);
                     }
-                    return array_keys($participants);
-                } else if ($v->type() == Tokenizer::NOBODY) {
+                    return implode(',', array_map(function (PlayerPrimitive $p) {
+                        return $p->getId();
+                    }, $participants));
+                case Tokenizer::NOBODY:
                     if (!empty($tempai)) {
-                        throw new ParseException("Не удалось распарсить темпай. Неожиданное ключевое слово 'nobody'. Опечатка?", 120);
+                        throw new ParseException("Failed to parse riichi statement. Unexpected keyword 'nobody'. Typo?", 120);
                     }
-                    return [];
-                } else {
-                    return $tempai;
-                }
+                    return '';
+                default:
+                    return implode(',', $tempai);
             }
         }
 
         if (empty($tempai)) {
             throw new ParseException('Не удалось распознать темпай: не распознаны игроки.', 118);
         }
-        return $tempai;
+        return implode(',', $tempai);
     }
 
+
+
+
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    /**
+     * @param $tokens Token[]
+     * @param $participants [alias => PlayerPrimitive]
+     */
     protected function _parseOutcomeRon($tokens, $participants)
     {
         // check if double/triple ron occured
@@ -265,6 +277,11 @@ class TextmodeSessionModel
         }
     }
 
+    /**
+     * @param $tokens Token[]
+     * @param $participants [alias => PlayerPrimitive]
+     * @throws ParseException
+     */
     protected function _parseOutcomeSingleRon($tokens, $participants) {
         /** @var $winner Token
          * @var $from Token
@@ -348,7 +365,7 @@ class TextmodeSessionModel
      *
      * @param $rons Token[][]
      * @param $loser Token
-     * @param $participants
+     * @param $participants [alias => PlayerPrimitive]
      * @return array
      * @throws ParseException
      */
@@ -407,6 +424,11 @@ class TextmodeSessionModel
         return $winners;
     }
 
+    /**
+     * @param $tokens Token[]
+     * @param $participants [alias => PlayerPrimitive]
+     * @throws ParseException
+     */
     protected function _parseOutcomeMultiRon($tokens, $participants)
     {
         /** @var $loser Token */
@@ -453,6 +475,11 @@ class TextmodeSessionModel
         if (count($rons) == 3) $this->_counts['tripleRon']++;
     }
 
+    /**
+     * @param $tokens Token[]
+     * @param $participants [alias => PlayerPrimitive]
+     * @throws ParseException
+     */
     protected function _parseOutcomeTsumo($tokens, $participants)
     {
         /** @var $winner Token */
@@ -489,6 +516,10 @@ class TextmodeSessionModel
         }
     }
 
+    /**
+     * @param $tokens Token[]
+     * @param $participants [alias => PlayerPrimitive]
+     */
     protected function _parseOutcomeDraw($tokens, $participants)
     {
         $tempaiPlayers = $this->_getTempai($tokens, $participants);
@@ -524,6 +555,11 @@ class TextmodeSessionModel
         $this->_counts['draw']++;
     }
 
+    /**
+     * @param $tokens Token[]
+     * @param $participants [alias => PlayerPrimitive]
+     * @throws ParseException
+     */
     protected function _parseOutcomeChombo($tokens, $participants)
     {
         /** @var $loser Token */
@@ -604,6 +640,21 @@ class TextmodeSessionModel
             }, $yaku), 
             'dora' => $doraCount ? $doraCount : '0'
         ];
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $type
+     * @return Token
+     */
+    protected function _findByType($tokens, $type) {
+        foreach ($tokens as $v) {
+            if ($v->type() == $type) {
+                return $v;
+            }
+        }
+
+        return new Token(null, Tokenizer::UNKNOWN_TOKEN, [], null);
     }
 
     //<editor-fold desc="For testing only!!!">
