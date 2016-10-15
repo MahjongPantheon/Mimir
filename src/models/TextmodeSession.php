@@ -46,11 +46,15 @@ class TextmodeSessionModel
      */
     protected $_db;
 
+    /**
+     * @var array
+     */
+    protected $_resultScoresOrig;
+
     public function __construct(Db $db)
     {
         $this->_db = $db;
     }
-
 
     public function addGame($eventId, $gameLog)
     {
@@ -65,73 +69,98 @@ class TextmodeSessionModel
         }
 
         $tokenizer = new Tokenizer();
+        $session = (new SessionPrimitive($this->_db))
+            ->setEvent($event)
+            ->setStatus('inprogress');
+
+        /** @var Token[] $statement */
         foreach ($tokenizer->tokenize($gameLog) as $statement) {
-            $this->_parseStatement($statement);
+            if ($statement[0]->type() == Tokenizer::USER_ALIAS) {
+                $this->_fillSession($session, $statement)->save(); // initial save required, rounds use session id
+                continue;
+            }
+
+            if ($statement[0]->type() == Tokenizer::OUTCOME) {
+                $round = $this->_fillRound($session, $statement);
+                $round->save();
+                $session->updateCurrentState($round);
+                continue;
+            }
+
+            $string = array_reduce($statement, function ($acc, $el) {
+                return $acc . ' ' . $el;
+            }, '');
+            throw new ParseException("Couldn't parse game log: " . $string, 202);
         }
 
-        return [
-            'scores' => $this->_resultScores,
-            'counts' => $this->_counts
-        ];
+        $session->save();
+        $session->finish();
+
+        $calculatedScore = $session->getCurrentState()->getScores();
+        if (array_diff($calculatedScore, $this->_resultScoresOrig) !== []
+            || array_diff($this->_resultScoresOrig, $calculatedScore) !== []) {
+            throw new ParseException("Calculated scores do not match with given ones: " . PHP_EOL
+                . print_r($this->_resultScoresOrig, 1) . PHP_EOL
+                . print_r($calculatedScore, 1), 225);
+        }
     }
 
     /**
-     * Сюда прилетают 100% лексически (и отчасти синтаксически) валидные выражения.
-     * Надо их проверить и распарсить
-     * @param $statement Token[]
+     * @param SessionPrimitive $session
+     * @param Token[] $statement
+     * @return SessionPrimitive
      * @throws ParseException
      */
-    protected function _parseStatement($statement)
+    protected function _fillSession(SessionPrimitive $session, $statement)
     {
-        if ($statement[0]->type() == Tokenizer::USER_ALIAS) {
-            // Первая строка с очками. Пробуем парсить.
-            while (!empty($statement)) {
-                /** @var $player Token */
-                $player = array_shift($statement);
-                /** @var $delimiter Token */
-                $delimiter = array_shift($statement);
-                /** @var $score Token */
-                $score = array_shift($statement);
+        $playersList = [];
 
-                if ($player->type() != Tokenizer::USER_ALIAS || $delimiter->type() != Tokenizer::SCORE_DELIMITER || $score->type() != Tokenizer::SCORE) {
-                    throw new ParseException("Ошибка при вводе данных: некорректный формат строки очков:
-                        {$player} {$delimiter} {$score}", 106);
-                }
+        // Line with users and scores
+        while (!empty($statement)) {
+            /** @var $player Token */
+            $player = array_shift($statement);
+            /** @var $delimiter Token */
+            $delimiter = array_shift($statement);
+            /** @var $score Token */
+            $score = array_shift($statement);
 
-                if (empty($this->_registeredUsers[$player->token()])) {
-                    throw new ParseException("Ошибка при вводе данных: игрок {$player} не зарегистрирован", 101);
-                }
-
-                $this->_resultScores[$player->token()] = $score;
+            if ($player->type() != Tokenizer::USER_ALIAS || $delimiter->type() != Tokenizer::SCORE_DELIMITER || $score->type() != Tokenizer::SCORE) {
+                throw new ParseException("Wrong score line format: {$player} {$delimiter} {$score}", 106);
             }
 
-            $this->_players = array_keys($this->_resultScores);
-            if ($this->_calc) {
-                $this->_calc->setPlayersList($this->_players);
+            /** @var PlayerPrimitive $playerItem */
+            $playerItem = PlayerPrimitive::findByAlias($this->_db, [$player->token()]); // TODO
+            if (empty($playerItem)) {
+                throw new ParseException("No player named '{$player->token()}' exists in our DB", 101);
             }
+            $playersList []= $playerItem;
 
-            if (count($this->_resultScores) != 4) { // TODO: Изменить условие, если будет хиросима :)
-                throw new ParseException("Ошибка при вводе данных: количество указанных игроков не равно 4", 100);
-            }
-
-            return;
+            $this->_resultScoresOrig[$playerItem->getId()] = $score; // For checking after calculcations
         }
 
-        if ($statement[0]->type() == Tokenizer::OUTCOME) {
-            // Строка с записью раунда. Пробуем парсить.
-            $methodName = '_parseOutcome' . ucfirst($statement[0]->token());
-            if (!is_callable([$this, $methodName])) {
-                throw new ParseException("Не удалось разобрать исход ({$statement[0]->token()}: {$methodName})", 106);
-            }
+        return $session->setPlayers($playersList);
+    }
 
-            $this->$methodName($statement, $this->_resultScores);
-            return;
+    /**
+     * @param SessionPrimitive $session
+     * @param Token[] $statement
+     * @return RoundPrimitive
+     * @throws ParseException
+     */
+    protected function _fillRound(SessionPrimitive $session, $statement)
+    {
+        // Line with round item
+        $methodName = '_parseOutcome' . ucfirst($statement[0]->token());
+        if (!is_callable([$this, $methodName])) {
+            throw new ParseException("Не удалось разобрать исход ({$statement[0]->token()}: {$methodName})", 106);
         }
 
-        $string = array_reduce($statement, function ($acc, $el) {
-            return $acc . ' ' . $el;
-        }, '');
-        throw new ParseException("Ошибка при вводе данных: не удалось разобрать начало строки: " . $string, 202);
+        return RoundPrimitive::createFromData(
+            $this->_db,
+            $session,
+            $this->$methodName($statement, $session->getPlayersIds()) // TODO: all outcome methods should return valid round data
+            // TODO TODO
+        );
     }
 
     /**
@@ -170,7 +199,6 @@ class TextmodeSessionModel
                         throw new ParseException("Не удалось распарсить риичи. Игрок {$v->token()} не указан в заголовке лога. Опечатка?", 107);
                     }
                     $riichi []= $v->token();
-                    $this->_riichi ++;
                 } else {
                     return $riichi;
                 }
@@ -267,20 +295,6 @@ class TextmodeSessionModel
             'riichi' => $this->_getRiichi($tokens, $participants),
             'dealer' => $this->_checkDealer($winner)
         ];
-
-        if ($this->_calc) {
-            $this->_calc->registerRon(
-                $resultData['han'],
-                $resultData['fu'],
-                $winner,
-                $loser,
-                $this->_honba,
-                $resultData['riichi'],
-                $resultData['riichi_totalCount'],
-                $this->_players[$this->_currentDealer % 4],
-                !empty($resultData['yakuman'])
-            );
-        }
 
         $this->_counts['ron']++;
         if (!empty($resultData['yakuman'])) {
@@ -427,20 +441,6 @@ class TextmodeSessionModel
             ];
             $resultData = array_merge($resultData, $riichiGoesTo[$winner->token()]);
 
-            if ($this->_calc) {
-                $this->_calc->registerRon(
-                    $resultData['han'],
-                    $resultData['fu'],
-                    $winner,
-                    $loser,
-                    $this->_honba,
-                    $resultData['riichi'],
-                    $resultData['riichi_totalCount'],
-                    $this->_players[$this->_currentDealer % 4],
-                    !empty($resultData['yakuman'])
-                );
-            }
-
             if (!empty($resultData['yakuman'])) {
                 $resultData['han'] = 13; // TODO: remove
                 $this->_counts['yakuman']++;
@@ -479,19 +479,6 @@ class TextmodeSessionModel
         $resultData['riichi_totalCount'] = $this->_riichi;
         $this->_riichi = 0;
 
-        if ($this->_calc) {
-            $this->_calc->registerTsumo(
-                $resultData['han'],
-                $resultData['fu'],
-                $winner,
-                $this->_honba,
-                $resultData['riichi'],
-                $resultData['riichi_totalCount'],
-                $this->_players[$this->_currentDealer % 4],
-                !empty($resultData['yakuman'])
-            );
-        }
-
         $this->_counts['tsumo']++;
         if (!empty($resultData['yakuman'])) {
             $resultData['han'] = 13; // TODO: remove
@@ -529,13 +516,6 @@ class TextmodeSessionModel
             'players_tempai' => $playersStatus
         ];
 
-        if ($this->_calc) {
-            $this->_calc->registerDraw(
-                $playersStatus,
-                $resultData['riichi']
-            );
-        }
-
         if ($playersStatus[$this->_players[$this->_currentDealer % 4]] != 'tempai') {
             $this->_currentDealer++;
             $this->_currentRound++;
@@ -558,13 +538,6 @@ class TextmodeSessionModel
             'loser' => $loser->token(),
             'dealer' => $this->_checkDealer($loser)
         ];
-
-        if ($this->_calc) {
-            $this->_calc->registerChombo(
-                $loser,
-                $this->_players[$this->_currentDealer % 4]
-            );
-        }
 
         $this->_counts['chombo']++;
     }

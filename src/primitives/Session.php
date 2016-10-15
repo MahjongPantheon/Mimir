@@ -406,6 +406,9 @@ class SessionPrimitive extends Primitive
      */
     public function finish()
     {
+        if ($this->getStatus() === 'finished') {
+            return false;
+        }
         return $this->setStatus('finished')->save() && $this->_finalizeGame();
     }
 
