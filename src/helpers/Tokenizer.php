@@ -1,0 +1,610 @@
+<?php
+/*  Riichi mahjong API game server
+ *  Copyright (C) 2016  heilage and others
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+namespace Riichi;
+require_once __DIR__ . '/YakuMap.php';
+
+class Token
+{
+    protected $_token;
+    protected $_allowedNextToken;
+    protected $_type;
+    protected $_cleanValue;
+
+    /**
+     * @param string $token
+     * @param string $type
+     * @param array $allowedNextToken
+     * @param string $cleanValue
+     */
+    public function __construct($token, $type, $allowedNextToken, $cleanValue = null)
+    {
+        $this->_token = $token;
+        $this->_type = $type;
+        $this->_allowedNextToken = $allowedNextToken;
+        $this->_cleanValue = $cleanValue;
+    }
+
+    public function token()
+    {
+        return $this->_token;
+    }
+
+    public function allowedNextToken()
+    {
+        return $this->_allowedNextToken;
+    }
+
+    public function type()
+    {
+        return $this->_type;
+    }
+
+    public function clean()
+    {
+        return $this->_cleanValue;
+    }
+
+    public function __toString()
+    {
+        return $this->_token;
+    }
+}
+
+class TokenizerException extends \Exception
+{
+}
+
+class Tokenizer
+{
+    protected $_regexps = [];
+
+    protected function _getRegexps()
+    {
+        return [
+            'SCORE_DELIMITER' => '#^:$#',
+            'YAKU_START' => '#^\($#',
+            'YAKU_END' => '#^\)$#',
+            'DORA_DELIMITER' => '#^dora$#',
+            'DORA_COUNT' => '#^\d{1,2}$#',
+            'SCORE' => '#^\-?\d+$#',
+            'HAN_COUNT' => '#^(\d{1,2})han$#',
+            'FU_COUNT' => '#^(20|25|30|40|50|60|70|80|90|100|110|120)fu$#',
+            'YAKUMAN' => '#^yakuman$#',
+            'TEMPAI' => '#^tempai#',
+            'ALL' => '#^all#',
+            'NOBODY' => '#^nobody#',
+            'RIICHI_DELIMITER' => '#^ri?ichi$#',
+            'OUTCOME' => '#^(ron|tsumo|draw|chombo)$#',
+            'ALSO' => '#^also$#', // double/triple ron
+
+            // Format of this regexp is bound to _getYakuCodes function, touch carefully
+            'YAKU' => '%^(
+                 (double|daburu)_(ri?ichi|reach)  # ' . Y_DOUBLERIICHI . '
+                |daisangen                        # ' . Y_DAISANGEN . '
+                |daisuu?shii?                     # ' . Y_DAISUUSHII . '
+                |junchan                          # ' . Y_JUNCHAN . '
+                |i?ipeikou?                       # ' . Y_IIPEIKOU . '
+                |ippatsu                          # ' . Y_IPPATSU . '
+                |itt?suu?                         # ' . Y_ITTSU . '
+                |kokushimusou?                    # ' . Y_KOKUSHIMUSOU . '
+                |(mend?zen)?tsumo                 # ' . Y_MENZENTSUMO . '
+                |pin-?fu                          # ' . Y_PINFU . '
+                |renhou?                          # ' . Y_RENHOU . '
+                |(ri?ichi|reach)                  # ' . Y_RIICHI . '
+                |rinshan(_kaihou)?                # ' . Y_RINSHANKAIHOU . '
+                |ryuii?sou?                       # ' . Y_RYUUIISOU . '
+                |ryanpeikou?                      # ' . Y_RYANPEIKOU . '
+                |sanankou?                        # ' . Y_SANANKOU . '
+                |sankantsu                        # ' . Y_SANKANTSU . '
+                |sanshoku                         # ' . Y_SANSHOKUDOUJUN . '
+                |sanshoku_dou?kou?                # ' . Y_SANSHOKUDOUKOU . '
+                |suu?ankou?                       # ' . Y_SUUANKOU . '
+                |suu?kantsu                       # ' . Y_SUUKANTSU . '
+                |tan-?yao                         # ' . Y_TANYAO . '
+                |tenhou?                          # ' . Y_TENHOU . '
+                |toitoi                           # ' . Y_TOITOI . '
+                |haitei                           # ' . Y_HAITEI . '
+                |honitsu                          # ' . Y_HONITSU . '
+                |honrou?tou?                      # ' . Y_HONROTO . '
+                |hou?tei                          # ' . Y_HOUTEI . '
+                |tsuu?ii?sou?                     # ' . Y_TSUUIISOU . '
+                |chankan                          # ' . Y_CHANKAN . '
+                |chanta                           # ' . Y_CHANTA . '
+                |chii?toitsu                      # ' . Y_CHIITOITSU . '
+                |chinitsu                         # ' . Y_CHINITSU . '
+                |chinrou?tou?                     # ' . Y_CHINROTO . '
+                |chihou?                          # ' . Y_CHIHOU . '
+                |chuu?renpou?tou?                 # ' . Y_CHUURENPOUTO . '
+                |shou?sangen                      # ' . Y_SHOSANGEN . '
+                |shou?suu?shi                     # ' . Y_SHOSUUSHII . '
+                |yakuhai1                         # ' . Y_YAKUHAI1 . '
+                |yakuhai2                         # ' . Y_YAKUHAI2 . '
+                |yakuhai3                         # ' . Y_YAKUHAI3 . '
+                |yakuhai4                         # ' . Y_YAKUHAI4 . '
+                |yakuhai5                         # ' . Y_YAKUHAI5 . '
+            )$%xi',
+
+            'FROM' => '#^from$#',
+
+            // this should always be the last!
+            'USER_ALIAS' => '#^[a-z_\.]+$#',
+        ];
+    }
+
+    const UNKNOWN_TOKEN = null;
+
+    const SCORE_DELIMITER = 'scoreDelimiter';
+    const DORA_DELIMITER = 'doraDelimiter';
+    const DORA_COUNT = 'doraCount';
+    const YAKU_START = 'yakuStart';
+    const YAKU_END = 'yakuEnd';
+    const YAKU = 'yaku';
+    const SCORE = 'score';
+    const HAN_COUNT = 'hanCount';
+    const FU_COUNT = 'fuCount';
+    const YAKUMAN = 'yakuman';
+    const TEMPAI = 'tempai';
+    const ALL = 'all';
+    const NOBODY = 'nobody';
+    const RIICHI_DELIMITER = 'riichi';
+    const OUTCOME = 'outcome';
+    const USER_ALIAS = 'userAlias';
+    const FROM = 'from';
+    const ALSO = 'also';
+
+    protected $_yakuCodes = [];
+
+    protected function _getYakuCodes()
+    {
+        // This hardly relies on that big regexp formatting. Touch carefully.
+        $rows = explode('   |',
+            str_replace(['%^(', ')$%xi'], '', $this->_regexps['YAKU'])
+        );
+
+        $codes = [];
+        array_map(function ($el) use (&$codes) {
+            $pieces = explode('#', $el);
+            $codes['#^' . trim($pieces[0]) . '$#'] = trim($pieces[1]);
+        }, $rows);
+
+        return $codes;
+    }
+
+    protected function _identifyToken($token)
+    {
+        $matches = [];
+        foreach ($this->_regexps as $name => $re) {
+            if (preg_match($re, $token, $matches)) {
+                return [constant('Tokenizer::' . $name), $matches];
+            }
+        }
+
+        return [self::UNKNOWN_TOKEN, null];
+    }
+
+    /**
+     * @var Token[]
+     */
+    protected $_currentStack = [];
+    protected $_lastAllowedToken = [];
+    /**
+     * @var callable
+     */
+    protected $_parseStatementCb = null;
+
+    public function __construct(callable $parseStatementCb)
+    {
+        $this->_regexps = $this->_getRegexps();
+        $this->_yakuCodes = $this->_getYakuCodes();
+        $this->_parseStatementCb = $parseStatementCb;
+        $this->_lastAllowedToken = [ // first line should contain user scores map
+            Tokenizer::USER_ALIAS => 1
+        ];
+    }
+
+    public function getYakuId(Token $yaku)
+    {
+        if ($yaku->type() != Tokenizer::YAKU) {
+            throw new TokenizerException('Requested token #' . $yaku->token() . ' is not yaku', 211);
+        }
+
+        $id = $this->_identifyYakuByName($yaku->token());
+        if (!$id) {
+            throw new TokenizerException('No id found for requested yaku #' . $yaku->token() .
+                ', this should not happen!', 212);
+        }
+
+        return $id;
+    }
+
+    protected function _identifyYakuByName($yaku)
+    {
+        foreach ($this->_yakuCodes as $regex => $code) {
+            if (preg_match($regex, $yaku)) {
+                return $code;
+            }
+        }
+
+        return null;
+    }
+
+    public function nextToken($token, $ctx)
+    {
+        list($tokenType, $reMatches) = $this->_identifyToken($token);
+
+        if (!$this->_isTokenAllowed($tokenType)) {
+            throw new TokenizerException("Unexpected token: {$token} ({$tokenType}, context: {$ctx})", 108);
+        }
+
+        $methodName = '_callToken' . ucfirst($tokenType);
+        if (is_callable([$this, ucfirst($tokenType)])) {
+            throw new TokenizerException("Unexpected token: {$token} ({$tokenType}, context: {$ctx})", 200);
+        }
+
+        $this->$methodName($token, $reMatches);
+    }
+
+    protected function _isTokenAllowed($tokenType)
+    {
+        if (empty($this->_currentStack)) {
+            return !empty($this->_lastAllowedToken[$tokenType]);
+        }
+
+        $allowed = end($this->_currentStack)->allowedNextToken();
+        return !empty($allowed[$tokenType]);
+    }
+
+    /**
+     * Eof decisive token: should parse all remaining items in stack
+     */
+    public function callTokenEof()
+    {
+        if (!is_callable($this->_parseStatementCb)) {
+            throw new TokenizerException("Tokenizer configuration error: no parser callback defined", 300);
+        }
+        $pCb = $this->_parseStatementCb;
+        $pCb($this->_currentStack);
+
+        $this->_currentStack = [];
+    }
+
+    /**
+     * New outcome decisive token: should parse items in stack, then start new statement
+     */
+    protected function _callTokenOutcome($token)
+    {
+        if (!empty($this->_currentStack) && $this->_identifyYakuByName($token) == 36 /* 36 = menzen tsumo*/) {
+            /** @var $lastToken Token */
+            $lastToken = end($this->_currentStack);
+            if (
+                $lastToken->type() == Tokenizer::YAKU_START ||
+                $lastToken->type() == Tokenizer::YAKU ||
+                $lastToken->type() == Tokenizer::DORA_COUNT ||
+                $lastToken->type() == Tokenizer::DORA_DELIMITER
+            ) {
+                // workaround against same word 'tsumo' in different context
+                $this->_callTokenYaku($token);
+                return;
+            }
+        }
+
+        if (!is_callable($this->_parseStatementCb)) {
+            throw new TokenizerException("Tokenizer configuration error: no parser callback defined", 300);
+        }
+        $pCb = $this->_parseStatementCb;
+        $pCb($this->_currentStack);
+
+        if (!empty($this->_currentStack)) {
+            $this->_lastAllowedToken = end($this->_currentStack)->allowedNextToken();
+            $this->_currentStack = [];
+        }
+
+        $methodName = '_callTokenOutcome' . ucfirst($token);
+        $this->$methodName($token);
+    }
+
+    protected function _callTokenYakuEnd($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::YAKU_END,
+            [
+                Tokenizer::RIICHI_DELIMITER => 1,
+                Tokenizer::OUTCOME => 1,
+                Tokenizer::ALSO => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenScore($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::SCORE,
+            [
+                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::OUTCOME => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenYakuStart($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::YAKU_START,
+            [
+                Tokenizer::YAKU => 1,
+                Tokenizer::DORA_DELIMITER => 1,
+                Tokenizer::RIICHI_DELIMITER => 1, // for 'riichi' as yaku
+                Tokenizer::OUTCOME => 1, // for 'tsumo' as yaku
+            ]
+        );
+    }
+
+    protected function _callTokenYaku($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::YAKU,
+            [
+                Tokenizer::YAKU => 1,
+                Tokenizer::DORA_DELIMITER => 1,
+                Tokenizer::YAKU_END => 1,
+                Tokenizer::RIICHI_DELIMITER => 1, // for 'riichi' as yaku
+                Tokenizer::OUTCOME => 1, // for 'tsumo' as yaku
+            ]
+        );
+    }
+
+    protected function _callTokenDoraCount($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::DORA_COUNT,
+            [
+                Tokenizer::YAKU => 1,
+                Tokenizer::YAKU_END => 1,
+                Tokenizer::RIICHI_DELIMITER => 1, // for 'riichi' as yaku
+                Tokenizer::OUTCOME => 1, // for 'tsumo' as yaku
+            ]
+        );
+    }
+
+    protected function _callTokenDoraDelimiter($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::DORA_DELIMITER,
+            [
+                Tokenizer::DORA_COUNT => 1,
+                Tokenizer::YAKU_END => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenScoreDelimiter($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::SCORE_DELIMITER,
+            [
+                Tokenizer::SCORE => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenHanCount($token, $matches)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::HAN_COUNT,
+            [
+                Tokenizer::FU_COUNT => 1,
+                Tokenizer::RIICHI_DELIMITER => 1,
+                Tokenizer::YAKU_START => 1,
+                Tokenizer::ALSO => 1,
+                Tokenizer::OUTCOME => 1,
+            ],
+            $matches[1]
+        );
+    }
+
+    protected function _callTokenFuCount($token, $matches)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::FU_COUNT,
+            [
+                Tokenizer::RIICHI_DELIMITER => 1,
+                Tokenizer::YAKU_START => 1,
+                Tokenizer::ALSO => 1,
+                Tokenizer::OUTCOME => 1,
+            ],
+            $matches[1]
+        );
+    }
+
+    protected function _callTokenYakuman($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::YAKUMAN,
+            [
+                Tokenizer::YAKU_START => 1,
+                Tokenizer::ALSO => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenTempai($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::TEMPAI,
+            [
+                Tokenizer::ALL => 1,
+                Tokenizer::NOBODY => 1,
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenAll($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::ALL,
+            [
+                Tokenizer::OUTCOME => 1,
+                Tokenizer::RIICHI_DELIMITER => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenNobody($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::NOBODY,
+            [
+                Tokenizer::OUTCOME => 1,
+                Tokenizer::RIICHI_DELIMITER => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenRiichi($token)
+    {
+        if (!empty($this->_currentStack)) {
+            /** @var $lastToken Token */
+            $lastToken = end($this->_currentStack);
+            if (
+                $lastToken->type() == Tokenizer::YAKU_START ||
+                $lastToken->type() == Tokenizer::YAKU ||
+                $lastToken->type() == Tokenizer::DORA_COUNT ||
+                $lastToken->type() == Tokenizer::DORA_DELIMITER
+            ) {
+                // workaround against same word 'riichi' in different context
+                $this->_callTokenYaku($token);
+                return;
+            }
+        }
+
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::RIICHI_DELIMITER,
+            [
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenAlso($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::ALSO,
+            [
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenOutcomeRon($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::OUTCOME,
+            [
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenOutcomeTsumo($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::OUTCOME,
+            [
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenOutcomeDraw($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::OUTCOME,
+            [
+                Tokenizer::TEMPAI => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenOutcomeChombo($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::OUTCOME,
+            [
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenFrom($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::FROM,
+            [
+                Tokenizer::USER_ALIAS => 1,
+            ]
+        );
+    }
+
+    protected function _callTokenUserAlias($token)
+    {
+        $this->_currentStack [] = new Token(
+            $token,
+            Tokenizer::USER_ALIAS,
+            [
+                Tokenizer::SCORE_DELIMITER => 1,
+                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::FROM => 1,
+                Tokenizer::RIICHI_DELIMITER => 1,
+                Tokenizer::HAN_COUNT => 1,
+                Tokenizer::YAKUMAN => 1,
+                Tokenizer::OUTCOME => 1,
+                Tokenizer::ALSO => 1,
+            ]
+        );
+    }
+
+    /**
+     * For tests only!!!
+     * @param $tokenList
+     */
+    public function _reassignLastAllowedToken($tokenList)
+    {
+        $this->_lastAllowedToken = $tokenList;
+    }
+}

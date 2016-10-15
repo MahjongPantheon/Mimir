@@ -19,19 +19,19 @@ namespace Riichi;
 
 use Monolog\Logger;
 
-require_once __DIR__ . '/../models/Session.php';
+require_once __DIR__ . '/../models/InteractiveSession.php';
 require_once __DIR__ . '/../Controller.php';
 
 class GamesController extends Controller
 {
     /**
-     * @var SessionModel
+     * @var InteractiveSessionModel
      */
     protected $_sessionModel;
     public function __construct(Db $db, Logger $log)
     {
         parent::__construct($db, $log);
-        $this->_sessionModel = new SessionModel($this->_db);
+        $this->_sessionModel = new InteractiveSessionModel($this->_db);
     }
 
     /**

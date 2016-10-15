@@ -33,7 +33,7 @@ require_once __DIR__ . '/../exceptions/Database.php';
  * Domain model for high-level logic
  * @package Riichi
  */
-class SessionModel extends Model
+class InteractiveSessionModel extends Model
 {
     /**
      * @param $eventId
