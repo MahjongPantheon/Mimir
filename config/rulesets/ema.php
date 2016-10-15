@@ -17,6 +17,7 @@
  */
 namespace Riichi;
 require_once __DIR__ . '/../../src/Ruleset.php';
+require_once __DIR__ . '/../../src/helpers/YakuMap.php';
 
 class RulesetEma extends Ruleset
 {
@@ -36,12 +37,19 @@ class RulesetEma extends Ruleset
         'withKazoe'             => false,
         'withButtobi'           => false,
         'withMultiYakumans'     => false,
-        'withOpenRiichi'        => false,
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'withLeadingDealerGameOver' => false
     ];
+
+    public function allowedYaku()
+    {
+        return YakuMap::listExcept([
+            Y_RENHOU,
+            Y_OPENRIICHI
+        ]);
+    }
 
     /**
      * EMA uses equalized uma in case of equal scores

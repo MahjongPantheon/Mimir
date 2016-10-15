@@ -45,6 +45,11 @@ abstract class Ruleset
         return static::$_title;
     }
 
+    public function allowedYaku()
+    {
+        return static::$_ruleset['allowedYaku'];
+    }
+
     public function tenboDivider()
     {
         return static::$_ruleset['tenboDivider'];
@@ -132,11 +137,6 @@ abstract class Ruleset
     public function withMultiYakumans()
     {
         return static::$_ruleset['withMultiYakumans'];
-    }
-
-    public function withOpenRiichi()
-    {
-        return static::$_ruleset['withOpenRiichi'];
     }
 
     public function withNagashiMangan()

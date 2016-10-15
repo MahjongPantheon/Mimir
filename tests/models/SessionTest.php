@@ -127,7 +127,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             'uradora'   => 0,
             'kandora'   => 0,
             'kanuradora' => 1,
-            'yaku'      => ''
+            'yaku'      => '2'
         ];
 
         $this->assertTrue($session->addRound($hash, $roundData));
@@ -154,7 +154,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             'uradora'   => 0,
             'kandora'   => 0,
             'kanuradora' => 1,
-            'yaku'      => ''
+            'yaku'      => '3'
         ];
 
         $this->assertTrue($session->addRound($hash, $roundData));

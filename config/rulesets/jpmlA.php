@@ -17,6 +17,7 @@
  */
 namespace Riichi;
 require_once __DIR__ . '/../../src/Ruleset.php';
+require_once __DIR__ . '/../../src/helpers/YakuMap.php';
 
 class RulesetJpmlA extends Ruleset
 {
@@ -36,12 +37,19 @@ class RulesetJpmlA extends Ruleset
         'withKazoe'             => true,
         'withButtobi'           => true,
         'withMultiYakumans'     => false,
-        'withOpenRiichi'        => false,
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'withLeadingDealerGameOver' => true
     ];
+
+    public function allowedYaku()
+    {
+        return YakuMap::listExcept([
+            Y_IPPATSU,
+            Y_OPENRIICHI
+        ]);
+    }
 
     /**
      * JPML A uses complex uma bonus

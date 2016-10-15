@@ -60,9 +60,71 @@ define('Y_YAKUHAI2', 14);
 define('Y_YAKUHAI3', 15);
 define('Y_YAKUHAI4', 16);
 define('Y_YAKUHAI5', 17);
+define('Y_OPENRIICHI', 44);
 
 class YakuMap
 {
+    public static function allYaku()
+    {
+        return [
+            Y_DOUBLERIICHI,
+            Y_DAISANGEN,
+            Y_DAISUUSHII,
+            Y_JUNCHAN,
+            Y_IIPEIKOU,
+            Y_IPPATSU,
+            Y_ITTSU,
+            Y_KOKUSHIMUSOU,
+            Y_MENZENTSUMO,
+            Y_PINFU,
+            Y_RENHOU,
+            Y_RIICHI,
+            Y_RINSHANKAIHOU,
+            Y_RYUUIISOU,
+            Y_RYANPEIKOU,
+            Y_SANANKOU,
+            Y_SANKANTSU,
+            Y_SANSHOKUDOUJUN,
+            Y_SANSHOKUDOUKOU,
+            Y_SUUANKOU,
+            Y_SUUKANTSU,
+            Y_TANYAO,
+            Y_TENHOU,
+            Y_TOITOI,
+            Y_HAITEI,
+            Y_HONITSU,
+            Y_HONROTO,
+            Y_HOUTEI,
+            Y_TSUUIISOU,
+            Y_CHANKAN,
+            Y_CHANTA,
+            Y_CHIITOITSU,
+            Y_CHINITSU,
+            Y_CHINROTO,
+            Y_CHIHOU,
+            Y_CHUURENPOUTO,
+            Y_SHOSANGEN,
+            Y_SHOSUUSHII,
+            Y_YAKUHAI1,
+            Y_YAKUHAI2,
+            Y_YAKUHAI3,
+            Y_YAKUHAI4,
+            Y_YAKUHAI5,
+            Y_OPENRIICHI
+        ];
+    }
+
+    /**
+     * Get full yaku list except of some yaku
+     *
+     * @param $except
+     * @return array
+     */
+    public static function listExcept($except)
+    {
+        return array_diff(self::allYaku(), $except);
+    }
+
     /**
      * @param string $yakuList csv: 'yaku,han,yaku2,han...'
      * @param string $yakumanList csv: 'yakuman,han,yakuman2,han...'
@@ -171,8 +233,9 @@ class YakuMap
         return $result;
     }
 
-    private static function _toArray($list) {
-        return array_filter(explode(',', $list), function($el) {
+    private static function _toArray($list)
+    {
+        return array_filter(explode(',', $list), function ($el) {
             return $el !== null && $el !== '' && $el !== false;
         });
     }

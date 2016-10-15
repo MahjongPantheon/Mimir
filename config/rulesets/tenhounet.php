@@ -42,7 +42,6 @@ class RulesetTenhounet extends Ruleset
         'withKazoe'             => true,
         'withButtobi'           => true,
         'withMultiYakumans'     => true,
-        'withOpenRiichi'        => false,
         'withNagashiMangan'     => true,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
@@ -54,4 +53,11 @@ class RulesetTenhounet extends Ruleset
             4 => -15
         ],
     ];
+
+    public function allowedYaku()
+    {
+        return YakuMap::listExcept([
+            Y_OPENRIICHI
+        ]);
+    }
 }
