@@ -12,9 +12,11 @@ CREATE TABLE "user" (
   "id" integer, -- serial
   primary key ("id"),
   "ident" varchar(255) not null, -- oauth ident info, for example
+  "alias" varchar(255), -- user alias for text-mode game log
   "display_name" varchar(255) not null,
   "tenhou_id" varchar(255)
 );
+CREATE INDEX "user_alias" ON "user" ("alias");
 CREATE INDEX "user_ident" ON "user" ("ident");
 CREATE INDEX "user_tenhou" ON "user" ("tenhou_id");
 

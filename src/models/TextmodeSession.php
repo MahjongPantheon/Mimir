@@ -129,7 +129,7 @@ class TextmodeSessionModel
             }
 
             /** @var PlayerPrimitive $playerItem */
-            $playerItem = PlayerPrimitive::findByAlias($this->_db, [$player->token()]); // TODO
+            $playerItem = PlayerPrimitive::findByAlias($this->_db, [$player->token()]);
             if (empty($playerItem)) {
                 throw new ParseException("No player named '{$player->token()}' exists in our DB", 101);
             }
