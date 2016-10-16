@@ -17,8 +17,6 @@
  */
 namespace Riichi;
 
-use \Idiorm\ORM;
-
 require_once __DIR__ . '/Player.php';
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Event.php';
@@ -284,10 +282,9 @@ class RoundPrimitive extends Primitive
 
     /**
      * @deprecated
-     * @param EventPrimitive $event
      * @throws InvalidParametersException
      */
-    public function _setEvent(EventPrimitive $event)
+    public function _setEvent()
     {
         throw new InvalidParametersException('Event should not be set directly to round. Set session instead!');
     }
@@ -535,6 +532,7 @@ class RoundPrimitive extends Primitive
     }
 
     /**
+     * @throws EntityNotFoundException
      * @return \Riichi\SessionPrimitive
      */
     public function getSession()

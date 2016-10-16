@@ -39,6 +39,8 @@ require_once __DIR__ . '/../helpers/Tokenizer.php';
 
 class ParseException extends \Exception {}
 
+// TODO: move all this shit to some helper or other lower-level abstraction (parser object?)
+
 class TextmodeSessionModel
 {
     /**

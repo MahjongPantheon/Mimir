@@ -128,6 +128,31 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         ]); // no exception == ok
     }
 
+    // TODO
+    public function testCheckMultiRonValid()
+    {
+//        $checkRon = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkRon');
+//        $checkRon->setAccessible(true);
+//
+//        $checkRon->invokeArgs(null, [
+//            '1,2,3,4',
+//            [1, 2, 3],
+//            [
+//                'riichi'    => '',
+//                'winner_id' => 2,
+//                'loser_id'  => 3,
+//                'han'       => 2,
+//                'fu'        => 20,
+//                'multi_ron' => null,
+//                'yaku'      => '3',
+//                'dora'      => 0,
+//                'uradora'   => 0,
+//                'kandora'   => 0,
+//                'kanuradora' => 0
+//            ]
+//        ]); // no exception == ok
+    }
+
     public function testCheckTsumoValid()
     {
         $checkTsumo = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkTsumo');

@@ -110,6 +110,17 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
         ], $this->_state->getScores());
     }
 
+    // TODO
+    public function testMultiRon()
+    {
+
+    }
+
+    public function testMultiRonWithRiichi()
+    {
+
+    }
+
     public function testTsumo()
     {
         $round = new RoundPrimitive($this->_db);
