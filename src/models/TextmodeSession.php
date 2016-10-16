@@ -155,26 +155,23 @@ class TextmodeSessionModel
             throw new ParseException("Не удалось разобрать исход ({$statement[0]->token()}: {$methodName})", 106);
         }
 
-        $playersAliases = array_map(function(PlayerPrimitive $player) {
-            return $player->getAlias();
-        }, $session->getPlayers());
-
         return RoundPrimitive::createFromData(
             $this->_db,
             $session,
-            $this->$methodName($statement, array_combine($playersAliases, $session->getPlayers())
-            // TODO: all outcome methods should return valid round data
-            // TODO TODO
+            $this->$methodName($statement, $session)
         );
     }
 
     /**
      * @param $tokens Token[]
-     * @param $participants PlayerPrimitive[] [alias => PlayerPrimitive]
+     * @param $session SessionPrimitive
      * @return string comma-separated riichi-players ids
      * @throws ParseException
      */
-    protected function _getRiichi($tokens, $participants) {
+    protected function _getRiichi($tokens, SessionPrimitive $session)
+    {
+        $participants = $this->_getParticipantsMap($session);
+
         $riichi = [];
         $started = false;
         foreach ($tokens as $v) {
@@ -203,11 +200,14 @@ class TextmodeSessionModel
 
     /**
      * @param $tokens Token[]
-     * @param $participants PlayerPrimitive[] [alias => PlayerPrimitive]
+     * @param $session SessionPrimitive
      * @return string comma-separated tempai players ids
      * @throws ParseException
      */
-    protected function _getTempai($tokens, $participants) {
+    protected function _getTempai($tokens, SessionPrimitive $session)
+    {
+        $participants = $this->_getParticipantsMap($session);
+
         $tempai = [];
         $started = false;
         foreach ($tokens as $v) {
@@ -250,6 +250,250 @@ class TextmodeSessionModel
         return implode(',', $tempai);
     }
 
+    /**
+     * @param SessionPrimitive $session
+     * @return PlayerPrimitive[] [alias => PlayerPrimitive]
+     */
+    protected function _getParticipantsMap(SessionPrimitive $session)
+    {
+        // TODO: runtime cache
+        return array_combine(
+            array_map(
+                function(PlayerPrimitive $player) {
+                    return $player->getAlias();
+                },
+                $session->getPlayers()
+            ),
+            $session->getPlayers()
+        );
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $type
+     * @return Token
+     */
+    protected function _findByType($tokens, $type) {
+        foreach ($tokens as $v) {
+            if ($v->type() == $type) {
+                return $v;
+            }
+        }
+
+        return new Token(null, Tokenizer::UNKNOWN_TOKEN, [], null);
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @return array
+     * @throws ParseException
+     * @throws TokenizerException
+     */
+    protected function _parseYaku($tokens)
+    {
+        if (!$this->_findByType($tokens, Tokenizer::YAKU_START)->token()) {
+            return [
+                'yaku' => [],
+                'dora' => '0'
+            ]; // no yaku info
+        }
+
+        $yakuStarted = false;
+        $yaku = [];
+        $doraCount = 0;
+        foreach ($tokens as $t) {
+            if ($t->type() == Tokenizer::YAKU_START) {
+                $yakuStarted = true;
+                continue;
+            }
+
+            if ($t->type() == Tokenizer::YAKU_END) {
+                $yakuStarted = false;
+                break;
+            }
+
+            if ($yakuStarted && $t->type() == Tokenizer::YAKU) {
+                $yaku []= $t;
+            }
+
+            if ($yakuStarted && $t->type() == Tokenizer::DORA_DELIMITER) {
+                $doraCount = '1'; // means dora 1 if there is only delimiter
+            }
+
+            if ($doraCount == '1' && $yakuStarted && $t->type() == Tokenizer::DORA_COUNT) {
+                $doraCount = $t->token();
+            }
+        }
+
+        if ($yakuStarted) {
+            throw new ParseException('Yaku list ending paren was not found', 210);
+        }
+
+        return [
+            'yaku' => array_map(function(Token $yaku) {
+                    if ($yaku->type() != Tokenizer::YAKU) {
+                        throw new TokenizerException('Requested token #' . $yaku->token() . ' is not yaku', 211);
+                    }
+
+                    $id = Tokenizer::identifyYakuByName($yaku->token());
+                    if (!$id) {
+                        throw new TokenizerException('No id found for requested yaku #' . $yaku->token() .
+                        ', this should not happen!', 212);
+                    }
+
+                    return $id;
+                }, $yaku),
+            'dora' => $doraCount ? $doraCount : '0'
+        ];
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws ParseException
+     */
+    protected function _parseOutcomeRon($tokens, SessionPrimitive $session)
+    {
+        // check if double/triple ron occured
+        $multiRon = !!$this->_findByType($tokens, Tokenizer::ALSO)->token();
+        if ($multiRon) {
+            if ($session->getEvent()->getRuleset()->withAtamahane()) {
+                throw new ParseException("Detected multi-ron, but current rules use atamahane.");
+            }
+            return $this->_parseOutcomeMultiRon($tokens, $session);
+        } else {
+            return $this->_parseOutcomeSingleRon($tokens, $session);
+        }
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws ParseException
+     */
+    protected function _parseOutcomeSingleRon($tokens, SessionPrimitive $session)
+    {
+        $participants = $this->_getParticipantsMap($session);
+
+        /** @var $winner Token
+         * @var $from Token
+         * @var $loser Token */
+        list(/*ron*/, $winner, $from, $loser) = $tokens;
+        if (empty($participants[$winner->token()])) {
+            throw new ParseException("Player {$winner} is not found. Typo?", 104);
+        }
+        if ($from->type() != Tokenizer::FROM) {
+            throw new ParseException("No 'from' keyword found in ron statement", 103);
+        }
+        if (empty($participants[$loser->token()])) {
+            throw new ParseException("Player {$loser} is not found. Typo?", 105);
+        }
+
+        $yakuParsed = $this->_parseYaku($tokens);
+        return [
+            'outcome'   => 'ron',
+            'winner_id' => $participants[$winner->token()]->getId(),
+            'loser_id'  => $participants[$loser->token()]->getId(),
+            'han'       => $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean(),
+            'fu'        => $this->_findByType($tokens, Tokenizer::FU_COUNT)->clean(),
+            'multi_ron' => false,
+            'dora'      => $yakuParsed['dora'],
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 0,
+            'yaku'      => implode(',', $yakuParsed['yaku']),
+            'riichi'    => $this->_getRiichi($tokens, $session),
+        ];
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws ParseException
+     */
+    protected function _parseOutcomeTsumo($tokens, SessionPrimitive $session)
+    {
+        $participants = $this->_getParticipantsMap($session);
+
+        /** @var $winner Token */
+        list(/*tsumo*/, $winner) = $tokens;
+        if (empty($participants[$winner->token()])) {
+            throw new ParseException("Player {$winner} is not found. Typo?", 104);
+        }
+
+        $yakuParsed = $this->_parseYaku($tokens);
+        return [
+            'outcome'   => 'tsumo',
+            'winner_id' => $participants[$winner->token()]->getId(),
+            'han'       => $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean(),
+            'fu'        => $this->_findByType($tokens, Tokenizer::FU_COUNT)->clean(),
+            'multi_ron' => false,
+            'dora'      => $yakuParsed['dora'],
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 0,
+            'yaku'      => implode(',', $yakuParsed['yaku']),
+            'riichi' => $this->_getRiichi($tokens, $session),
+        ];
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $session SessionPrimitive
+     * @return array
+     */
+    protected function _parseOutcomeDraw($tokens, SessionPrimitive $session)
+    {
+        return [
+            'outcome'   => 'draw',
+            'tempai'    => $this->_getTempai($tokens, $session),
+            'riichi'    => $this->_getRiichi($tokens, $session),
+        ];
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $session SessionPrimitive
+     * @return array
+     */
+    protected function _parseOutcomeAbort($tokens, SessionPrimitive $session)
+    {
+        return [
+            'outcome'   => 'abort',
+            'riichi'    => $this->_getRiichi($tokens, $session),
+        ];
+    }
+
+    /**
+     * @param $tokens Token[]
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws ParseException
+     */
+    protected function _parseOutcomeChombo($tokens, SessionPrimitive $session)
+    {
+        $participants = $this->_getParticipantsMap($session);
+
+        /** @var $loser Token */
+        list(/*chombo*/, $loser) = $tokens;
+        if (empty($participants[$loser->token()])) {
+            throw new ParseException("Player {$loser} is not found. Typo?", 104);
+        }
+
+        return [
+            'outcome'   => 'chombo',
+            'loser_id'  => $participants[$loser->token()]->getId(),
+        ];
+    }
+
+
+
+
+
+
 
 
 
@@ -260,65 +504,6 @@ class TextmodeSessionModel
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-    /**
-     * @param $tokens Token[]
-     * @param $participants [alias => PlayerPrimitive]
-     */
-    protected function _parseOutcomeRon($tokens, $participants)
-    {
-        // check if double/triple ron occured
-        $multiRon = !!$this->_findByType($tokens, Tokenizer::ALSO)->token();
-        if ($multiRon) {
-            $this->_parseOutcomeMultiRon($tokens, $participants);
-        } else {
-            $this->_parseOutcomeSingleRon($tokens, $participants);
-        }
-    }
-
-    /**
-     * @param $tokens Token[]
-     * @param $participants [alias => PlayerPrimitive]
-     * @throws ParseException
-     */
-    protected function _parseOutcomeSingleRon($tokens, $participants) {
-        /** @var $winner Token
-         * @var $from Token
-         * @var $loser Token */
-        list(/*ron*/, $winner, $from, $loser) = $tokens;
-        if (empty($participants[$winner->token()])) {
-            throw new ParseException("Игрок {$winner} не указан в заголовке лога. Опечатка?", 104);
-        }
-        if ($from->type() != Tokenizer::FROM) {
-            throw new ParseException("Не указан игрок, с которого взят рон", 103);
-        }
-        if (empty($participants[$loser->token()])) {
-            throw new ParseException("Игрок {$loser} не указан в заголовке лога. Опечатка?", 105);
-        }
-        $yakuParsed = $this->_parseYaku($tokens);
-        $resultData = [
-            'outcome' => 'ron',
-            'multiRon' => false,
-            'round' => $this->_currentRound,
-            'winner' => $winner->token(),
-            'loser' => $loser->token(),
-            'honba' => $this->_honba,
-            'han' => $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean(),
-            'fu' => $this->_findByType($tokens, Tokenizer::FU_COUNT)->clean(),
-            'yakuman' => !!$this->_findByType($tokens, Tokenizer::YAKUMAN)->token(),
-            'yakuList' => $yakuParsed['yaku'],
-            'doraCount' => $yakuParsed['dora'],
-            'riichi' => $this->_getRiichi($tokens, $participants),
-            'dealer' => $this->_checkDealer($winner)
-        ];
-
-        $this->_counts['ron']++;
-        if (!empty($resultData['yakuman'])) {
-            $resultData['han'] = 13; // TODO: remove
-            $this->_counts['yakuman']++;
-        }
-    }
 
     /**
      * @param $tokens Token[]
@@ -365,11 +550,11 @@ class TextmodeSessionModel
      *
      * @param $rons Token[][]
      * @param $loser Token
-     * @param $participants [alias => PlayerPrimitive]
+     * @param $session SessionPrimitive
      * @return array
      * @throws ParseException
      */
-    protected function _assignRiichiBets($rons, $loser, $participants) {
+    protected function _assignRiichiBets($rons, $loser, SessionPrimitive $session) {
         $riichiOnTable = $this->_riichi; // save this one as it's erased with this->_getRiichi
         $bets = [];
         $winners = [];
@@ -377,7 +562,7 @@ class TextmodeSessionModel
         /** @var $ron Token[] */
         foreach ($rons as $ron) {
             $winners[$ron[0]->token()] = [];
-            $bets = array_merge($bets, $this->_getRiichi($ron, $participants));
+            $bets = array_merge($bets, $this->_getRiichi($ron, $session));
             foreach ($bets as $k => $player) {
                 if (isset($winners[$player])) {
                     $winners[$player] []= $ron[0]->token(); // winner always gets back his bet
@@ -426,10 +611,10 @@ class TextmodeSessionModel
 
     /**
      * @param $tokens Token[]
-     * @param $participants [alias => PlayerPrimitive]
+     * @param $session SessionPrimitive
      * @throws ParseException
      */
-    protected function _parseOutcomeMultiRon($tokens, $participants)
+    protected function _parseOutcomeMultiRon($tokens, SessionPrimitive $session)
     {
         /** @var $loser Token */
         list($rons, $loser) = $this->_splitMultiRon($tokens);
@@ -475,187 +660,7 @@ class TextmodeSessionModel
         if (count($rons) == 3) $this->_counts['tripleRon']++;
     }
 
-    /**
-     * @param $tokens Token[]
-     * @param $participants [alias => PlayerPrimitive]
-     * @throws ParseException
-     */
-    protected function _parseOutcomeTsumo($tokens, $participants)
-    {
-        /** @var $winner Token */
-        list(/*tsumo*/, $winner) = $tokens;
-        if (empty($participants[$winner->token()])) {
-            throw new ParseException("Игрок {$winner} не указан в заголовке лога. Опечатка?", 104);
-        }
 
-        $yakuParsed = $this->_parseYaku($tokens);
-        $resultData = [
-            'outcome' => 'tsumo',
-            'multiRon' => false,
-            'round' => $this->_currentRound,
-            'winner' => $winner->token(),
-            'honba' => $this->_honba,
-            'han' => $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean(),
-            'fu' => $this->_findByType($tokens, Tokenizer::FU_COUNT)->clean(),
-            'yakuman' => !!$this->_findByType($tokens, Tokenizer::YAKUMAN)->token(),
-            'yakuList' => $yakuParsed['yaku'],
-            'doraCount' => $yakuParsed['dora'],
-            'dealer' => $this->_checkDealer($winner),
-            'riichi' => $this->_getRiichi($tokens, $participants)
-        ];
-        $resultData['riichi_totalCount'] = $this->_riichi;
-        $this->_riichi = 0;
-
-        $this->_counts['tsumo']++;
-        if (!empty($resultData['yakuman'])) {
-            $resultData['han'] = 13; // TODO: remove
-            $this->_counts['yakuman']++;
-            call_user_func_array($this->_yakuman, array($resultData));
-        } else {
-            call_user_func_array($this->_usualWin, array($resultData));
-        }
-    }
-
-    /**
-     * @param $tokens Token[]
-     * @param $participants [alias => PlayerPrimitive]
-     */
-    protected function _parseOutcomeDraw($tokens, $participants)
-    {
-        $tempaiPlayers = $this->_getTempai($tokens, $participants);
-        $playersStatus = array_combine(
-            array_keys($participants),
-            ['noten', 'noten', 'noten', 'noten']
-        );
-
-        if (!empty($tempaiPlayers)) {
-            $playersStatus = array_merge(
-                $playersStatus,
-                array_combine(
-                    $tempaiPlayers,
-                    array_fill(0, count($tempaiPlayers), 'tempai')
-                )
-            );
-        }
-
-        $resultData = [
-            'outcome' => 'draw',
-            'round' => $this->_currentRound,
-            'honba' => $this->_honba,
-            'riichi' => $this->_getRiichi($tokens, $participants),
-            'riichi_totalCount' => $this->_riichi,
-            'players_tempai' => $playersStatus
-        ];
-
-        if ($playersStatus[$this->_players[$this->_currentDealer % 4]] != 'tempai') {
-            $this->_currentDealer++;
-            $this->_currentRound++;
-        }
-
-        $this->_counts['draw']++;
-    }
-
-    /**
-     * @param $tokens Token[]
-     * @param $participants [alias => PlayerPrimitive]
-     * @throws ParseException
-     */
-    protected function _parseOutcomeChombo($tokens, $participants)
-    {
-        /** @var $loser Token */
-        list(/*chombo*/, $loser) = $tokens;
-        if (empty($participants[$loser->token()])) {
-            throw new ParseException("Игрок {$loser} не указан в заголовке лога. Опечатка?", 104);
-        }
-
-        $resultData = [
-            'outcome' => 'chombo',
-            'round' => $this->_currentRound,
-            'loser' => $loser->token(),
-            'dealer' => $this->_checkDealer($loser)
-        ];
-
-        $this->_counts['chombo']++;
-    }
-
-    /**
-     * @param $tokens Token[]
-     * @return array
-     * @throws ParseException
-     * @throws TokenizerException
-     */
-    protected function _parseYaku($tokens)
-    {
-        if (!$this->_findByType($tokens, Tokenizer::YAKU_START)->token()) {
-            return [
-                'yaku' => [],
-                'dora' => '0'
-            ]; // no yaku info
-        }
-
-        $yakuStarted = false;
-        $yaku = [];
-        $doraCount = 0;
-        foreach ($tokens as $t) {
-            if ($t->type() == Tokenizer::YAKU_START) {
-                $yakuStarted = true;
-                continue;
-            }
-
-            if ($t->type() == Tokenizer::YAKU_END) {
-                $yakuStarted = false;
-                break;
-            }
-
-            if ($yakuStarted && $t->type() == Tokenizer::YAKU) {
-                $yaku []= $t;
-            }
-
-            if ($yakuStarted && $t->type() == Tokenizer::DORA_DELIMITER) {
-                $doraCount = '1'; // means dora 1 if there is only delimiter
-            }
-
-            if ($doraCount == '1' && $yakuStarted && $t->type() == Tokenizer::DORA_COUNT) {
-                $doraCount = $t->token();
-            }
-        }
-
-        if ($yakuStarted) {
-            throw new ParseException('Не найдено окончание списка яку', 210);
-        }
-
-        return [
-            'yaku' => array_map(function(Token $yaku) {
-                if ($yaku->type() != Tokenizer::YAKU) {
-                    throw new TokenizerException('Requested token #' . $yaku->token() . ' is not yaku', 211);
-                }
-
-                $id = Tokenizer::identifyYakuByName($yaku->token());
-                if (!$id) {
-                    throw new TokenizerException('No id found for requested yaku #' . $yaku->token() .
-                        ', this should not happen!', 212);
-                }
-
-                return $id;
-            }, $yaku), 
-            'dora' => $doraCount ? $doraCount : '0'
-        ];
-    }
-
-    /**
-     * @param $tokens Token[]
-     * @param $type
-     * @return Token
-     */
-    protected function _findByType($tokens, $type) {
-        foreach ($tokens as $v) {
-            if ($v->type() == $type) {
-                return $v;
-            }
-        }
-
-        return new Token(null, Tokenizer::UNKNOWN_TOKEN, [], null);
-    }
 
     //<editor-fold desc="For testing only!!!">
     public function _iGetRiichi($tokens, $participants)
