@@ -233,6 +233,9 @@ class SessionState
             case 'ron':
                 $this->_updateAfterRon($round);
                 break;
+            case 'multiron':
+                $this->_updateAfterMultiRon($round);
+                break;
             case 'tsumo':
                 $this->_updateAfterTsumo($round);
                 break;
@@ -280,6 +283,102 @@ class SessionState
         }
 
         $this->_resetRiichiBets();
+    }
+
+
+    /**
+     * TODO: for multiron
+     *
+     * @param $rons Token[][]
+     * @param $loser Token
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws InvalidParametersException
+     */
+    protected function _assignRiichiBets($rons, $loser, SessionPrimitive $session) {
+        $riichiOnTable = $this->_riichi; // save this one as it's erased with this->_getRiichi
+        $bets = [];
+        $winners = [];
+
+        /** @var $ron Token[] */
+        foreach ($rons as $ron) {
+            $winners[$ron[0]->token()] = [];
+            $bets = array_merge($bets, $this->_getRiichi($ron, $session));
+            foreach ($bets as $k => $player) {
+                if (isset($winners[$player])) {
+                    $winners[$player] []= $ron[0]->token(); // winner always gets back his bet
+                    unset($bets[$k]);
+                }
+            }
+        }
+
+        // Find player who gets non-winning riichi bets
+        $playersRing = array_merge(array_keys($participants), array_keys($participants)); // double the array to form a ring
+        $closestWinner = null;
+        for ($i = 0; $i < count($playersRing); $i++) {
+            if ($loser->token() == $playersRing[$i]) {
+                for ($j = $i + 1; $j < count($playersRing); $j++) {
+                    if (isset($winners[$playersRing[$j]])) {
+                        $closestWinner = $playersRing[$j];
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if (!$closestWinner) {
+            throw new InvalidParametersException('Не найден ближайший победитель для риичи-ставок: такого не должно было произойти!', 119);
+        }
+
+        $winners[$closestWinner] = array_merge($winners[$closestWinner], $bets);
+
+        // assign riichi counts, add riichi on table for first winner
+        foreach ($winners as $name => $bets) {
+            if ($name == $closestWinner) {
+                $winners[$name] = [
+                    'riichi_totalCount' => $riichiOnTable + count($winners[$name]),
+                    'riichi' => $winners[$name]
+                ];
+            } else {
+                $winners[$name] = [
+                    'riichi_totalCount' => count($winners[$name]),
+                    'riichi' => $winners[$name]
+                ];
+            }
+        }
+
+        return $winners;
+    }
+
+    /**
+     * @param RoundPrimitive $round
+     */
+    protected function _updateAfterMultiRon(RoundPrimitive $round)
+    {
+        // TODO
+//        $isDealer = $this->getCurrentDealer() == $round->getWinnerId();
+//
+//        $this->_scores = PointsCalc::ron(
+//            $this->_rules,
+//            $isDealer,
+//            $this->getScores(),
+//            $round->getWinnerId(),
+//            $round->getLoserId(),
+//            $round->getHan(),
+//            $round->getFu(),
+//            $round->getRiichiIds(),
+//            $this->getHonba(),
+//            $this->getRiichiBets()
+//        );
+//
+//        if ($isDealer) {
+//            $this->_addHonba();
+//        } else {
+//            $this->_resetHonba()
+//                ->_nextRound();
+//        }
+//
+//        $this->_resetRiichiBets();
     }
 
     /**
