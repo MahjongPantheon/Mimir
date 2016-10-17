@@ -223,7 +223,7 @@ class SessionState
 
     /**
      * Register new round in current session
-     * @param RoundPrimitive $round
+     * @param RoundPrimitive|MultiRoundPrimitive $round
      * @throws InvalidParametersException
      * @return bool
      */
@@ -351,34 +351,38 @@ class SessionState
     }
 
     /**
-     * @param RoundPrimitive $round
+     * @param MultiRoundPrimitive $round
+     * @throws InvalidParametersException
      */
-    protected function _updateAfterMultiRon(RoundPrimitive $round)
+    protected function _updateAfterMultiRon(MultiRoundPrimitive $round)
     {
-        // TODO
-//        $isDealer = $this->getCurrentDealer() == $round->getWinnerId();
-//
-//        $this->_scores = PointsCalc::ron(
-//            $this->_rules,
-//            $isDealer,
-//            $this->getScores(),
-//            $round->getWinnerId(),
-//            $round->getLoserId(),
-//            $round->getHan(),
-//            $round->getFu(),
-//            $round->getRiichiIds(),
-//            $this->getHonba(),
-//            $this->getRiichiBets()
-//        );
-//
-//        if ($isDealer) {
-//            $this->_addHonba();
-//        } else {
-//            $this->_resetHonba()
-//                ->_nextRound();
-//        }
-//
-//        $this->_resetRiichiBets();
+        $dealerWon = false;
+        foreach ($round->rounds() as $roundItem) {
+            $dealerWon = $dealerWon || $this->getCurrentDealer() == $roundItem->getWinnerId();
+            $this->_scores = PointsCalc::ron(
+                $this->_rules,
+                $this->getCurrentDealer() == $roundItem->getWinnerId(),
+                $this->getScores(),
+                $roundItem->getWinnerId(),
+                $roundItem->getLoserId(),
+                $roundItem->getHan(),
+                $roundItem->getFu(),
+                $roundItem->getRiichiIds(),
+                $this->getHonba(),
+                $this->getRiichiBets()
+            );
+
+            $this->_resetRiichiBets();
+        }
+
+        // $this->_assignRiichiBets      TODO===============
+
+        if ($dealerWon) {
+            $this->_addHonba();
+        } else {
+            $this->_resetHonba()
+                ->_nextRound();
+        }
     }
 
     /**

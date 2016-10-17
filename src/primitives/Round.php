@@ -20,6 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/Player.php';
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Event.php';
+require_once __DIR__ . '/MultiRound.php';
 require_once __DIR__ . '/../Primitive.php';
 require_once __DIR__ . '/../validators/Round.php';
 
@@ -251,15 +252,25 @@ class RoundPrimitive extends Primitive
         return $success;
     }
 
+    /**
+     * @param Db $db
+     * @param SessionPrimitive $session
+     * @param $roundData
+     * @return RoundPrimitive|MultiRoundPrimitive
+     */
     public static function createFromData(Db $db, SessionPrimitive $session, $roundData)
     {
+        if ($roundData['outcome'] === 'multiron') {
+            return MultiRoundPrimitive::createFromData($db, $session, $roundData);
+        }
+
         RoundsHelper::checkRound($session, $roundData);
         $roundData['session_id'] = $session->getId();
         $roundData['event_id'] = $session->getEventId();
         $roundData['id'] = null;
 
         // Just set it, as we already checked its perfect validity.
-        return (new RoundPrimitive($db))->_restore($roundData);
+        return [(new RoundPrimitive($db))->_restore($roundData)];
     }
 
     /**

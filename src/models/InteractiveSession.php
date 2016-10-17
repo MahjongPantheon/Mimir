@@ -122,10 +122,8 @@ class InteractiveSessionModel extends Model
     public function addRound($gameHashcode, $roundData)
     {
         $session = $this->_findGame($gameHashcode, 'inprogress');
-        $newRound = RoundPrimitive::createFromData($this->_db, $session, $roundData);
-
-        return $newRound->save()
-            && $session->updateCurrentState($newRound);
+        $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
+        return $round->save() && $session->updateCurrentState($round);
     }
 
     /**
