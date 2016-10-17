@@ -17,11 +17,11 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/Parser.php';
+require_once __DIR__ . '/../../src/models/TextmodeSession.php';
 
 // TODO: adopt test
 
-class TextmodeSessionModelTest extends PHPUnit_Framework_TestCase
+class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
 {
     protected $_users = [
         'heilage' => 1,

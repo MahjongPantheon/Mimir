@@ -133,7 +133,7 @@ class Tokenizer
             }
         }
 
-        return $this->_callTokenEof();
+        yield $this->_callTokenEof();
     }
 
     // -----------------------------------------------------------------

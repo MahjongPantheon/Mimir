@@ -128,29 +128,42 @@ class RoundsHelperTest extends \PHPUnit_Framework_TestCase
         ]); // no exception == ok
     }
 
-    // TODO
     public function testCheckMultiRonValid()
     {
-//        $checkRon = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkRon');
-//        $checkRon->setAccessible(true);
-//
-//        $checkRon->invokeArgs(null, [
-//            '1,2,3,4',
-//            [1, 2, 3],
-//            [
-//                'riichi'    => '',
-//                'winner_id' => 2,
-//                'loser_id'  => 3,
-//                'han'       => 2,
-//                'fu'        => 20,
-//                'multi_ron' => null,
-//                'yaku'      => '3',
-//                'dora'      => 0,
-//                'uradora'   => 0,
-//                'kandora'   => 0,
-//                'kanuradora' => 0
-//            ]
-//        ]); // no exception == ok
+        $checkRon = new \ReflectionMethod('\Riichi\RoundsHelper', '_checkMultiron');
+        $checkRon->setAccessible(true);
+
+        $checkRon->invokeArgs(null, [
+            '1,2,3,4',
+            [1, 2, 3, 8],
+            [
+                'loser_id'  => 3,
+                'multi_ron' => 2,
+                'wins' => [
+                    [
+                        'riichi'    => '',
+                        'winner_id' => 1,
+                        'han'       => 2,
+                        'fu'        => 40,
+                        'yaku'      => '8',
+                        'dora'      => 0,
+                        'uradora'   => 0,
+                        'kandora'   => 0,
+                        'kanuradora' => 0
+                    ], [
+                        'riichi'    => '',
+                        'winner_id' => 2,
+                        'han'       => 2,
+                        'fu'        => 20,
+                        'yaku'      => '3',
+                        'dora'      => 0,
+                        'uradora'   => 0,
+                        'kandora'   => 0,
+                        'kanuradora' => 0
+                    ]
+                ]
+            ]
+        ]); // no exception == ok
     }
 
     public function testCheckTsumoValid()
