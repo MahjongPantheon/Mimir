@@ -19,6 +19,9 @@ namespace Riichi;
 
 require_once __DIR__ . '/../../src/helpers/SessionState.php';
 require_once __DIR__ . '/../../src/primitives/Round.php';
+require_once __DIR__ . '/../../src/primitives/Event.php';
+require_once __DIR__ . '/../../src/primitives/Session.php';
+require_once __DIR__ . '/../../src/primitives/MultiRound.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/Db.php';
 
@@ -37,20 +40,45 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
      * @var SessionState
      */
     protected $_state;
+    /**
+     * @var SessionPrimitive
+     */
+    protected $_session;
+    /**
+     * @var EventPrimitive
+     */
+    protected $_event;
 
     public function setUp()
     {
         $this->_db = Db::getCleanInstance();
+        $this->_event = (new EventPrimitive($this->_db))
+            ->setTitle('title')
+            ->setDescription('desc')
+            ->setType('online')
+            ->setRuleset(Ruleset::instance('jpmlA'));
+        $this->_event->save();
+
         $this->_players = array_map(function ($i) {
             $p = (new PlayerPrimitive($this->_db))
-                ->setDisplayName('test' . $i)
-                ->setIdent("$i");
+                ->setDisplayName('player' . $i)
+                ->setIdent('oauth' . $i)
+                ->setTenhouId('tenhou' . $i);
             $p->save();
             return $p;
         }, [1, 2, 3, 4]);
 
+        $this->_session = (new SessionPrimitive($this->_db))
+            ->setEvent($this->_event)
+            ->setPlayers($this->_players)
+            ->setStatus('inprogress')
+            ->setReplayHash('')
+            ->setOrigLink('');
+        $this->_session->save();
+
         $this->_ruleset = new MockRuleset();
         $this->_ruleset->setRule('startPoints', 30000);
+        $this->_ruleset->setRule('withKiriageMangan', false);
         $this->_state = new SessionState($this->_ruleset, array_map(function (PlayerPrimitive $player) {
             return $player->getId();
         }, $this->_players));
@@ -110,15 +138,88 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
         ], $this->_state->getScores());
     }
 
-    // TODO
     public function testMultiRon()
     {
+        $rounds = [
+            (new RoundPrimitive($this->_db))
+                ->setSession($this->_session)
+                ->setOutcome('ron')
+                ->setWinner($this->_players[1])
+                ->setLoser($this->_players[0])
+                ->setHan(3)
+                ->setFu(30)
+                ->setDora(1)
+                ->setRiichiUsers([$this->_players[1]]),
+            (new RoundPrimitive($this->_db))
+                ->setSession($this->_session)
+                ->setOutcome('ron')
+                ->setWinner($this->_players[3])
+                ->setLoser($this->_players[0])
+                ->setHan(2)
+                ->setFu(30)
+                ->setDora(1)
+                ->setRiichiUsers([$this->_players[2]]),
+        ];
 
+        $this->_state->update((new MultiRoundPrimitive($this->_db))->_setRounds($rounds));
+
+        $this->assertEquals($this->_players[1]->getId(), $this->_state->getCurrentDealer());
+        $this->assertEquals(2, $this->_state->getRound());
+        $this->assertEquals(0, $this->_state->getHonba());
+        $this->assertEquals(0, $this->_state->getRiichiBets());
+        $this->assertEquals([
+            1 => 30000 - 3900                - 2000,
+                 30000 + 3900 - 1000 + 1000         + 1000,
+                 30000                              - 1000,
+                 30000                       + 2000
+        ], $this->_state->getScores());
     }
 
     public function testMultiRonWithRiichi()
     {
+        $round = new RoundPrimitive($this->_db);
+        $round
+            ->setOutcome('draw')
+            ->setTempaiUsers([])
+            ->setRiichiUsers([$this->_players[1]]);
+        $this->_state->update($round);
 
+        $this->assertEquals(1, $this->_state->getHonba());
+        $this->assertEquals(1, $this->_state->getRiichiBets());
+
+        $rounds = [
+            (new RoundPrimitive($this->_db))
+                ->setSession($this->_session)
+                ->setOutcome('ron')
+                ->setWinner($this->_players[0])
+                ->setLoser($this->_players[1])
+                ->setHan(3)
+                ->setFu(30)
+                ->setDora(1)
+                ->setRiichiUsers([$this->_players[0]]),
+            (new RoundPrimitive($this->_db))
+                ->setSession($this->_session)
+                ->setOutcome('ron')
+                ->setWinner($this->_players[3])
+                ->setLoser($this->_players[1])
+                ->setHan(2)
+                ->setFu(30)
+                ->setDora(1)
+                ->setRiichiUsers([$this->_players[2]]),
+        ];
+
+        $this->_state->update((new MultiRoundPrimitive($this->_db))->_setRounds($rounds));
+
+        $this->assertEquals($this->_players[2]->getId(), $this->_state->getCurrentDealer());
+        $this->assertEquals(3, $this->_state->getRound());
+        $this->assertEquals(0, $this->_state->getHonba());
+        $this->assertEquals(0, $this->_state->getRiichiBets());
+        $this->assertEquals([
+            1 => 30000        + 3900 - 1000 + 1000,
+                 30000 - 1000 - 3900 - 2000               - 300,
+                 30000                      - 1000,
+                 30000               + 2000 + 1000 + 1000 + 300, /* dealer is #2, this player is closest */
+        ], $this->_state->getScores());
     }
 
     public function testTsumo()

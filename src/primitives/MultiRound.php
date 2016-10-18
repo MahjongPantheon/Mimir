@@ -42,6 +42,11 @@ class MultiRoundPrimitive extends RoundPrimitive
         return [];
     }
 
+    public function __construct(IDb $db)
+    {
+        $this->_db = $db;
+    }
+
     /**
      * @var RoundPrimitive[]
      */
@@ -103,6 +108,16 @@ class MultiRoundPrimitive extends RoundPrimitive
     public function rounds()
     {
         return $this->_rounds;
+    }
+
+    /**
+     * @deprecated
+     * For unit testing only
+     */
+    public function _setRounds($rounds)
+    {
+        $this->_rounds = $rounds;
+        return $this;
     }
 
     public function setDora($dora)
@@ -207,7 +222,7 @@ class MultiRoundPrimitive extends RoundPrimitive
 
     public function getOutcome()
     {
-        throw new InvalidParametersException('MultiRound should not be treated as round');
+        return 'multiron';
     }
 
     public function getRiichiIds()

@@ -332,8 +332,9 @@ class SessionState
         // assign riichi counts, add riichi on table for first (closest) winner
         foreach ($winners as $id => $bets) {
             $winners[$id] = [
-                'total_count' => ($id == $closestWinner ? $this->getRiichiBets() : 0) + count($winners[$id]),
-                'taken_from'  => $winners[$id]
+                'from_table'    => ($id == $closestWinner ? $this->getRiichiBets() : 0),
+                'from_players'  => $winners[$id],
+                'honba'         => ($id == $closestWinner ? $this->getHonba() : 0),
             ];
         }
 
@@ -359,9 +360,9 @@ class SessionState
                 $roundItem->getLoserId(),
                 $roundItem->getHan(),
                 $roundItem->getFu(),
-                $riichiWinners[$roundItem->getWinnerId()]['taken_from'],
-                $this->getHonba(),
-                $riichiWinners[$roundItem->getWinnerId()]['total_count']
+                $riichiWinners[$roundItem->getWinnerId()]['from_players'],
+                $riichiWinners[$roundItem->getWinnerId()]['honba'],
+                $riichiWinners[$roundItem->getWinnerId()]['from_table']
             );
         }
 

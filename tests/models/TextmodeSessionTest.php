@@ -325,7 +325,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
                 'loser' => 'frontier',
                 'yakuman' => false,
                 'yakuList' => [],
-                'doraCount' => '0' 
+                'doraCount' => '0'
             ],
             [
                 'dealer' => false,
@@ -341,7 +341,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
                 'loser' => 'frontier',
                 'yakuman' => false,
                 'yakuList' => [],
-                'doraCount' => '0' 
+                'doraCount' => '0'
             ]
         ];
         $this->_hooks['usual'] = function ($data) use ($expected, &$idx) {
@@ -409,7 +409,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
                 'loser' => 'frontier',
                 'yakuman' => false,
                 'yakuList' => [],
-                'doraCount' => '0' 
+                'doraCount' => '0'
             ],
             [
                 'dealer' => true,
@@ -425,7 +425,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
                 'loser' => 'frontier',
                 'yakuman' => false,
                 'yakuList' => [],
-                'doraCount' => '0' 
+                'doraCount' => '0'
 
             ]
         ];
@@ -459,7 +459,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
             'yakuman' => false,
             'multiRon' => false,
             'yakuList' => [],
-            'doraCount' => '0' 
+            'doraCount' => '0'
         ];
         $this->_hooks['usual'] = function ($data) use ($expected) {
             ksort($data);
@@ -490,7 +490,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
             'yakuman' => false,
             'multiRon' => false,
             'yakuList' => ['33'],
-            'doraCount' => '5' 
+            'doraCount' => '5'
         ];
         $this->_hooks['usual'] = function ($data) use ($expected) {
             ksort($data);
@@ -657,7 +657,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
             'yakuman' => false,
             'multiRon' => false,
             'yakuList' => [],
-            'doraCount' => '0' 
+            'doraCount' => '0'
         ];
         $this->_hooks['usual'] = function ($data) use ($expected) {
             ksort($data);
@@ -687,7 +687,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
             'yakuman' => false,
             'multiRon' => false,
             'yakuList' => [],
-            'doraCount' => '0' 
+            'doraCount' => '0'
         ];
         $this->_hooks['usual'] = function ($data) use ($expected) {
             ksort($data);
@@ -955,7 +955,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
             'yakuman' => false,
             'multiRon' => false,
             'yakuList' => [],
-            'doraCount' => '0' 
+            'doraCount' => '0'
         ];
 
         $this->_hooks['draw'] = function ($data) use ($expectedDraw) {
@@ -1049,7 +1049,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
             'yakuman' => false,
             'multiRon' => false,
             'yakuList' => [8, 33, 23, 36],
-            'doraCount' => '0' 
+            'doraCount' => '0'
         ];
         $this->_hooks['usual'] = function ($data) use ($expected) {
             ksort($data);
@@ -1089,7 +1089,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
                 'loser' => 'frontier',
                 'yakuman' => false,
                 'yakuList' => [13],
-                'doraCount' => '0' 
+                'doraCount' => '0'
             ],
             [
                 'dealer' => false,
@@ -1105,7 +1105,7 @@ class TextmodeSessionModelTest extends \PHPUnit_Framework_TestCase
                 'loser' => 'frontier',
                 'yakuman' => false,
                 'yakuList' => [34, 11],
-                'doraCount' => '0' 
+                'doraCount' => '0'
             ]
         ];
         $this->_hooks['usual'] = function ($data) use ($expected, &$idx) {
