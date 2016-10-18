@@ -215,10 +215,10 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(0, $this->_state->getHonba());
         $this->assertEquals(0, $this->_state->getRiichiBets());
         $this->assertEquals([
-            1 => 30000        + 3900 - 1000 + 1000,
-                 30000 - 1000 - 3900 - 2000               - 300,
+            1 => 30000        + 3900 - 1000 + 1000        + 300,
+                 30000 - 1000 - 3900 - 2000               - 600, // renchan payments go to each winner
                  30000                      - 1000,
-                 30000               + 2000 + 1000 + 1000 + 300, /* dealer is #2, this player is closest */
+                 30000               + 2000 + 1000 + 1000 + 300,
         ], $this->_state->getScores());
     }
 

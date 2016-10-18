@@ -80,14 +80,14 @@ class MultiRoundPrimitive extends RoundPrimitive
 
         $item = new self($db);
         $item->_rounds = array_map(function($round) use (&$roundData, $db) {
-            return [(new RoundPrimitive($db))->_restore(array_merge($round, [
+            return (new RoundPrimitive($db))->_restore(array_merge($round, [
                 'outcome'    => $roundData['outcome'],
                 'multi_ron'  => $roundData['multi_ron'],
-                'loser'      => $roundData['loser'],
+                'loser_id'   => $roundData['loser_id'],
                 'session_id' => $roundData['session_id'],
                 'event_id'   => $roundData['event_id'],
                 'id'         => null
-            ]))];
+            ]));
         }, $roundData['wins']);
         return $item;
     }

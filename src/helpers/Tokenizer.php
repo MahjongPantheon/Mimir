@@ -240,7 +240,7 @@ class Tokenizer
                 'FROM' => '#^from$#',
 
                 // this should always be the last!
-                'USER_ALIAS' => '#^[a-z_\.]+$#',
+                'USER_ALIAS' => '#^[a-z0-9_\.]+$#',
             ];
         }
 
@@ -254,7 +254,7 @@ class Tokenizer
         $matches = [];
         foreach (self::_getRegexps() as $name => $re) {
             if (preg_match($re, $token, $matches)) {
-                return [constant('Tokenizer::' . $name), $matches];
+                return [constant('Riichi\Tokenizer::' . $name), $matches];
             }
         }
 

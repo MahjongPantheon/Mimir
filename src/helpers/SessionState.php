@@ -308,8 +308,8 @@ class SessionState
         }
 
         // Find player who gets non-winning riichi bets
-        // First we double the array to form a ring: id list starts with initial dealer, not the current one.
-        // Then we find winner closest to current dealer.
+        // First we double the array to form a ring to simplify traversal
+        // Then we find winner closest to current loser - he'll get all riichi (like with atamahane rule).
         $playersRing = array_merge($session->getPlayersIds(), $session->getPlayersIds());
         $closestWinner = null;
         for ($i = 0; $i < count($playersRing); $i++) {
@@ -334,7 +334,7 @@ class SessionState
             $winners[$id] = [
                 'from_table'    => ($id == $closestWinner ? $this->getRiichiBets() : 0),
                 'from_players'  => $winners[$id],
-                'honba'         => ($id == $closestWinner ? $this->getHonba() : 0),
+                'honba'         => $this->getHonba(),
             ];
         }
 
