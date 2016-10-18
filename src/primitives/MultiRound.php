@@ -180,12 +180,12 @@ class MultiRoundPrimitive extends RoundPrimitive
         throw new InvalidParametersException('MultiRound should not be treated as round');
     }
 
-    public function getLoser()
+    public function getLoserId()
     {
-        throw new InvalidParametersException('MultiRound should not be treated as round');
+        return $this->_rounds[0]->getLoserId();
     }
 
-    public function getLoserId()
+    public function getLoser()
     {
         throw new InvalidParametersException('MultiRound should not be treated as round');
     }
@@ -242,7 +242,7 @@ class MultiRoundPrimitive extends RoundPrimitive
 
     public function getSession()
     {
-        throw new InvalidParametersException('MultiRound should not be treated as round');
+        return $this->_rounds[0]->getSession();
     }
 
     public function getSessionId()
