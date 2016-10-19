@@ -38,8 +38,7 @@ namespace Riichi;
 require_once __DIR__ . '/Tokenizer.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../primitives/Round.php';
-
-class ParseException extends \Exception {}
+require_once __DIR__ . '/../exceptions/Parser.php';
 
 class TextlogParser
 {
@@ -256,7 +255,7 @@ class TextlogParser
         // TODO: runtime cache
         return array_combine(
             array_map(
-                function(PlayerPrimitive $player) {
+                function (PlayerPrimitive $player) {
                     return $player->getAlias();
                 },
                 $session->getPlayers()
@@ -270,7 +269,8 @@ class TextlogParser
      * @param $type
      * @return Token
      */
-    protected function _findByType($tokens, $type) {
+    protected function _findByType($tokens, $type)
+    {
         foreach ($tokens as $v) {
             if ($v->type() == $type) {
                 return $v;
@@ -327,7 +327,7 @@ class TextlogParser
         }
 
         return [
-            'yaku' => array_map(function(Token $yaku) {
+            'yaku' => array_map(function (Token $yaku) {
                 if ($yaku->type() != Tokenizer::YAKU) {
                     throw new TokenizerException('Requested token #' . $yaku->token() . ' is not yaku', 211);
                 }
@@ -503,18 +503,18 @@ class TextlogParser
         $chunks = [[]];
         $idx = 0;
         foreach ($tokens as $k => $t) {
-            if (
-                $t->type() == Tokenizer::OUTCOME ||
+            if ($t->type() == Tokenizer::OUTCOME ||
                 $t->type() == Tokenizer::FROM
-            ) continue; // unify statements, cut unused keywords
-
-            if (
-                $k > 0 &&
+            ) {
+                continue; // unify statements, cut unused keywords
+            }
+            if ($k > 0 &&
                 $tokens[$k-1]->type() == Tokenizer::FROM &&
                 $t->type() == Tokenizer::USER_ALIAS &&
                 $t->token() == $loser->token()
-            ) continue; // loser alias is saved separately, skip it
-
+            ) {
+                continue; // loser alias is saved separately, skip it
+            }
             if ($t->type() == Tokenizer::ALSO) { // next ron statement
                 $idx ++;
                 $chunks []= [];

@@ -16,58 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+
 require_once __DIR__ . '/YakuMap.php';
-
-class Token
-{
-    protected $_token;
-    protected $_allowedNextToken;
-    protected $_type;
-    protected $_cleanValue;
-
-    /**
-     * @param string $token
-     * @param string $type
-     * @param array $allowedNextToken
-     * @param string $cleanValue
-     */
-    public function __construct($token, $type, $allowedNextToken, $cleanValue = null)
-    {
-        $this->_token = $token;
-        $this->_type = $type;
-        $this->_allowedNextToken = $allowedNextToken;
-        $this->_cleanValue = $cleanValue;
-    }
-
-    public function token()
-    {
-        return $this->_token;
-    }
-
-    public function allowedNextToken()
-    {
-        return $this->_allowedNextToken;
-    }
-
-    public function type()
-    {
-        return $this->_type;
-    }
-
-    public function clean()
-    {
-        return $this->_cleanValue;
-    }
-
-    public function __toString()
-    {
-        return $this->_token;
-    }
-}
-
-class TokenizerException extends \Exception
-{
-}
+require_once __DIR__ . '/Token.php';
+require_once __DIR__ . '/../exceptions/Tokenizer.php';
 
 class Tokenizer
 {
@@ -155,7 +107,8 @@ class Tokenizer
     {
         if (empty(self::$_yakuCodes)) {
             // This hardly relies on that big regexp formatting. Touch carefully.
-            $rows = explode('   |',
+            $rows = explode(
+                '   |',
                 str_replace(['%^(', ')$%xi'], '', self::_getRegexps()['YAKU'])
             );
 
@@ -310,8 +263,7 @@ class Tokenizer
         if (!empty($this->_currentStack) && self::identifyYakuByName($token) == Y_MENZENTSUMO) {
             /** @var $lastToken Token */
             $lastToken = end($this->_currentStack);
-            if (
-                $lastToken->type() == Tokenizer::YAKU_START ||
+            if ($lastToken->type() == Tokenizer::YAKU_START ||
                 $lastToken->type() == Tokenizer::YAKU ||
                 $lastToken->type() == Tokenizer::DORA_COUNT ||
                 $lastToken->type() == Tokenizer::DORA_DELIMITER
@@ -523,8 +475,7 @@ class Tokenizer
         if (!empty($this->_currentStack)) {
             /** @var $lastToken Token */
             $lastToken = end($this->_currentStack);
-            if (
-                $lastToken->type() == Tokenizer::YAKU_START ||
+            if ($lastToken->type() == Tokenizer::YAKU_START ||
                 $lastToken->type() == Tokenizer::YAKU ||
                 $lastToken->type() == Tokenizer::DORA_COUNT ||
                 $lastToken->type() == Tokenizer::DORA_DELIMITER

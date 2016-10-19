@@ -79,7 +79,7 @@ class MultiRoundPrimitive extends RoundPrimitive
         $roundData['id'] = null;
 
         $item = new self($db);
-        $item->_rounds = array_map(function($round) use (&$roundData, $db) {
+        $item->_rounds = array_map(function ($round) use (&$roundData, $db) {
             return (new RoundPrimitive($db))->_restore(array_merge($round, [
                 'outcome'    => $roundData['outcome'],
                 'multi_ron'  => $roundData['multi_ron'],

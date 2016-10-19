@@ -292,7 +292,8 @@ class SessionState
      * @return array
      * @throws InvalidParametersException
      */
-    protected function _assignRiichiBets($rounds, $loserId, SessionPrimitive $session) {
+    protected function _assignRiichiBets($rounds, $loserId, SessionPrimitive $session)
+    {
         $bets = [];
         $winners = [];
 

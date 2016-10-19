@@ -671,4 +671,3 @@ class TextlogParserTest extends \PHPUnit_Framework_TestCase
             ');
     }
 }
-
