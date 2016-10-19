@@ -33,7 +33,7 @@ require_once __DIR__ . '/../exceptions/Database.php';
  * Domain model for high-level logic
  * @package Riichi
  */
-class SessionModel extends Model
+class InteractiveSessionModel extends Model
 {
     /**
      * @param $eventId
@@ -122,10 +122,8 @@ class SessionModel extends Model
     public function addRound($gameHashcode, $roundData)
     {
         $session = $this->_findGame($gameHashcode, 'inprogress');
-        $newRound = RoundPrimitive::createFromData($this->_db, $session, $roundData);
-
-        return $newRound->save()
-            && $session->updateCurrentState($newRound);
+        $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
+        return $round->save() && $session->updateCurrentState($round);
     }
 
     /**

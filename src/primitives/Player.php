@@ -35,6 +35,7 @@ class PlayerPrimitive extends Primitive
         'id' => '_id',
         'display_name' => '_displayName',
         'ident' => '_ident',
+        'alias' => '_alias',
         'tenhou_id' => '_tenhouId'
     ];
 
@@ -55,6 +56,11 @@ class PlayerPrimitive extends Primitive
      * @var string
      */
     protected $_ident;
+    /**
+     * alias for text-mode game logs
+     * @var string
+     */
+    protected $_alias;
     /**
      * How to display in state
      * @var string
@@ -90,6 +96,19 @@ class PlayerPrimitive extends Primitive
     public static function findByIdent(IDb $db, $idents)
     {
         return self::_findBy($db, 'ident', $idents);
+    }
+
+    /**
+     * Find users by alias (indexed search)
+     *
+     * @param IDb $db
+     * @param int[] $idents
+     * @throws \Exception
+     * @return PlayerPrimitive[]
+     */
+    public static function findByAlias(IDb $db, $idents)
+    {
+        return self::_findBy($db, 'alias', $idents);
     }
 
     /**
@@ -158,6 +177,24 @@ class PlayerPrimitive extends Primitive
     public function getIdent()
     {
         return $this->_ident;
+    }
+
+    /**
+     * @param string $alias
+     * @return $this
+     */
+    public function setAlias($alias)
+    {
+        $this->_alias = $alias;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAlias()
+    {
+        return $this->_alias;
     }
 
     /**

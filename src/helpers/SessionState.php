@@ -223,7 +223,7 @@ class SessionState
 
     /**
      * Register new round in current session
-     * @param RoundPrimitive $round
+     * @param RoundPrimitive|MultiRoundPrimitive $round
      * @throws InvalidParametersException
      * @return bool
      */
@@ -232,6 +232,9 @@ class SessionState
         switch ($round->getOutcome()) {
             case 'ron':
                 $this->_updateAfterRon($round);
+                break;
+            case 'multiron':
+                $this->_updateAfterMultiRon($round);
                 break;
             case 'tsumo':
                 $this->_updateAfterTsumo($round);
@@ -273,6 +276,98 @@ class SessionState
         );
 
         if ($isDealer) {
+            $this->_addHonba();
+        } else {
+            $this->_resetHonba()
+                ->_nextRound();
+        }
+
+        $this->_resetRiichiBets();
+    }
+
+    /**
+     * @param $rounds RoundPrimitive[]
+     * @param $loserId int
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws InvalidParametersException
+     */
+    protected function _assignRiichiBets($rounds, $loserId, SessionPrimitive $session)
+    {
+        $bets = [];
+        $winners = [];
+
+        foreach ($rounds as $round) {
+            $winners[$round->getWinnerId()] = [];
+            $bets = array_merge($bets, $round->getRiichiIds());
+            foreach ($bets as $k => $player) {
+                if (isset($winners[$player])) {
+                    $winners[$player] []= $round->getWinnerId(); // winner always gets back his bet
+                    unset($bets[$k]);
+                }
+            }
+        }
+
+        // Find player who gets non-winning riichi bets
+        // First we double the array to form a ring to simplify traversal
+        // Then we find winner closest to current loser - he'll get all riichi (like with atamahane rule).
+        $playersRing = array_merge($session->getPlayersIds(), $session->getPlayersIds());
+        $closestWinner = null;
+        for ($i = 0; $i < count($playersRing); $i++) {
+            if ($loserId == $playersRing[$i]) {
+                for ($j = $i + 1; $j < count($playersRing); $j++) {
+                    if (isset($winners[$playersRing[$j]])) {
+                        $closestWinner = $playersRing[$j];
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if (!$closestWinner) {
+            throw new InvalidParametersException('No closest winner was found when calculation riichi bets assignment', 119);
+        }
+
+        $winners[$closestWinner] = array_merge($winners[$closestWinner], $bets);
+
+        // assign riichi counts, add riichi on table for first (closest) winner
+        foreach ($winners as $id => $bets) {
+            $winners[$id] = [
+                'from_table'    => ($id == $closestWinner ? $this->getRiichiBets() : 0),
+                'from_players'  => $winners[$id],
+                'honba'         => $this->getHonba(),
+            ];
+        }
+
+        return $winners;
+    }
+
+    /**
+     * @param MultiRoundPrimitive $round
+     * @throws InvalidParametersException
+     */
+    protected function _updateAfterMultiRon(MultiRoundPrimitive $round)
+    {
+        $riichiWinners = $this->_assignRiichiBets($round->rounds(), $round->getLoserId(), $round->getSession());
+
+        $dealerWon = false;
+        foreach ($round->rounds() as $roundItem) {
+            $dealerWon = $dealerWon || $this->getCurrentDealer() == $roundItem->getWinnerId();
+            $this->_scores = PointsCalc::ron(
+                $this->_rules,
+                $this->getCurrentDealer() == $roundItem->getWinnerId(),
+                $this->getScores(),
+                $roundItem->getWinnerId(),
+                $roundItem->getLoserId(),
+                $roundItem->getHan(),
+                $roundItem->getFu(),
+                $riichiWinners[$roundItem->getWinnerId()]['from_players'],
+                $riichiWinners[$roundItem->getWinnerId()]['honba'],
+                $riichiWinners[$roundItem->getWinnerId()]['from_table']
+            );
+        }
+
+        if ($dealerWon) {
             $this->_addHonba();
         } else {
             $this->_resetHonba()

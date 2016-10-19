@@ -17,8 +17,6 @@
  */
 namespace Riichi;
 
-use \Idiorm\ORM;
-
 require_once __DIR__ . '/../exceptions/EntityNotFound.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 require_once __DIR__ . '/../Primitive.php';
@@ -113,7 +111,7 @@ class SessionPrimitive extends Primitive
 
     /**
      * comma-separated ordered list of player ids, east to north.
-     * @var string
+     * @var int[]
      */
     protected $_playersIds = [];
 
@@ -406,6 +404,9 @@ class SessionPrimitive extends Primitive
      */
     public function finish()
     {
+        if ($this->getStatus() === 'finished') {
+            return false;
+        }
         return $this->setStatus('finished')->save() && $this->_finalizeGame();
     }
 
