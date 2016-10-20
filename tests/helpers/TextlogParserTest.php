@@ -17,7 +17,7 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../../src/helpers/TextlogParser.php';
+require_once __DIR__ . '/../../src/helpers/textLog/Parser.php';
 
 /**
  * Log parser integration test suite

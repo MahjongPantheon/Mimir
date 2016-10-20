@@ -36,9 +36,9 @@ namespace Riichi;
 */
 
 require_once __DIR__ . '/Tokenizer.php';
-require_once __DIR__ . '/../primitives/Player.php';
-require_once __DIR__ . '/../primitives/Round.php';
-require_once __DIR__ . '/../exceptions/Parser.php';
+require_once __DIR__ . '/../../primitives/Player.php';
+require_once __DIR__ . '/../../primitives/Round.php';
+require_once __DIR__ . '/../../exceptions/Parser.php';
 
 class TextlogParser
 {
