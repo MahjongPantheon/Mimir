@@ -71,11 +71,11 @@ class OnlineParser
      */
     public function parseToSession(SessionPrimitive $session, $content)
     {
-        $reader = new XMLReader();
+        $reader = new \XMLReader();
         $reader->xml($content);
 
         while ($reader->read()) {
-            if ($reader->nodeType != XMLReader::ELEMENT) {
+            if ($reader->nodeType != \XMLReader::ELEMENT) {
                 continue;
             }
 
@@ -99,11 +99,11 @@ class OnlineParser
      * This actually should be called first, before any round.
      * If game format is not changed, this won't break.
      *
-     * @param XMLReader $reader
+     * @param \XMLReader $reader
      * @param SessionPrimitive $session
      * @throws ParseException
      */
-    protected function _tokenUN(XMLReader $reader, SessionPrimitive $session)
+    protected function _tokenUN(\XMLReader $reader, SessionPrimitive $session)
     {
         if (count($this->_players) == 0) {
             $this->_players = [
@@ -127,13 +127,13 @@ class OnlineParser
         }
     }
 
-    protected function _tokenAGARI(XMLReader $reader, SessionPrimitive $session)
+    protected function _tokenAGARI(\XMLReader $reader)
     {
         $winner = $reader->getAttribute('who');
         $loser = $reader->getAttribute('fromWho');
         $outcomeType = ($winner == $loser ? 'tsumo' : 'ron');
 
-        list($fu, $points) = explode(',', $reader->getAttribute('ten'));
+        list($fu) = explode(',', $reader->getAttribute('ten'));
         $yakuList = $reader->getAttribute('yaku');
         $yakumanList = $reader->getAttribute('yakuman');
 
@@ -197,12 +197,12 @@ class OnlineParser
     }
 
     // round start, reset all needed things
-    protected function _tokenINIT(XMLReader $reader, SessionPrimitive $session)
+    protected function _tokenINIT()
     {
         $this->_lastTokenIsAgari = false; // resets double/triple ron sequence
     }
 
-    protected function _tokenRYUUKYOKU(XMLReader $reader, SessionPrimitive $session)
+    protected function _tokenRYUUKYOKU(\XMLReader $reader)
     {
         $rkType = $reader->getAttribute('type');
 
@@ -244,13 +244,13 @@ class OnlineParser
         ];
     }
 
-    protected function _tokenREACH(XMLReader $reader, SessionPrimitive $session)
+    protected function _tokenREACH(\XMLReader $reader)
     {
         $player = $reader->getAttribute('who');
         $this->_riichi []= $this->_players[$player]->getId();
     }
 
-    protected function _tokenGO(XMLReader $reader, SessionPrimitive $session)
+    protected function _tokenGO(\XMLReader $reader, SessionPrimitive $session)
     {
         $lobby = $reader->getAttribute('lobby');
         if ($session->getEvent()->getLobbyId() != $lobby) {
