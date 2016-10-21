@@ -20,7 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/../helpers/onlineLog/Parser.php';
 require_once __DIR__ . '/../helpers/onlineLog/Downloader.php';
 
-class TextmodeSessionModel extends Model
+class OnlineSessionModel extends Model
 {
     /**
      * @param $eventId int

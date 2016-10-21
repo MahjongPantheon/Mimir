@@ -37,6 +37,30 @@ class OnlineParser
     }
 
     /**
+     * @param SessionPrimitive $session
+     * @param $content string game log xml string
+     * @return array parsed score
+     */
+    public function parseToSession(SessionPrimitive $session, $content)
+    {
+        $reader = new \XMLReader();
+        $reader->xml($content);
+
+        while ($reader->read()) {
+            if ($reader->nodeType != \XMLReader::ELEMENT) {
+                continue;
+            }
+
+            if (is_callable([$this, '_token' . $reader->localName])) {
+                $method = '_token' . $reader->localName;
+                $this->$method($reader, $session);
+            }
+        }
+
+        return $this->_parseOutcome($content);
+    }
+
+    /**
      * Much simpler to get final scores by regex :)
      *
      * @param $content
@@ -62,30 +86,6 @@ class OnlineParser
         }
 
         return [];
-    }
-
-    /**
-     * @param SessionPrimitive $session
-     * @param $content string game log xml string
-     * @return array parsed score
-     */
-    public function parseToSession(SessionPrimitive $session, $content)
-    {
-        $reader = new \XMLReader();
-        $reader->xml($content);
-
-        while ($reader->read()) {
-            if ($reader->nodeType != \XMLReader::ELEMENT) {
-                continue;
-            }
-
-            if (is_callable([$this, '_token' . $reader->localName])) {
-                $method = '_token' . $reader->localName;
-                $this->$method($reader, $session);
-            }
-        }
-
-        return $this->_parseOutcome($content);
     }
 
     protected function _getRiichi()

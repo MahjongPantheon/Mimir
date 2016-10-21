@@ -17,23 +17,13 @@
  */
 namespace Riichi;
 
-use Monolog\Logger;
-
 require_once __DIR__ . '/../models/InteractiveSession.php';
+require_once __DIR__ . '/../models/TextmodeSession.php';
+require_once __DIR__ . '/../models/OnlineSession.php';
 require_once __DIR__ . '/../Controller.php';
 
 class GamesController extends Controller
 {
-    /**
-     * @var InteractiveSessionModel
-     */
-    protected $_sessionModel;
-    public function __construct(Db $db, Logger $log)
-    {
-        parent::__construct($db, $log);
-        $this->_sessionModel = new InteractiveSessionModel($this->_db);
-    }
-
     /**
      * Get event rules configuration
      *
@@ -43,13 +33,15 @@ class GamesController extends Controller
     public function getGameConfig($eventId)
     {
         $this->_log->addInfo('Getting config for event id# ' . $eventId);
-        $data = $this->_sessionModel->getGameConfig($eventId);
+        $data = (new InteractiveSessionModel($this->_db))->getGameConfig($eventId);
         $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
         return $data;
     }
 
+    // INTERACITVE MODE
+
     /**
-     * Start new game and return its hash
+     * Start new interactive game and return its hash
      *
      * @param int $eventId Event this session belongs to
      * @param array $players Player id list
@@ -60,12 +52,14 @@ class GamesController extends Controller
     public function start($eventId, $players)
     {
         $this->_log->addInfo('Starting game with players id# ' . implode(',', $players));
-        $gameHash = $this->_sessionModel->startGame($eventId, $players);
+        $gameHash = (new InteractiveSessionModel($this->_db))->startGame($eventId, $players);
         $this->_log->addInfo('Successfully started game with players id# ' . implode(',', $players));
         return $gameHash;
     }
 
     /**
+     * Explicitly force end of interactive game
+     *
      * @param $gameHashcode string Hashcode of game
      * @throws DatabaseException
      * @throws BadActionException
@@ -74,14 +68,16 @@ class GamesController extends Controller
     public function end($gameHashcode)
     {
         $this->_log->addInfo('Finishing game # ' . $gameHashcode);
-        $result = $this->_sessionModel->endGame($gameHashcode);
+        $result = (new InteractiveSessionModel($this->_db))->endGame($gameHashcode);
         $this->_log->addInfo(($result ? 'Successfully finished' : 'Failed to finish') . ' game # ' . $gameHashcode);
         return $result;
     }
 
     /**
-     * @param $gameHashcode string Hashcode of game
-     * @param $roundData array Structure of round data
+     * Add new round to interactive game
+     *
+     * @param string $gameHashcode Hashcode of game
+     * @param array $roundData Structure of round data
      * @throws DatabaseException
      * @throws BadActionException
      * @return bool Success?
@@ -89,8 +85,46 @@ class GamesController extends Controller
     public function addRound($gameHashcode, $roundData)
     {
         $this->_log->addInfo('Adding new round to game # ' . $gameHashcode);
-        $result = $this->_sessionModel->addRound($gameHashcode, $roundData);
+        $result = (new InteractiveSessionModel($this->_db))->addRound($gameHashcode, $roundData);
         $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
         return $result;
+    }
+
+    // TEXT LOG MODE
+
+    /**
+     * Add textual log for whole game
+     *
+     * @param int $eventId
+     * @param string $text
+     * @return bool
+     * @throws InvalidParametersException
+     * @throws ParseException
+     */
+    public function addTextLog($eventId, $text)
+    {
+        $this->_log->addInfo('Saving new game for event id# ' . $eventId);
+        $success = (new TextmodeSessionModel($this->_db))->addGame($eventId, $text);
+        $this->_log->addInfo('Successfully saved game for event id# ' . $eventId);
+        return $success;
+    }
+
+    // ONLINE REPLAY MODE
+
+    /**
+     * Add online replay
+     *
+     * @param int $eventId
+     * @param string $link
+     * @return bool
+     * @throws InvalidParametersException
+     * @throws ParseException
+     */
+    public function addOnlineReplay($eventId, $link)
+    {
+        $this->_log->addInfo('Saving new online game for event id# ' . $eventId);
+        $success = (new OnlineSessionModel($this->_db))->addGame($eventId, $link);
+        $this->_log->addInfo('Successfully saved online game for event id# ' . $eventId);
+        return $success;
     }
 }
