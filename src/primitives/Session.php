@@ -69,6 +69,8 @@ class SessionPrimitive extends Primitive
         ];
     }
 
+    protected $_debugScore = false;
+
     /**
      * Local id
      * @var int
@@ -429,5 +431,15 @@ class SessionPrimitive extends Primitive
 
             return $acc && $result->save() && $userHistoryItem->save();
         }, true);
+    }
+
+    public function setDebugScore($d = true)
+    {
+        $this->_debugScore = $d;
+    }
+
+    public function getDebugScore()
+    {
+        return $this->_debugScore;
     }
 }

@@ -1,10 +1,17 @@
+<!--
+     /0/?log=2009120221gm-0001-0000-8f264f66&tw=0&ts=3
+
+     All intellectual rights for the format and contents of this file belong to its
+     respective owners. Since contents of this file are available freely on the net,
+     we decided to include it in the repo. If owners of the file would wish to remove
+     this file from public access and this repo, we will remove it by first claim.
+ -->
 <mjloggm ver="2.3">
     <SHUFFLE
             seed="mt19937ar-sha512-n288,2F9D63AC,8F12D229,D11ABEBF,12006EB6,AAD3A1AA,663CEAC9,17AAD410,C63B3B07,6FFD827D,66B80BEB,58AE3022,A33210B9,D32E3D31,4F2D8C90,368F5565,18BEF948,8C4F7554,CA5F568D,026F0BB1,0DF60EEA,E13C9E4C,C98D6047,E68C93FA,4002CBC8,00A6E324,3D172EDA,0AB37494,229BF9D7,B0287D3B,D1E8C7E6,10BEFCF0,B182112E"
             ref=""/>
-    <GO type="1"/>
-    <UN n0="%E3%81%A8%E3%81%A8%E3%81%A8%E3%83%BC" n1="%E7%8C%AB%E7%BC%B6%4C%4F%56%45" n2="%79%6F%6D%69%6A%69"
-        n3="%73%69%6E%74%61%72%6F" dan="10,9,9,3" rate="1528,1516,1541,1321" sx="M,M,M,M"/>
+    <GO type="1" lobby="0" />
+    <UN n0="player1" n1="player2" n2="player3" n3="player4" dan="10,9,9,3" rate="1528,1516,1541,1321" sx="M,M,M,M"/>
     <TAIKYOKU oya="0"/>
     <INIT seed="0,0,0,2,0,36" ten="250,250,250,250" oya="0" hai0="35,74,92,96,103,54,16,31,99,121,70,118,37"
           hai1="4,87,7,95,42,32,41,46,0,71,66,129,65" hai2="29,28,75,53,107,132,18,119,123,81,48,25,131"

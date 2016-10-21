@@ -145,7 +145,7 @@ class RoundsHelper
     protected static function _checkOneOf($data, $key, $values)
     {
         if (!in_array($data[$key], $values)) {
-            throw new MalformedPayloadException('Field #' . $key . ' should be one of [' . implode(', ', $values) . ']');
+            throw new MalformedPayloadException('Field #' . $key . ' should be one of [' . implode(', ', $values) . '], but is "' . $data[$key] . '"');
         }
     }
 
