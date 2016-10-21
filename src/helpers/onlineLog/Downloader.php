@@ -16,10 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+
 require_once __DIR__ . '/../../primitives/Session.php';
 require_once __DIR__ . '/../../exceptions/Download.php';
 
-class Downloader {
+class Downloader
+{
     /**
      * @var Db
      */
@@ -36,7 +38,8 @@ class Downloader {
      * @param $replayHash
      * @return bool
      */
-    protected function _alreadyAdded($replayHash) {
+    protected function _alreadyAdded($replayHash)
+    {
         $result = SessionPrimitive::findByReplayHash($this->_db, [$replayHash]);
         return !empty($result);
     }
@@ -48,7 +51,8 @@ class Downloader {
      * @return array [hash => string, content => string]
      * @throws DownloadException
      */
-    public function getReplay($logUrl) {
+    public function getReplay($logUrl)
+    {
         $queryString = parse_url($logUrl, PHP_URL_QUERY);
         parse_str($queryString, $out);
 
@@ -81,7 +85,8 @@ class Downloader {
      * @param $log
      * @return string
      */
-    protected function _decodeHash($log) {
+    protected function _decodeHash($log)
+    {
         $t = json_decode(base64_decode(
             "WzIyMTM2LDUyNzE5LDU1MTQ2LDQyMTA0LDU5NTkxLDQ2OTM0LDkyNDgsMjg4OTEsNDk1OTcsNTI5Nz" .
             "QsNjI4NDQsNDAxNSwxODMxMSw1MDczMCw0MzA1NiwxNzkzOSw2NDgzOCwzODE0NSwyNzAwOCwzOTEy" .

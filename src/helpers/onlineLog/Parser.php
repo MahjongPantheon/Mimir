@@ -27,6 +27,9 @@ class OnlineParser
      */
     protected $_players = [];
     protected $_db;
+    protected $_riichi = [];
+
+    protected $_lastTokenIsAgari = false;
 
     public function __construct(Db $db)
     {
@@ -34,13 +37,13 @@ class OnlineParser
     }
 
     /**
-     * TODO: this should receive final scores from game log
-     * TODO move to _tokenSMTH
+     * Much simpler to get final scores by regex :)
      *
      * @param $content
      * @return array|bool
      */
-    protected function _parseOutcome($content) {
+    protected function _parseOutcome($content)
+    {
         $regex = "#owari=\"([^\"]*)\"#";
         $matches = [];
         if (preg_match($regex, $content, $matches)) {
@@ -56,18 +59,35 @@ class OnlineParser
         return false;
     }
 
-    public function parseToSession(SessionPrimitive $session, $content) {
+    /**
+     * @param SessionPrimitive $session
+     * @param $content string game log xml string
+     * @return array|bool parsed score
+     */
+    public function parseToSession(SessionPrimitive $session, $content)
+    {
         $reader = new XMLReader();
         $reader->xml($content);
 
         while ($reader->read()) {
-            if ($reader->nodeType != XMLReader::ELEMENT) continue;
+            if ($reader->nodeType != XMLReader::ELEMENT) {
+                continue;
+            }
 
             if (is_callable([$this, '_token' . $reader->localName])) {
                 $method = '_token' . $reader->localName;
                 $this->$method($reader, $session);
             }
         }
+
+        return $this->_parseOutcome($content);
+    }
+
+    protected function _getRiichi()
+    {
+        $riichis = $this->_riichi;
+        $this->_riichi = [];
+        return implode(',', $riichis);
     }
 
     // new round, this looks redundant
@@ -124,20 +144,67 @@ class OnlineParser
 
         $yakuData = YakuMap::fromTenhou($yakuList, $yakumanList);
 
-        $this->_roundData []= [
-            'outcome'   => $outcomeType,
-            'winner_id' => $this->_players[$winner]->getId(),
-            'loser_id'  => $outcomeType === 'ron' ? $this->_players[$loser]->getId() : null,
-            'han'       => $yakuData['han'],
-            'fu'        => $fu,
-            'multi_ron' => false, // TODO!!!!!!!!!!!!!!!!!
-            'dora'      => $yakuData['dora'],
-            'uradora'   => 0,
-            'kandora'   => 0,
-            'kanuradora' => 0,
-            'yaku'      => implode(',', $yakuData['yaku']),
-            'riichi'    => $this->_getRiichi($session), // TODO: where to get them?
-        ];
+        if (!$this->_lastTokenIsAgari) { // single ron, or first ron in sequence
+            $this->_roundData [] = [
+                'outcome' => $outcomeType,
+                'winner_id' => $this->_players[$winner]->getId(),
+                'loser_id' => $outcomeType === 'ron' ? $this->_players[$loser]->getId() : null,
+                'han' => $yakuData['han'],
+                'fu' => $fu,
+                'multi_ron' => false,
+                'dora' => $yakuData['dora'],
+                'uradora' => 0,
+                'kandora' => 0,
+                'kanuradora' => 0,
+                'yaku' => implode(',', $yakuData['yaku']),
+                'riichi' => $this->_getRiichi(),
+            ];
+        } else {
+            // double or triple ron, previous round record should be modified
+            $roundRecord = array_pop($this->_roundData);
+
+            if ($roundRecord['outcome'] === 'ron') {
+                $roundRecord = [
+                    'outcome' => 'multiron',
+                    'multi_ron' => 1,
+                    'loser_id' => $this->_players[$loser]->getId(),
+                    'wins' => [[
+                        'winner_id' => $roundRecord['winner_id'],
+                        'han' => $roundRecord['han'],
+                        'fu' => $roundRecord['fu'],
+                        'dora' => $roundRecord['dora'],
+                        'uradora' => $roundRecord['uradora'],
+                        'kandora' => $roundRecord['kandora'],
+                        'kanuradora' => $roundRecord['kanuradora'],
+                        'yaku' => $roundRecord['yaku'],
+                        'riichi' => $roundRecord['riichi'],
+                    ]]
+                ];
+            }
+
+            $roundRecord['multi_ron'] ++;
+            $roundRecord['wins'] []= [
+                'winner_id' => $this->_players[$winner]->getId(),
+                'han' => $yakuData['han'],
+                'fu' => $fu,
+                'dora' => $yakuData['dora'],
+                'uradora' => 0,
+                'kandora' => 0,
+                'kanuradora' => 0,
+                'yaku' => implode(',', $yakuData['yaku']),
+                'riichi' => $this->_getRiichi(),
+            ];
+
+            $this->_roundData []= $roundRecord;
+        }
+
+        $this->_lastTokenIsAgari = true;
+    }
+
+    // round start, reset all needed things
+    protected function _tokenINIT(XMLReader $reader, SessionPrimitive $session)
+    {
+        $this->_lastTokenIsAgari = false;
     }
 
     protected function _tokenRYUUKYOKU(XMLReader $reader, SessionPrimitive $session)
@@ -145,7 +212,7 @@ class OnlineParser
         if ($reader->getAttribute('type')) { // abortive draw
             $this->_roundData []= [
                 'outcome'   => 'abort',
-                'riichi'    => $this->_getRiichi($session), // TODO: where to get them?
+                'riichi'    => $this->_getRiichi(),
             ];
         } else {
             $scores = array_filter(explode(',', $reader->getAttribute('sc')));
@@ -153,7 +220,9 @@ class OnlineParser
 
             // scores is in form of: player1,score,player2,score,player3,score,player4,score
             for ($i = 0; $i < count($scores); $i++) {
-                if (intval($scores[$i * 2 + 1]) < 0 ) continue;
+                if (intval($scores[$i * 2 + 1]) < 0) {
+                    continue;
+                }
                 $tempai []= $this->_players[$scores[$i * 2]]->getId();
             }
 
@@ -162,9 +231,18 @@ class OnlineParser
             $this->_roundData []= [
                 'outcome'   => 'draw',
                 'tempai'    => $tempai,
-                'riichi'    => $this->_getRiichi($session), // TODO: where to get them?
+                'riichi'    => $this->_getRiichi(),
             ];
         }
+
+        // TODO: nagashi mangan (need to implement it in lower layers too)
+        // detect it by scores (sc)
+    }
+
+    protected function _tokenREACH(XMLReader $reader, SessionPrimitive $session)
+    {
+        $player = $reader->getAttribute('who');
+        $this->_riichi []= $this->_players[$player]->getId();
     }
 
     protected function _tokenGO(XMLReader $reader, SessionPrimitive $session)
@@ -174,7 +252,4 @@ class OnlineParser
             throw new MalformedPayloadException('Provided replay does not belong to current event (wrong lobby)');
         }
     }
-
-
-    // TODO: nagashi mangan (need to implement it in lower layers too)
 }
