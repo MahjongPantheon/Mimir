@@ -204,35 +204,44 @@ class OnlineParser
 
     protected function _tokenRYUUKYOKU(XMLReader $reader, SessionPrimitive $session)
     {
-        if ($reader->getAttribute('type')) { // abortive draw
+        $rkType = $reader->getAttribute('type');
+
+        if ($rkType && $rkType == 'nm') {
+            // TODO: nagashi mangan (need to implement it in lower layers too)
+            return;
+        }
+
+        if ($rkType) { // abortive draw
             $this->_roundData []= [
                 'outcome'   => 'abort',
                 'riichi'    => $this->_getRiichi(),
             ];
-        } else {
-            $scores = array_filter(explode(',', $reader->getAttribute('sc')));
-            $tempai = [];
 
-            // scores is in form of: player1,score,player2,score,player3,score,player4,score
-            for ($i = 0; $i < count($scores); $i++) {
-                if (intval($scores[$i * 2 + 1]) < 0) {
-                    continue;
-                }
-                $tempai []= $this->_players[$scores[$i * 2]]->getId();
-            }
-
-            // TODO: проверить наличие hai[0-3] - если есть все, значит все темпай. Если нет ни одного, то все нотен.
-            // кстати можно таким образом и по очкам не ориентироваться, а завязаться чисто на hai*
-
-            $this->_roundData []= [
-                'outcome'   => 'draw',
-                'tempai'    => $tempai,
-                'riichi'    => $this->_getRiichi(),
-            ];
+            return;
         }
 
-        // TODO: nagashi mangan (need to implement it in lower layers too)
-        // detect it by type="nm"
+        // form array in form of [int 'player id' => bool 'tempai?']
+        $tempai = array_filter(
+            array_combine(
+                array_map(
+                    function(PlayerPrimitive $el) {
+                        return $el->getId();
+                    },
+                    $this->_players
+                ), [
+                    !!$reader->getAttribute('hai0'),
+                    !!$reader->getAttribute('hai1'),
+                    !!$reader->getAttribute('hai2'),
+                    !!$reader->getAttribute('hai3'),
+                ]
+            )
+        );
+
+        $this->_roundData []= [
+            'outcome' => 'draw',
+            'tempai'  => implode(',', array_keys($tempai)),
+            'riichi'  => $this->_getRiichi(),
+        ];
     }
 
     protected function _tokenREACH(XMLReader $reader, SessionPrimitive $session)
