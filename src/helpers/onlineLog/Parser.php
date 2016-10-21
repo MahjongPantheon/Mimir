@@ -40,7 +40,7 @@ class OnlineParser
      * Much simpler to get final scores by regex :)
      *
      * @param $content
-     * @return array|bool
+     * @return array (player id => score)
      */
     protected function _parseOutcome($content)
     {
@@ -48,21 +48,26 @@ class OnlineParser
         $matches = [];
         if (preg_match($regex, $content, $matches)) {
             $parts = explode(',', $matches[1]);
-            return [
-                $parts[0] . '00',
-                $parts[2] . '00',
-                $parts[4] . '00',
-                $parts[6] . '00'
-            ];
+            return array_combine(
+                array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+                }, $this->_players),
+                [
+                    $parts[0] . '00',
+                    $parts[2] . '00',
+                    $parts[4] . '00',
+                    $parts[6] . '00'
+                ]
+            );
         }
 
-        return false;
+        return [];
     }
 
     /**
      * @param SessionPrimitive $session
      * @param $content string game log xml string
-     * @return array|bool parsed score
+     * @return array parsed score
      */
     public function parseToSession(SessionPrimitive $session, $content)
     {
@@ -89,16 +94,6 @@ class OnlineParser
         $this->_riichi = [];
         return implode(',', $riichis);
     }
-
-    // new round, this looks redundant
-//    protected function _tokenINIT(XMLReader $reader, SessionPrimitive $session)
-//    {
-//        $newDealer = $reader->getAttribute('oya');
-//        if ($currentDealer != $newDealer) {
-//            $currentRound ++;
-//            $currentDealer = $newDealer;
-//        }
-//    }
 
     /**
      * This actually should be called first, before any round.
@@ -204,7 +199,7 @@ class OnlineParser
     // round start, reset all needed things
     protected function _tokenINIT(XMLReader $reader, SessionPrimitive $session)
     {
-        $this->_lastTokenIsAgari = false;
+        $this->_lastTokenIsAgari = false; // resets double/triple ron sequence
     }
 
     protected function _tokenRYUUKYOKU(XMLReader $reader, SessionPrimitive $session)
@@ -226,7 +221,8 @@ class OnlineParser
                 $tempai []= $this->_players[$scores[$i * 2]]->getId();
             }
 
-            // TODO: как отличить all от nobody? Нужен какой-то маркер. Не хочется ориентироваться на следующий раунд.
+            // TODO: проверить наличие hai[0-3] - если есть все, значит все темпай. Если нет ни одного, то все нотен.
+            // кстати можно таким образом и по очкам не ориентироваться, а завязаться чисто на hai*
 
             $this->_roundData []= [
                 'outcome'   => 'draw',
@@ -236,7 +232,7 @@ class OnlineParser
         }
 
         // TODO: nagashi mangan (need to implement it in lower layers too)
-        // detect it by scores (sc)
+        // detect it by type="nm"
     }
 
     protected function _tokenREACH(XMLReader $reader, SessionPrimitive $session)
