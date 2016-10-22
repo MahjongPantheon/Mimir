@@ -45,7 +45,7 @@ class OnlineSessionModel extends Model
             ->setEvent($event[0])
             ->setStatus('inprogress');
 
-        list($success, $originalScore) = $parser->parseToSession($session, $replay);
+        list($success, $originalScore/*, $debug*/) = $parser->parseToSession($session, $replay);
         $success = $success && $session->save();
         $success = $success && $session->finish();
 

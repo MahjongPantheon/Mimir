@@ -17,8 +17,6 @@
  */
 namespace Riichi;
 
-use Idiorm\ORM;
-
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/InteractiveSession.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';

@@ -41,17 +41,22 @@ class TextmodeSessionModel extends Model
             ->setEvent($event[0])
             ->setStatus('inprogress');
 
-        $originalScore = $parser->parseToSession($session, $gameLog);
+        list($originalScore, $debug) = $parser->parseToSession($session, $gameLog);
         $success = true;
         $success = $success && $session->save();
         $success = $success && $session->finish();
 
         $calculatedScore = $session->getCurrentState()->getScores();
+        $aliases = array_map(function (PlayerPrimitive $p) {
+            return $p->getAlias();
+        }, $session->getPlayers());
+
         if (array_diff($calculatedScore, $originalScore) !== []
             || array_diff($originalScore, $calculatedScore) !== []) {
             throw new ParseException("Calculated scores do not match with given ones: " . PHP_EOL
-                . print_r($originalScore, 1) . PHP_EOL
-                . print_r($calculatedScore, 1), 225);
+                . json_encode(array_combine($aliases, array_values($originalScore)), JSON_PRETTY_PRINT) . PHP_EOL
+                . json_encode(array_combine($aliases, array_values($calculatedScore)), JSON_PRETTY_PRINT) . PHP_EOL
+                . "Here is log changes for your convenience: \n" . implode("\n", $debug), 225);
         }
 
         return $success;

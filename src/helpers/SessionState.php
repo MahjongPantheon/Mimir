@@ -255,6 +255,11 @@ class SessionState
         return true; // todo: can be here any errors?
     }
 
+    public function giveRiichiBetsToPlayer($id)
+    {
+        $this->_scores[$id] += $this->getRiichiBets() * 1000;
+    }
+
     /**
      * @param RoundPrimitive $round
      */
