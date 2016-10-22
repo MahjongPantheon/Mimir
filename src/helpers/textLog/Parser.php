@@ -131,7 +131,9 @@ class TextlogParser
         }
 
         if (count($playersList) !== 4) {
-            throw new ParseException("Malformed header, not all players are described", 100);
+            throw new ParseException("Malformed header, not all players are described: ["
+                . implode(',', array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $playersList))
+                . ']', 100);
         }
 
         return $session->setPlayers($playersList);

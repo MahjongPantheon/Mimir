@@ -72,7 +72,7 @@ class RoundsHelper
         }
         self::_checkYaku($roundData['yaku'], $yakuList);
 
-        self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4]);
+        self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]); // TODO: shrink to 0..5 if following is ok
         self::_checkOneOf($roundData, 'uradora', [0, 1, 2, 3, 4]); // TODO: not sure if we really need these guys
         self::_checkOneOf($roundData, 'kandora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
         self::_checkOneOf($roundData, 'kanuradora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
@@ -97,7 +97,7 @@ class RoundsHelper
             }
             self::_checkYaku($ron['yaku'], $yakuList);
 
-            self::_checkOneOf($ron, 'dora', [0, 1, 2, 3, 4]);
+            self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]); // TODO: shrink to 0..5 if following is ok
             self::_checkOneOf($ron, 'uradora', [0, 1, 2, 3, 4]); // TODO: not sure if we really need these guys
             self::_checkOneOf($ron, 'kandora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
             self::_checkOneOf($ron, 'kanuradora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
@@ -118,7 +118,7 @@ class RoundsHelper
         }
         self::_checkYaku($roundData['yaku'], $yakuList);
 
-        self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4]);
+        self::_checkOneOf($roundData, 'dora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]); // TODO: shrink to 0..5 if following is ok
         self::_checkOneOf($roundData, 'uradora', [0, 1, 2, 3, 4]); // TODO: not sure if we really need these guys
         self::_checkOneOf($roundData, 'kandora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
         self::_checkOneOf($roundData, 'kanuradora', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);

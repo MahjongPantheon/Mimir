@@ -89,7 +89,7 @@ ron player27 from player28 2han 30fu (yakuhai1 dora)
 ron player25 from player26 1han 40fu (riichi) riichi player25
 
 
-player29:20900 player30:57800 player31:23000 player32:19300
+player29:19900 player30:57800 player31:23000 player32:19300
 tsumo player30 6han (riichi tsumo ippatsu pinfu dora 2) riichi player29 player30
 draw tempai all riichi player29
 ron player31 from player30 1han 40fu (riichi) riichi player31
