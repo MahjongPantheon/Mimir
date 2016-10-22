@@ -129,7 +129,7 @@ class TextlogParserTest extends \PHPUnit_Framework_TestCase
 
     public function testEmptyLog()
     {
-        $actual = (new TextlogParser($this->_db))
+        list($actual/*, $debug*/) = (new TextlogParser($this->_db))
             ->parseToSession($this->_session, '
                 player1:23200 player2:23300 player3:43000 player4:12000
             ');

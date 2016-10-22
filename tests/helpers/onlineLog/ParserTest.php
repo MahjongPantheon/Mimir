@@ -77,9 +77,8 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseUsualGame()
     {
-//        $this->_session->setDebugScore();
         $content = file_get_contents(__DIR__ . '/testdata/usual.xml');
-        list($success, $results) = (new OnlineParser($this->_db))
+        list($success, $results/*, $debug*/) = (new OnlineParser($this->_db))
             ->parseToSession($this->_session, $content);
 
         $this->assertTrue($success);
@@ -91,9 +90,8 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseYakumanDoubleRon()
     {
-//        $this->_session->setDebugScore();
         $content = file_get_contents(__DIR__ . '/testdata/doubleron.xml');
-        list($success, $results) = (new OnlineParser($this->_db))
+        list($success, $results/*, $debug*/) = (new OnlineParser($this->_db))
             ->parseToSession($this->_session, $content);
 
         $this->assertTrue($success);
@@ -105,9 +103,8 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseTripleYakuman()
     {
-//        $this->_session->setDebugScore();
         $content = file_get_contents(__DIR__ . '/testdata/tripleyakuman.xml');
-        list($success, $results) = (new OnlineParser($this->_db))
+        list($success, $results/*, $debug*/) = (new OnlineParser($this->_db))
             ->parseToSession($this->_session, $content);
 
         $this->assertTrue($success);

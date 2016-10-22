@@ -75,6 +75,9 @@ class TextlogParser
 
         $tokenizer = new Tokenizer();
 
+        $debug = [];
+        $lastScoresDebug = array_fill(0, 4, $session->getEvent()->getRuleset()->startPoints()); // todo: omg :(
+
         /** @var Token[] $statement */
         foreach ($tokenizer->tokenize($gameLog) as $statement) {
             if ($statement[0]->type() == Tokenizer::USER_ALIAS) {
@@ -86,6 +89,19 @@ class TextlogParser
                 $round = $this->_fillRound($session, $statement);
                 $round->save();
                 $session->updateCurrentState($round);
+
+                // some debug info
+                $statementStr = $this->_getStatementAsString($statement);
+                $debug []= '-> ' . $statementStr
+                    . "\n       `+ [\t" . implode("\t",
+                        array_map(function($sc, $sc2) {
+                            return $sc - $sc2;
+                        }, $session->getCurrentState()->getScores(), $lastScoresDebug)
+                    ) . "\t]"
+                    . "\n       `= [\t" . implode("\t", $session->getCurrentState()->getScores()) . "\t]";
+
+                $lastScoresDebug = $session->getCurrentState()->getScores();
+
                 continue;
             }
 
@@ -95,7 +111,14 @@ class TextlogParser
             throw new ParseException("Couldn't parse game log: " . $string, 202);
         }
 
-        return $this->_originalScore;
+        return [$this->_originalScore, $debug];
+    }
+
+    protected function _getStatementAsString($statement)
+    {
+        return implode(' ', array_map(function(Token $t) {
+            return $t->token();
+        }, $statement));
     }
 
     /**
@@ -161,9 +184,7 @@ class TextlogParser
             );
         } catch (\Exception $e) {
             // add some context for debug and rethrow
-            $statementTokens = implode(' ', array_map(function(Token $t) {
-                return $t->token();
-            }, $statement));
+            $statementTokens = $this->_getStatementAsString($statement);
 
             // TODO: needs reformatting to avoid exposing internals to clients
             throw new ParseException(
@@ -301,6 +322,18 @@ class TextlogParser
         return new Token(null, Tokenizer::UNKNOWN_TOKEN, [], null);
     }
 
+    protected function _findHan($tokens)
+    {
+        $han = $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean();
+        $yakuman = $this->_findByType($tokens, Tokenizer::YAKUMAN)->clean();
+        if (!$han && $yakuman) {
+            // -1 means 1 yakuman
+            $han = -1; // TODO: multi yakumans for textual logs?
+        }
+
+        return $han;
+    }
+
     /**
      * @param $tokens Token[]
      * @return array
@@ -414,7 +447,7 @@ class TextlogParser
             'outcome'   => 'ron',
             'winner_id' => $participants[$winner->token()]->getId(),
             'loser_id'  => $participants[$loser->token()]->getId(),
-            'han'       => $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean(),
+            'han'       => $this->_findHan($tokens),
             'fu'        => $this->_findByType($tokens, Tokenizer::FU_COUNT)->clean(),
             'multi_ron' => false,
             'dora'      => $yakuParsed['dora'],
@@ -446,7 +479,7 @@ class TextlogParser
         return [
             'outcome'   => 'tsumo',
             'winner_id' => $participants[$winner->token()]->getId(),
-            'han'       => $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean(),
+            'han'       => $this->_findHan($tokens),
             'fu'        => $this->_findByType($tokens, Tokenizer::FU_COUNT)->clean(),
             'multi_ron' => false,
             'dora'      => $yakuParsed['dora'],
@@ -584,7 +617,7 @@ class TextlogParser
             $yakuParsed = $this->_parseYaku($ron);
             $resultData['wins'] []= [
                 'winner_id' => $winner->getId(),
-                'han'       => $this->_findByType($ron, Tokenizer::HAN_COUNT)->clean(),
+                'han'       => $this->_findHan($tokens),
                 'fu'        => $this->_findByType($ron, Tokenizer::FU_COUNT)->clean(),
                 'dora'      => $yakuParsed['dora'],
                 'uradora'   => 0,

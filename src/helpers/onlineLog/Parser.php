@@ -45,7 +45,7 @@ class OnlineParser
     public function parseToSession(SessionPrimitive $session, $content)
     {
         $reader = new \XMLReader();
-        $reader->xml($content);
+        $reader->XML($content);
 
         while ($reader->read()) {
             if ($reader->nodeType != \XMLReader::ELEMENT) {
@@ -68,17 +68,15 @@ class OnlineParser
             $scores []= $session->getCurrentState()->getScores();
         }
 
-        if ($session->getDebugScore()) {
-            for ($i = 0; $i < count($this->_checkScores); $i++) {
-                echo "Expected\t"
-                    . implode("\t", $this->_checkScores[$i])
-                    . "\t:: Got\t"
-                    . implode("\t", $scores[$i])
-                    . PHP_EOL;
-            }
+        $debug = [];
+        for ($i = 0; $i < count($this->_checkScores); $i++) {
+            $debug[]= "Expected\t"
+                . implode("\t", $this->_checkScores[$i])
+                . "\t:: Got\t"
+                . implode("\t", $scores[$i]);
         }
 
-        return [$success, $this->_parseOutcome($content)];
+        return [$success, $this->_parseOutcome($content), $debug];
     }
 
     /**
