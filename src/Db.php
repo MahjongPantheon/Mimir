@@ -75,16 +75,16 @@ class Db implements IDb
 
     public function lastInsertId()
     {
-        switch (0) {
-            case strpos($this->_connString, 'mysql'):
+        switch (true) {
+            case strpos($this->_connString, 'mysql') === 0:
                 ORM::rawExecute('SELECT LAST_INSERT_ID()');
                 return ORM::getLastStatement()->fetchColumn();
                 break;
-            case strpos($this->_connString, 'pgsql'):
+            case strpos($this->_connString, 'pgsql') === 0:
                 ORM::rawExecute('SELECT LASTVAL()');
                 return ORM::getLastStatement()->fetchColumn();
                 break;
-            case strpos($this->_connString, 'sqlite'):
+            case strpos($this->_connString, 'sqlite') === 0:
                 ORM::rawExecute('SELECT last_insert_rowid()');
                 return ORM::getLastStatement()->fetchColumn();
                 break;

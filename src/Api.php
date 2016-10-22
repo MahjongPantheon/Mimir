@@ -44,7 +44,7 @@ class Api
     public function registerImplAutoloading()
     {
         spl_autoload_register(function ($class) {
-            $class = strtolower($class);
+            $class = ucfirst(str_replace([__NAMESPACE__ . '\\', 'Controller'], '', $class));
             $classFile = __DIR__ . '/controllers/' . $class . '.php';
             if (is_file($classFile) && !class_exists($class)) {
                 include_once $classFile;
