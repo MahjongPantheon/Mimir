@@ -30,10 +30,17 @@
  */
 return [
     // client
-    'addRound' => ['GamesController', 'addRound'],
+    'addRound'          => ['GamesController', 'addRound'],
+    'getGameConfig'     => ['GamesController', 'getGameConfig'],
+    'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
 
     // admin
-    'startGame' => ['GamesController', 'start'],
-    'endGame' => ['GamesController', 'end'],
+    'startGame'         => ['GamesController', 'start'],
+    'endGame'           => ['GamesController', 'end'],
+    'addTextLog'        => ['GamesController', 'addTextLog'],
+
+    'addPlayer'         => ['PlayersController', 'add'],
+    'updatePlayer'      => ['PlayersController', 'update'],
+
     'generateSortition' => ['SortitionController', 'generate']
 ];

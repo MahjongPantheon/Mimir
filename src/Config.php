@@ -52,7 +52,7 @@ class Config
      */
     public function getDbConnectionString()
     {
-        $value = $this->getValue('db.connectionString');
+        $value = $this->getValue('db.connection_string');
         if (empty($value)) {
             throw new \RuntimeException('DB connection string not found in configuration!');
         }
