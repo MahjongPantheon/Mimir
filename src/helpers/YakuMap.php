@@ -1,6 +1,6 @@
 <?php
 /*  Riichi mahjong API game server
- *  Copyright (C) 2016  heilage and others
+ *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ class YakuMap
 
     /**
      * @param string $yakuList csv: 'yaku,han,yaku2,han...'
-     * @param string $yakumanList csv: 'yakuman,han,yakuman2,han...'
+     * @param string $yakumanList csv: 'yakuman,yakuman2...'
      * @return array ['yaku' => [...], 'dora' => int, 'han' => int, 'yakuman' => int]
      */
     public static function fromTenhou($yakuList, $yakumanList)
@@ -217,17 +217,19 @@ class YakuMap
             }
         }
 
-        for ($i = 0; $i < count($yakumanList); $i += 2) {
-            $key = $yakumanList[$i];
-            $value = $yakumanList[$i + 1];
-            $result['yaku'] [] = $tenhouYakuMap[$key];
-            $result['yakuman'] += $value;
-        }
-
-
         if ($yakuhaiCount > 0) {
             $result['yaku'] [] = $yakuhaiCountMap[$yakuhaiCount];
             $result['han'] += $yakuhaiCount;
+        }
+
+        for ($i = 0; $i < count($yakumanList); $i ++) {
+            $key = $yakumanList[$i];
+            $result['yaku'] [] = $tenhouYakuMap[$key];
+            $result['yakuman'] ++;
+        }
+
+        if ($result['yakuman'] > 0) {
+            $result['han'] = -$result['yakuman']; // storage-specific representation
         }
 
         return $result;

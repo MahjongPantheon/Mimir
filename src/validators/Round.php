@@ -1,6 +1,6 @@
 <?php
 /*  Riichi mahjong API game server
- *  Copyright (C) 2016  heilage and others
+ *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -145,7 +145,7 @@ class RoundsHelper
     protected static function _checkOneOf($data, $key, $values)
     {
         if (!in_array($data[$key], $values)) {
-            throw new MalformedPayloadException('Field #' . $key . ' should be one of [' . implode(', ', $values) . ']');
+            throw new MalformedPayloadException('Field #' . $key . ' should be one of [' . implode(', ', $values) . '], but is "' . $data[$key] . '"');
         }
     }
 

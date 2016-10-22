@@ -17,32 +17,35 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/../helpers/textLog/Parser.php';
+require_once __DIR__ . '/../helpers/onlineLog/Parser.php';
+require_once __DIR__ . '/../helpers/onlineLog/Downloader.php';
 
-class TextmodeSessionModel extends Model
+class OnlineSessionModel extends Model
 {
     /**
      * @param $eventId int
-     * @param $gameLog string
+     * @param $gameLink string
      * @return bool
      * @throws InvalidParametersException
      * @throws MalformedPayloadException
      * @throws ParseException
      */
-    public function addGame($eventId, $gameLog)
+    public function addGame($eventId, $gameLink)
     {
         $event = EventPrimitive::findById($this->_db, [$eventId]);
         if (empty($event)) {
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $parser = new TextlogParser($this->_db);
+        $downloader = new Downloader($this->_db);
+        $replay = $downloader->getReplay($gameLink);
+
+        $parser = new OnlineParser($this->_db);
         $session = (new SessionPrimitive($this->_db))
             ->setEvent($event[0])
             ->setStatus('inprogress');
 
-        $originalScore = $parser->parseToSession($session, $gameLog);
-        $success = true;
+        list($success, $originalScore) = $parser->parseToSession($session, $replay);
         $success = $success && $session->save();
         $success = $success && $session->finish();
 

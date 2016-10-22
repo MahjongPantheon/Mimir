@@ -15,8 +15,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-return [
-    'db'        => require __DIR__ . '/db.php',
-    'routes'    => require __DIR__ . '/routes.php'
-];
+class DownloadException extends \Exception
+{
+}

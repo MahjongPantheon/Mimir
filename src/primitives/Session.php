@@ -1,6 +1,6 @@
 <?php
 /*  Riichi mahjong API game server
- *  Copyright (C) 2016  heilage and others
+ *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,6 +68,8 @@ class SessionPrimitive extends Primitive
             ]
         ];
     }
+
+    protected $_debugScore = false;
 
     /**
      * Local id
@@ -429,5 +431,15 @@ class SessionPrimitive extends Primitive
 
             return $acc && $result->save() && $userHistoryItem->save();
         }, true);
+    }
+
+    public function setDebugScore($d = true)
+    {
+        $this->_debugScore = $d;
+    }
+
+    public function getDebugScore()
+    {
+        return $this->_debugScore;
     }
 }

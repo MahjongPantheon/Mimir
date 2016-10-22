@@ -40,3 +40,8 @@ You also will need standard `make` utility to use following shortcuts.
 
 To generate or recreate sqlite db, run `make init_sqlite`.
 To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.
+
+Distribution info
+-----------------
+
+This software is distributed under GNU GPL v3 license. Latest version of the software can be downloaded at [its primary repo](https://github.com/Furiten/riichi-api). It's also the one and only place to submit your issues and pull requests :)

@@ -1,6 +1,6 @@
 <?php
 /*  Riichi mahjong API game server
- *  Copyright (C) 2016  heilage and others
+ *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/YakuMap.php';
+require_once __DIR__ . '/../YakuMap.php';
 require_once __DIR__ . '/Token.php';
-require_once __DIR__ . '/../exceptions/Tokenizer.php';
+require_once __DIR__ . '/../../exceptions/Tokenizer.php';
 
 class Tokenizer
 {

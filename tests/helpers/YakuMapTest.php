@@ -1,6 +1,6 @@
 <?php
 /*  Riichi mahjong API game server
- *  Copyright (C) 2016  heilage and others
+ *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ class YakuMapTest extends \PHPUnit_Framework_TestCase
     public function testFromTenhou()
     {
         $yakuList = '1,1,2,1,24,2,52,2,53,1,54,3';
-        $yakumanList = '46,1';
+        $yakumanList = '46';
 
         $result = YakuMap::fromTenhou($yakuList, $yakumanList);
         $expected = [
@@ -40,6 +40,6 @@ class YakuMapTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result['yaku']);
         $this->assertEquals(1, $result['yakuman']);
         $this->assertEquals(6, $result['dora']);
-        $this->assertEquals(10, $result['han']);
+        $this->assertEquals(-1, $result['han']);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*  Riichi mahjong API game server
- *  Copyright (C) 2016  heilage and others
+ *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -223,7 +223,7 @@ class PointsCalc
 
     protected static function _calcPoints(Ruleset $rules, $han, $fu, $tsumo, $dealer)
     {
-        if ($han < 5) {
+        if ($han > 0 && $han < 5) {
             $basePoints = $fu * pow(2, 2 + $han);
             $rounded = ceil($basePoints / 100.) * 100;
             $doubleRounded = ceil(2 * $basePoints / 100.) * 100;
@@ -243,17 +243,15 @@ class PointsCalc
                 $timesSixRounded = $doubleRounded * 3;
             }
         } else { // limits
-            // yakuman
-            if ($rules->withKazoe() && $han >= 13) {
+            if ($han < 0) { // natural yakuman
+                $rounded = abs($han * 8000);
+            } else if ($rules->withKazoe() && $han >= 13) { // kazoe yakuman
                 $rounded = 8000;
-            } // sanbaiman
-            else if ($han >= 11) {
+            } else if ($han >= 11) { // sanbaiman
                 $rounded = 6000;
-            } // baiman
-            else if ($han >= 8) {
+            } else if ($han >= 8) { // baiman
                 $rounded = 4000;
-            } // haneman
-            else if ($han >= 6) {
+            } else if ($han >= 6) { // haneman
                 $rounded = 3000;
             } else {
                 $rounded = 2000;
