@@ -153,11 +153,30 @@ class TextlogParser
             throw new ParseException("Failed to parse round statement ({$statement[0]->token()}: {$methodName})", 106);
         }
 
-        return RoundPrimitive::createFromData(
-            $this->_db,
-            $session,
-            $this->$methodName($statement, $session)
-        );
+        try {
+            return RoundPrimitive::createFromData(
+                $this->_db,
+                $session,
+                $this->$methodName($statement, $session)
+            );
+        } catch (\Exception $e) {
+            // add some context for debug and rethrow
+            $statementTokens = implode(' ', array_map(function(Token $t) {
+                return $t->token();
+            }, $statement));
+
+            // TODO: needs reformatting to avoid exposing internals to clients
+            throw new ParseException(
+                "\n[" . get_class($e) . "]\n{$e->getMessage()}\nOccured at statement: [{$statementTokens}]" .
+                "\n ======= Original trace: ======= \n" . implode("\n", array_filter(array_map(function($el) {
+                    if (empty($el['file']) || empty($el['line']) || strpos($el['file'], 'phar') === 0) {
+                        return null;
+                    }
+                    return $el['file'] . ':' . $el['line'] . ' @ ' . $el['function'];
+                }, $e->getTrace()))),
+                $e->getCode()
+            );
+        }
     }
 
     /**

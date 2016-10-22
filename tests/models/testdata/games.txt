@@ -274,7 +274,7 @@ ron player19 from player12 2han 30fu (tanyao dora)
 ron player12 from player25 1han 30fu (yakuhai1)
 
 
-player27:35500 player24:31600 player1:21700 player11:32200
+player27:35500 player24:31600 player1:21700 player11:31200
 draw tempai player24
 ron player11 from player27 2han 40fu (riichi dora) riichi player11
 draw tempai all
@@ -317,7 +317,7 @@ ron player22 from player5 3han 30fu (tanyao sanshoku dora)
 tsumo player31 2han 30fu (yakuhai1 dora)
 
 
-player26:24500 player9:43800 player17:20400 player14:32300
+player26:24500 player9:43800 player17:20400 player14:31300
 draw tempai player9
 draw tempai player9 player14 riichi player9
 tsumo player9 2han 40fu (honitsu)
