@@ -24,7 +24,7 @@ tsumo player8 7han (riichi ippatsu tsumo iipeiko dora 3)
 ron player6 from player7 1han 40fu (tanyao)
 
 
-player9:41000 player11:35500 player10:15500 player12:27000
+player9:42000 player11:35500 player10:15500 player12:27000
 tsumo player9 4han 30fu (tsumo sanshoku dora)
 tsumo player9 4han 40fu (tanyao dora 3)
 ron player11 from player12 2han 30fu (yakuhai1 dora)
@@ -386,7 +386,7 @@ draw tempai player18 riichi player18
 tsumo player27 2han 30fu (honitsu)
 
 
-player19:61500 player1:13300 player32:19200 player13:25000
+player19:62500 player1:13300 player32:19200 player13:25000
 tsumo player19 5han (riichi pinfu tanyao iipeiko tsumo) riichi player19 player32
 ron player1 from player32 3han 40fu (yakuhai1 toitoi)
 draw tempai player19 riichi player19
@@ -571,7 +571,7 @@ ron player8 from player2 1han 30fu (yakuhai1)
 tsumo player2 5han (riichi tsumo dora 3) riichi player2
 
 
-player19:37500 player27:38900 player30:24200 player28:19400
+player19:37500 player27:37900 player30:25200 player28:19400
 tsumo player19 4han 40fu (riichi tsumo ipeiko rinshan) riichi player19 player27
 ron player19 from player30 1han 30fu (tanyao)
 ron player30 from player28 3han 30fu (yakuhai1 dora 2) riichi player28
@@ -673,7 +673,7 @@ draw tempai player19 player21 riichi player19
 ron player26 from player19 4han 40fu (riichi dora 3) riichi player26
 
 
-player29:14900 player27:39900 player30:28400 player2:36800
+player29:14900 player27:40900 player30:27400 player2:36800
 draw tempai player29 player27
 ron player2 from player27 2han 50fu (riichi dora 1) riichi player2
 draw tempai player30
@@ -752,7 +752,7 @@ tsumo player32 4han 40fu (yakuhai2 honitsu) riichi player17
 ron player22 from player16 4han 30fu (junchan sanshoku dora)
 
 
-player9:22300 player27:21900 player25:31900 player4:43900
+player9:23000 player27:22200 player25:30900 player4:43900
 tsumo player4 2han 30fu (yakuhai1 dora 1)
 tsumo player27 7han (riichi iipeiko tsumo honitsu pinfu) riichi player27
 ron player9 from player4 2han 30fu (sanshoku yakuhai1)
@@ -801,7 +801,7 @@ tsumo player8 2han 30fu (riichi tsumo) riichi player8
 ron player3 from player23 2han 40fu (riichi ippatsu) riichi player3
 
 
-player6:35500 player14:38600 player11:28800 player30:16100
+player6:35500 player14:39600 player11:28800 player30:16100
 ron player14 from player30 1han 40fu (riichi) riichi player14
 ron player30 from player6 3han 40fu (riichi ippatsu dora 1) riichi player11 player30
 tsumo player6 4han 20fu (riichi pinfu tsumo iipeiko) riichi player6 player30
@@ -832,7 +832,7 @@ ron player18 from player32 2han 40fu (honitsu)
 draw tempai player18 player24
 ron player18 from player32 1han 30fu (tanyao) riichi player17
 ron player18 from player24 1han 30fu (tanyao)
-tsumo player17 3han 30fu riichi player32 player17
+tsumo player17 3han 30fu (riichi tsumo dora 1) riichi player32 player17
 ron player24 from player18 1han 30fu (ittsu)
 ron player17 from player32 4han 40fu (riichi ippatsu yakuhai1 dora 1) riichi player17
 chombo player17

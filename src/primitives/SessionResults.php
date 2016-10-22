@@ -308,6 +308,12 @@ class SessionResultsPrimitive extends Primitive
         }
 
         $this->_place = $this->_calcPlace($results->getScores(), $playerIds);
+
+        if ($rules->riichiGoesToWinner() && $this->_place === 1) {
+            $this->_score += $results->getRiichiBets() * 1000;
+            $results->giveRiichiBetsToPlayer($this->_playerId);
+        }
+
         $this->_ratingDelta = $this->_calcRatingDelta($rules, $results->getScores());
 
         if (!empty($results->getPenalties()[$this->_playerId])) { // final chombing

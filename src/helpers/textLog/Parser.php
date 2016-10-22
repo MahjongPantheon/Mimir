@@ -93,8 +93,9 @@ class TextlogParser
                 // some debug info
                 $statementStr = $this->_getStatementAsString($statement);
                 $debug []= '-> ' . $statementStr
-                    . "\n       `+ [\t" . implode("\t",
-                        array_map(function($sc, $sc2) {
+                    . "\n       `+ [\t" . implode(
+                        "\t",
+                        array_map(function ($sc, $sc2) {
                             return $sc - $sc2;
                         }, $session->getCurrentState()->getScores(), $lastScoresDebug)
                     ) . "\t]"
@@ -116,7 +117,7 @@ class TextlogParser
 
     protected function _getStatementAsString($statement)
     {
-        return implode(' ', array_map(function(Token $t) {
+        return implode(' ', array_map(function (Token $t) {
             return $t->token();
         }, $statement));
     }
@@ -155,7 +156,9 @@ class TextlogParser
 
         if (count($playersList) !== 4) {
             throw new ParseException("Malformed header, not all players are described: ["
-                . implode(',', array_map(function(PlayerPrimitive $p) { return $p->getId(); }, $playersList))
+                . implode(',', array_map(function (PlayerPrimitive $p) {
+                    return $p->getId();
+                }, $playersList))
                 . ']', 100);
         }
 
@@ -189,7 +192,7 @@ class TextlogParser
             // TODO: needs reformatting to avoid exposing internals to clients
             throw new ParseException(
                 "\n[" . get_class($e) . "]\n{$e->getMessage()}\nOccured at statement: [{$statementTokens}]" .
-                "\n ======= Original trace: ======= \n" . implode("\n", array_filter(array_map(function($el) {
+                "\n ======= Original trace: ======= \n" . implode("\n", array_filter(array_map(function ($el) {
                     if (empty($el['file']) || empty($el['line']) || strpos($el['file'], 'phar') === 0) {
                         return null;
                     }
@@ -325,7 +328,7 @@ class TextlogParser
     protected function _findHan($tokens)
     {
         $han = $this->_findByType($tokens, Tokenizer::HAN_COUNT)->clean();
-        $yakuman = $this->_findByType($tokens, Tokenizer::YAKUMAN)->clean();
+        $yakuman = $this->_findByType($tokens, Tokenizer::YAKUMAN)->token();
         if (!$han && $yakuman) {
             // -1 means 1 yakuman
             $han = -1; // TODO: multi yakumans for textual logs?
@@ -617,7 +620,7 @@ class TextlogParser
             $yakuParsed = $this->_parseYaku($ron);
             $resultData['wins'] []= [
                 'winner_id' => $winner->getId(),
-                'han'       => $this->_findHan($tokens),
+                'han'       => $this->_findHan($ron),
                 'fu'        => $this->_findByType($ron, Tokenizer::FU_COUNT)->clean(),
                 'dora'      => $yakuParsed['dora'],
                 'uradora'   => 0,

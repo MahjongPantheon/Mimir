@@ -47,7 +47,7 @@ class TextmodeSessionModel extends Model
         $success = $success && $session->finish();
 
         $calculatedScore = $session->getCurrentState()->getScores();
-        $aliases = array_map(function(PlayerPrimitive $p) {
+        $aliases = array_map(function (PlayerPrimitive $p) {
             return $p->getAlias();
         }, $session->getPlayers());
 

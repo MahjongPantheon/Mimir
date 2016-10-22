@@ -62,6 +62,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_ruleset = new MockRuleset();
         $this->_ruleset->setRule('withButtobi', false);
         $this->_ruleset->setRule('startRating', 1500);
+        $this->_ruleset->setRule('riichiGoesToWinner', false);
         $this->_ruleset->setRule('tenboDivider', 1000.);
         $this->_ruleset->setRule('ratingDivider', 1.);
         $this->_ruleset->setRule('startPoints', 30000);
