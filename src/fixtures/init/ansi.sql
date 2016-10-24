@@ -81,7 +81,6 @@ CREATE TABLE "session" (
   "replay_hash" varchar(255), -- tenhou game hash, for deduplication
   "orig_link" text, -- original tenhou game link, for access to replay
   "play_date" timestamp,
-  "players" varchar(255), -- comma-separated ordered list of player ids, east to north.
   "status" varchar(255), -- planned / inprogress / finished
   "intermediate_results" text, -- json-encoded results for in-progress sessions
   foreign key ("event_id") references "event" ("id")
@@ -89,7 +88,20 @@ CREATE TABLE "session" (
 CREATE INDEX "session_replay" ON "session"("replay_hash");
 CREATE INDEX "session_status" ON "session"("status");
 CREATE INDEX "session_rephash" ON "session"("representational_hash");
-CREATE INDEX "session_players" ON "session"("players");
+
+-- Many-to-many relation
+DROP TABLE
+-- IF EXISTS
+   "session_user";
+CREATE TABLE "session_user" (
+  "session_id" integer not null,
+  "user_id" integer not null,
+  "order" integer not null, -- position in game
+  foreign key ("session_id") references "session" ("id"),
+  foreign key ("user_id") references "user" ("id")
+);
+-- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
+CREATE UNIQUE INDEX "session_user_uniq" ON "session_user"("session_user","user_id");
 
 -- Session results, entry should exist only for finished sessions
 DROP TABLE

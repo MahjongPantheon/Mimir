@@ -69,6 +69,70 @@ abstract class Primitive
     }
 
     /**
+     * @param $obj object to serialize (usually array of ids)
+     * @param $connectorTable
+     * @param $currentEntityField
+     * @param $foreignEntityField
+     * @return bool
+     */
+    protected function _serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField)
+    {
+        $result = [];
+        $i = 1;
+        foreach ($obj as $id) {
+            $result []= [
+                $currentEntityField => $this->getId(),
+                $foreignEntityField => $id,
+                'order' => $i++ // hardcoded column name; usually order matters, so it should exist in every * <-> *
+            ];
+        }
+
+        return $this->_db->upsertQuery($connectorTable, $result);
+    }
+
+    /**
+     * @param $connectorTable
+     * @param $currentEntityField
+     * @param $foreignEntityField
+     * @return array (usually array of ids)
+     */
+    protected function _deserializeManyToMany($connectorTable, $currentEntityField, $foreignEntityField)
+    {
+        $items = $this->_db
+            ->table($connectorTable)
+            ->where($currentEntityField, $this->getId())
+            ->asArray();
+
+        usort($items, function(&$item1, &$item2) {
+            return $item1['order'] - $item2['order'];
+        });
+
+        return array_map(function($item) use ($foreignEntityField) {
+            return $item[$foreignEntityField];
+        }, $items);
+    }
+
+    /**
+     * Transform for many-to-many relation fields
+     *
+     * @param $connectorTable
+     * @param $currentEntityField
+     * @param $foreignEntityField
+     * @return array
+     */
+    protected function _externalManyToManyTransform($connectorTable, $currentEntityField, $foreignEntityField)
+    {
+        return [
+            'serialize' => function($obj) use ($connectorTable, $currentEntityField, $foreignEntityField) {
+                return $this->_serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField);
+            },
+            'deserialize' => function() use ($connectorTable, $currentEntityField, $foreignEntityField) {
+                return $this->_deserializeManyToMany($connectorTable, $currentEntityField, $foreignEntityField);
+            }
+        ];
+    }
+
+    /**
      * Default integer cast transform
      * @return array
      */
@@ -150,6 +214,11 @@ abstract class Primitive
         $fieldsTransform = $this->_getFieldsTransforms();
 
         foreach (static::$_fieldsMapping as $dst => $src) {
+            if (strpos($dst, '::') === 0) { // external relation, just call serializer
+                call_user_func($fieldsTransform[$src]['serialize'], $this->$src);
+                continue;
+            }
+
             $instance->set(
                 $dst,
                 empty($fieldsTransform[$src]['serialize'])

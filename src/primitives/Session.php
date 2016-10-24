@@ -40,7 +40,7 @@ class SessionPrimitive extends Primitive
         'replay_hash'           => '_replayHash',
         'orig_link'             => '_origLink',
         'play_date'             => '_playDate',
-        'players'               => '_playersIds',
+        '::session_user'        => '_playersIds', // external many-to-many relation
         'status'                => '_status',
         'intermediate_results'  => '_current',
     ];
@@ -48,7 +48,7 @@ class SessionPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
-            '_playersIds'   => $this->_csvTransform(),
+            '_playersIds'   => $this->_externalManyToManyTransform('session_user', 'session_id', 'user_id'),
             '_eventId'      => $this->_integerTransform(),
             '_id'           => $this->_nullableIntegerTransform(),
             '_current'      => [

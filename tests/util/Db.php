@@ -78,4 +78,25 @@ class Db implements IDb
         ORM::rawExecute('SELECT last_insert_rowid()');
         return ORM::getLastStatement()->fetchColumn();
     }
+
+    /**
+     * @param $table
+     * @param $data
+     * @return string
+     */
+    public function upsertQuery($table, $data)
+    {
+        foreach ($data as $k => $v) {
+            $data[$k] = intval($v); // Maybe use PDO::quote here in future
+        }
+
+        $values = implode(', ', array_values($data));
+        $fields = implode(', ', array_map(function($field) {
+            return '"' . $field . '"';
+        }, array_keys($data)));
+
+        return ORM::rawExecute("
+            REPLACE INTO {$table} ({$fields}) VALUES ({$values});
+        ");
+    }
 }
