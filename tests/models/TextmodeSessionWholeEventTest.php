@@ -19,6 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/TextmodeSession.php';
+require_once __DIR__ . '/../../src/models/PlayerStat.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../util/Db.php';
@@ -61,10 +62,16 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
             return $p;
         }, $playerNames);
 
-        $model = (new TextmodeSessionModel($this->_db));
+        $model = new TextmodeSessionModel($this->_db);
 
         foreach ($games as $log) {
             $model->addGame($this->_event->getId(), $log);
         }
+
+        // no exceptions - ok!
+
+        $statModel = new PlayerStatModel($this->_db);
+        $stats = $statModel->getStats($this->_event->getId(), '10');
+        print_r($stats);
     }
 }
