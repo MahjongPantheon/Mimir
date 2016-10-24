@@ -193,6 +193,31 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * Find items by indexed search by several fields
+     *
+     * @param IDb $db
+     * @param $player
+     * @param $event
+     * @return Primitive|Primitive[]
+     */
+    public static function findByPlayerAndEvent(IDb $db, $player, $event)
+    {
+        $orm = $db->table(static::$_table);
+
+        $player = intval($player);
+        $orm->where('event_id', $event)->whereRaw("FIND_IN_SET('players', {$player})"); // TODO: check sqlite and postgres syntax
+
+        $result = $orm->findArray();
+        if (empty($result)) {
+            return [];
+        }
+
+        return array_map(function ($data) use ($db) {
+            return self::_recreateInstance($db, $data);
+        }, $result);
+    }
+
+    /**
      * Save session instance to db
      * @return bool success
      */

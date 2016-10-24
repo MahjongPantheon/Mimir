@@ -89,6 +89,7 @@ CREATE TABLE "session" (
 CREATE INDEX "session_replay" ON "session"("replay_hash");
 CREATE INDEX "session_status" ON "session"("status");
 CREATE INDEX "session_rephash" ON "session"("representational_hash");
+CREATE INDEX "session_players" ON "session"("players");
 
 -- Session results, entry should exist only for finished sessions
 DROP TABLE
