@@ -86,17 +86,27 @@ class Db implements IDb
      */
     public function upsertQuery($table, $data)
     {
-        foreach ($data as $k => $v) {
-            $data[$k] = intval($v); // Maybe use PDO::quote here in future
-        }
+        $data = array_map(function($dataset) {
+            foreach ($dataset as $k => $v) {
+                $dataset[$k] = intval($v); // Maybe use PDO::quote here in future
+            }
+            return $dataset;
+        }, $data);
 
-        $values = implode(', ', array_values($data));
+        // sqlite does not support multi-row upsert :( loop manually here
+
         $fields = implode(', ', array_map(function($field) {
             return '"' . $field . '"';
-        }, array_keys($data)));
+        }, array_keys(reset($data))));
 
-        return ORM::rawExecute("
-            REPLACE INTO {$table} ({$fields}) VALUES ({$values});
-        ");
+        $values = array_map(function($dataset) {
+            return implode(', ', array_values($dataset));
+        }, $data);
+
+        return array_reduce($values, function($acc, $dataset) use($table, $fields) {
+            return $acc && ORM::rawExecute("
+                REPLACE INTO {$table} ({$fields}) VALUES ({$dataset});
+            ");
+        }, true);
     }
 }

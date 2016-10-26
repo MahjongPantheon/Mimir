@@ -101,7 +101,7 @@ CREATE TABLE "session_user" (
   foreign key ("user_id") references "user" ("id")
 );
 -- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
-CREATE UNIQUE INDEX "session_user_uniq" ON "session_user"("session_user","user_id");
+CREATE UNIQUE INDEX "session_user_uniq" ON "session_user"("session_id","user_id");
 
 -- Session results, entry should exist only for finished sessions
 DROP TABLE

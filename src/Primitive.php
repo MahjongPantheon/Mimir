@@ -81,7 +81,8 @@ abstract class Primitive
         $i = 1;
         foreach ($obj as $id) {
             $result []= [
-                $currentEntityField => $this->getId(),
+                $currentEntityField => $this->getId(), // TODO: if session is new, it may not have an ID.
+                                                       // TODO Make sure that queries are executed after id is assigned.
                 $foreignEntityField => $id,
                 'order' => $i++ // hardcoded column name; usually order matters, so it should exist in every * <-> *
             ];

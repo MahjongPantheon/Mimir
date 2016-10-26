@@ -107,56 +107,77 @@ class Db implements IDb
      * This should not be used for external data processing.
      * May have some vulnerabilities on field names escaping.
      *
+     * Warning:
+     * Don't touch this crap until you totally know what are you doing :)
+     *
      * @param $table
-     * @param $data
+     * @param $data [ [ field => value, field2 => value2 ], [ ... ] ] - nested arrays should be monomorphic
      * @throws \Exception
      * @return boolean
      */
     public function upsertQuery($table, $data)
     {
-        foreach ($data as $k => $v) {
-            $data[$k] = intval($v); // Maybe use PDO::quote here in future
-        }
-        $values = implode(', ', array_values($data));
+        $data = array_map(function($dataset) {
+            foreach ($dataset as $k => $v) {
+                $dataset[$k] = intval($v); // Maybe use PDO::quote here in future
+            }
+            return $dataset;
+        }, $data);
 
         switch (true) {
             case strpos($this->_connString, 'mysql') === 0:
                 $fields = implode(', ', array_map(function($field) {
                     return '`' . $field . '`';
-                }, array_keys($data)));
+                }, array_keys(reset($data))));
 
-                $assignments = implode(', ', array_map(function($field, $value) {
-                    return $field . '=' . $value;
-                }, $fields, $values));
+                $values = '(' . implode('), (', array_map(function($dataset) {
+                    return implode(', ', array_values($dataset));
+                }, $data)) . ')';
+
+                $assignments = implode(', ', array_map(function($field) {
+                    return $field . '=VALUES(' . $field . ')';
+                }, $fields));
 
                 return ORM::rawExecute("
-                    INSERT INTO {$table} ({$fields}) VALUES ({$values})
+                    INSERT INTO {$table} ({$fields}) VALUES {$values}
                     ON DUPLICATE KEY UPDATE {$assignments}
                 ");
                 break;
             case strpos($this->_connString, 'pgsql') === 0:
                 $fields = implode(', ', array_map(function($field) {
                     return '"' . $field . '"';
-                }, array_keys($data)));
+                }, array_keys(reset($data))));
 
-                $assignments = implode(', ', array_map(function($field, $value) {
-                    return $field . '=' . $value;
-                }, $fields, $values));
+                $values = '(' . implode('), (', array_map(function($dataset) {
+                    return implode(', ', array_values($dataset));
+                }, $data)) . ')';
+
+                $assignments = implode(', ', array_map(function($field) {
+                    return $field . '= excluded.' . $field;
+                }, $fields));
 
                 // Postgresql >= 9.5
                 return ORM::rawExecute("
-                    INSERT INTO {$table} ({$fields}) VALUES ({$values})
+                    INSERT INTO {$table} ({$fields}) VALUES {$values}
                     ON CONFLICT ({$table}_uniq) DO UPDATE SET {$assignments}
                 ");
                 break;
             case strpos($this->_connString, 'sqlite') === 0:
+                // sqlite does not support multi-row upsert :( loop manually here
+
                 $fields = implode(', ', array_map(function($field) {
                     return '"' . $field . '"';
-                }, array_keys($data)));
+                }, array_keys(reset($data))));
 
-                return ORM::rawExecute("
-                    REPLACE INTO {$table} ({$fields}) VALUES ({$values});
-                ");
+                $values = array_map(function($dataset) {
+                    return implode(', ', array_values($dataset));
+                }, $data);
+
+                return array_reduce($values, function($acc, $dataset) use($table, $fields) {
+                    return $acc && ORM::rawExecute("
+                        REPLACE INTO {$table} ({$fields}) VALUES ({$dataset});
+                    ");
+                }, true);
                 break;
             default:
                 throw new \Exception(

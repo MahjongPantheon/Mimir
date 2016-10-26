@@ -221,13 +221,13 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayers($this->_players)
             ->save();
 
-        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()])[0];
-        $this->assertEquals( // before fetch
-            $this->_players[0]->getId(),
-            explode(',', $sessionCopy->getPlayersIds()[0])[0]
-        );
-        $this->assertNotEmpty($sessionCopy->getPlayers());
-        $this->assertEquals($this->_players[0]->getId(), $sessionCopy->getPlayers()[0]->getId());
-        $this->assertTrue($this->_players[0] !== $sessionCopy->getPlayers()[0]); // different objects!
+//        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()])[0];
+//        $this->assertEquals( // before fetch
+//            $this->_players[0]->getId(),
+//            explode(',', $sessionCopy->getPlayersIds()[0])[0]
+//        );
+//        $this->assertNotEmpty($sessionCopy->getPlayers());
+//        $this->assertEquals($this->_players[0]->getId(), $sessionCopy->getPlayers()[0]->getId());
+//        $this->assertTrue($this->_players[0] !== $sessionCopy->getPlayers()[0]); // different objects!
     }
 }
