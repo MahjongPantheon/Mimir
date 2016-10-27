@@ -92,11 +92,11 @@ class PlayerStatModel extends Model
      */
     protected function _getScoreHistoryAndPlayers($playerId, $games)
     {
-        $scoreHistory = array_map(function($game) use ($playerId) {
+        $scoreHistory = array_map(function ($game) use ($playerId) {
             /** @var $results SessionResultsPrimitive[] */
             $results = $game['results'];
 
-            return array_map(function(SessionResultsPrimitive $sr, $playerId) {
+            return array_map(function (SessionResultsPrimitive $sr, $playerId) {
                 return [
                     'player_id'     => $playerId,
                     'score'         => $sr->getScore(),
@@ -123,12 +123,12 @@ class PlayerStatModel extends Model
      */
     protected function _fetchPlayersInfo($scoreHistory)
     {
-        $playerIds = array_reduce($scoreHistory, function($acc, $item) {
-            return $acc + array_map(function($playerInfo) {
+        $playerIds = array_reduce($scoreHistory, function ($acc, $item) {
+            return $acc + array_map(function ($playerInfo) {
                 return $playerInfo['player_id'];
             }, $item);
         }, []);
-        $players = array_map(function(PlayerPrimitive $p) {
+        $players = array_map(function (PlayerPrimitive $p) {
             return [
                 'id' => $p->getId(),
                 'display_name' => $p->getDisplayName(),
@@ -148,7 +148,7 @@ class PlayerStatModel extends Model
      */
     protected function _getPlacesSummary($playerId, $games)
     {
-        return array_reduce($games, function($acc, $game) use ($playerId) {
+        return array_reduce($games, function ($acc, $game) use ($playerId) {
             /** @var $results SessionResultsPrimitive[] */
             $results = $game['results'];
 
@@ -169,7 +169,7 @@ class PlayerStatModel extends Model
      */
     protected function _getOutcomeSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function($acc, RoundPrimitive $r) use ($playerId) {
+        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             switch ($r->getOutcome()) {
                 case 'ron':
                     if ($r->getLoserId() == $playerId) {
@@ -177,20 +177,21 @@ class PlayerStatModel extends Model
                     } else if ($r->getWinnerId() == $playerId) {
                         $acc['ron'] ++;
                     }
-                break;
+                    break;
                 case 'tsumo':
                     if ($r->getWinnerId() == $playerId) {
                         $acc['tsumo'] ++;
                     } else {
                         $acc['tsumofeed'] ++;
                     }
-                break;
+                    break;
                 case 'chombo':
                     if ($r->getLoserId() == $playerId) {
                         $acc['chombo'] ++;
                     }
-                break;
-                default:;
+                    break;
+                default:
+                    ;
             }
             return $acc;
         }, [
@@ -211,9 +212,9 @@ class PlayerStatModel extends Model
      */
     protected function _getYakuSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function($acc, RoundPrimitive $r) use ($playerId) {
+        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
-                $acc = array_reduce(explode(',', $r->getYaku()), function($acc, $yaku) {
+                $acc = array_reduce(explode(',', $r->getYaku()), function ($acc, $yaku) {
                     if (empty($acc[$yaku])) {
                         $acc[$yaku] = 0;
                     }
@@ -234,9 +235,9 @@ class PlayerStatModel extends Model
      */
     protected function _getHanSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function($acc, RoundPrimitive $r) use ($playerId) {
+        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
-                $acc = array_reduce(explode(',', $r->getHan()), function($acc, $han) {
+                $acc = array_reduce(explode(',', $r->getHan()), function ($acc, $han) {
                     if (empty($acc[$han])) {
                         $acc[$han] = 0;
                     }
@@ -254,7 +255,7 @@ class PlayerStatModel extends Model
      */
     protected function _fetchRounds($games)
     {
-        $sessionIds = array_map(function($item) {
+        $sessionIds = array_map(function ($item) {
             /** @var $session SessionPrimitive */
             $session = $item['session'];
             return $session->getId();
@@ -272,7 +273,7 @@ class PlayerStatModel extends Model
     {
         $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $player->getId(), $event->getId());
 
-        $sessionIds = array_map(function(SessionPrimitive $s) {
+        $sessionIds = array_map(function (SessionPrimitive $s) {
             return $s->getId();
         }, $sessions);
 

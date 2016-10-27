@@ -125,7 +125,7 @@ class Db implements IDb
      */
     public function upsertQuery($table, $data)
     {
-        $data = array_map(function($dataset) {
+        $data = array_map(function ($dataset) {
             foreach ($dataset as $k => $v) {
                 $dataset[$k] = intval($v); // Maybe use PDO::quote here in future
             }
@@ -134,15 +134,15 @@ class Db implements IDb
 
         switch (true) {
             case strpos($this->_connString, 'mysql') === 0:
-                $fields = implode(', ', array_map(function($field) {
+                $fields = implode(', ', array_map(function ($field) {
                     return '`' . $field . '`';
                 }, array_keys(reset($data))));
 
-                $values = '(' . implode('), (', array_map(function($dataset) {
+                $values = '(' . implode('), (', array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
                 }, $data)) . ')';
 
-                $assignments = implode(', ', array_map(function($field) {
+                $assignments = implode(', ', array_map(function ($field) {
                     return $field . '=VALUES(' . $field . ')';
                 }, $fields));
 
@@ -152,15 +152,15 @@ class Db implements IDb
                 ");
                 break;
             case strpos($this->_connString, 'pgsql') === 0:
-                $fields = implode(', ', array_map(function($field) {
+                $fields = implode(', ', array_map(function ($field) {
                     return '"' . $field . '"';
                 }, array_keys(reset($data))));
 
-                $values = '(' . implode('), (', array_map(function($dataset) {
+                $values = '(' . implode('), (', array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
                 }, $data)) . ')';
 
-                $assignments = implode(', ', array_map(function($field) {
+                $assignments = implode(', ', array_map(function ($field) {
                     return $field . '= excluded.' . $field;
                 }, $fields));
 
@@ -173,15 +173,15 @@ class Db implements IDb
             case strpos($this->_connString, 'sqlite') === 0:
                 // sqlite does not support multi-row upsert :( loop manually here
 
-                $fields = implode(', ', array_map(function($field) {
+                $fields = implode(', ', array_map(function ($field) {
                     return '"' . $field . '"';
                 }, array_keys(reset($data))));
 
-                $values = array_map(function($dataset) {
+                $values = array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
                 }, $data);
 
-                return array_reduce($values, function($acc, $dataset) use($table, $fields) {
+                return array_reduce($values, function ($acc, $dataset) use ($table, $fields) {
                     return $acc && ORM::rawExecute("
                         REPLACE INTO {$table} ({$fields}) VALUES ({$dataset});
                     ");

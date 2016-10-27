@@ -21,6 +21,7 @@ require_once __DIR__ . '/Date.php';
 
 use Monolog\Logger;
 use Idiorm\ORM;
+
 define('EXTERNAL_RELATION_MARKER', '::');
 
 abstract class Primitive
@@ -107,11 +108,11 @@ abstract class Primitive
             ->where($currentEntityField, $this->getId())
             ->findArray();
 
-        usort($items, function(&$item1, &$item2) {
+        usort($items, function (&$item1, &$item2) {
             return $item1['order'] - $item2['order'];
         });
 
-        return array_map(function($item) use ($foreignEntityField) {
+        return array_map(function ($item) use ($foreignEntityField) {
             return $item[$foreignEntityField];
         }, $items);
     }
@@ -127,10 +128,10 @@ abstract class Primitive
     protected function _externalManyToManyTransform($connectorTable, $currentEntityField, $foreignEntityField)
     {
         return [
-            'serialize' => function($obj) use ($connectorTable, $currentEntityField, $foreignEntityField) {
+            'serialize' => function ($obj) use ($connectorTable, $currentEntityField, $foreignEntityField) {
                 return $this->_serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField);
             },
-            'deserialize' => function() use ($connectorTable, $currentEntityField, $foreignEntityField) {
+            'deserialize' => function () use ($connectorTable, $currentEntityField, $foreignEntityField) {
                 return $this->_deserializeManyToMany($connectorTable, $currentEntityField, $foreignEntityField);
             }
         ];
