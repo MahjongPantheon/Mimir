@@ -147,6 +147,23 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
     }
 
+    public function testFindSessionByPlayerAndEvent()
+    {
+        $newSession = new SessionPrimitive($this->_db);
+        $newSession
+            ->setStatus('inprogress')
+            ->setOrigLink('test')
+            ->setPlayers($this->_players)
+            ->setReplayHash('hash')
+            ->setEvent($this->_event)
+            ->save();
+
+        $sessionCopy = SessionPrimitive::findByPlayerAndEvent($this->_db, $this->_players[0]->getId(), $this->_event->getId());
+        $this->assertEquals(1, count($sessionCopy));
+        $this->assertEquals('hash', $sessionCopy[0]->getReplayHash());
+        $this->assertTrue($newSession !== $sessionCopy[0]); // different objects!
+    }
+
     public function testUpdateSession()
     {
         $newSession = new SessionPrimitive($this->_db);
@@ -221,13 +238,13 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayers($this->_players)
             ->save();
 
-//        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()])[0];
-//        $this->assertEquals( // before fetch
-//            $this->_players[0]->getId(),
-//            explode(',', $sessionCopy->getPlayersIds()[0])[0]
-//        );
-//        $this->assertNotEmpty($sessionCopy->getPlayers());
-//        $this->assertEquals($this->_players[0]->getId(), $sessionCopy->getPlayers()[0]->getId());
-//        $this->assertTrue($this->_players[0] !== $sessionCopy->getPlayers()[0]); // different objects!
+        $sessionCopy = SessionPrimitive::findById($this->_db, [$newSession->getId()])[0];
+        $this->assertEquals( // before fetch
+            $this->_players[0]->getId(),
+            explode(',', $sessionCopy->getPlayersIds()[0])[0]
+        );
+        $this->assertNotEmpty($sessionCopy->getPlayers());
+        $this->assertEquals($this->_players[0]->getId(), $sessionCopy->getPlayers()[0]->getId());
+        $this->assertTrue($this->_players[0] !== $sessionCopy->getPlayers()[0]); // different objects!
     }
 }

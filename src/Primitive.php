@@ -21,6 +21,7 @@ require_once __DIR__ . '/Date.php';
 
 use Monolog\Logger;
 use Idiorm\ORM;
+define('EXTERNAL_RELATION_MARKER', '::');
 
 abstract class Primitive
 {
@@ -69,6 +70,9 @@ abstract class Primitive
     }
 
     /**
+     * This serialization should occur after primary entity is saved, to ensure it already has an id.
+     * @see Primitive::save Save logic is handled by this.
+     *
      * @param $obj object to serialize (usually array of ids)
      * @param $connectorTable
      * @param $currentEntityField
@@ -81,8 +85,7 @@ abstract class Primitive
         $i = 1;
         foreach ($obj as $id) {
             $result []= [
-                $currentEntityField => $this->getId(), // TODO: if session is new, it may not have an ID.
-                                                       // TODO Make sure that queries are executed after id is assigned.
+                $currentEntityField => $this->getId(),
                 $foreignEntityField => $id,
                 'order' => $i++ // hardcoded column name; usually order matters, so it should exist in every * <-> *
             ];
@@ -102,7 +105,7 @@ abstract class Primitive
         $items = $this->_db
             ->table($connectorTable)
             ->where($currentEntityField, $this->getId())
-            ->asArray();
+            ->findArray();
 
         usort($items, function(&$item1, &$item2) {
             return $item1['order'] - $item2['order'];
@@ -198,11 +201,22 @@ abstract class Primitive
     {
         $id = $this->getId();
         if (empty($id)) {
-            return $this->_create();
+            $result = $this->_create();
+        } else {
+            $instance = $this->_db->table(static::$_table)->findOne($id);
+            $result = ($instance ? $this->_save($instance) : $this->_create());
         }
 
-        $instance = $this->_db->table(static::$_table)->findOne($id);
-        return ($instance ? $this->_save($instance) : $this->_create());
+        // external relations, just call serializer
+        // Need to invoke this after save to ensure current entity has an id
+        $fieldsTransform = $this->_getFieldsTransforms();
+        foreach (static::$_fieldsMapping as $dst => $src) {
+            if (strpos($dst, EXTERNAL_RELATION_MARKER) === 0) {
+                call_user_func($fieldsTransform[$src]['serialize'], $this->$src);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -215,8 +229,7 @@ abstract class Primitive
         $fieldsTransform = $this->_getFieldsTransforms();
 
         foreach (static::$_fieldsMapping as $dst => $src) {
-            if (strpos($dst, '::') === 0) { // external relation, just call serializer
-                call_user_func($fieldsTransform[$src]['serialize'], $this->$src);
+            if (strpos($dst, EXTERNAL_RELATION_MARKER) === 0) {
                 continue;
             }
 

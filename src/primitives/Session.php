@@ -32,6 +32,7 @@ require_once __DIR__ . '/SessionResults.php';
 class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';
+    const REL_USER = 'session_user';
 
     protected static $_fieldsMapping = [
         'id'                    => '_id',
@@ -48,7 +49,7 @@ class SessionPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
-            '_playersIds'   => $this->_externalManyToManyTransform('session_user', 'session_id', 'user_id'),
+            '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'user_id'),
             '_eventId'      => $this->_integerTransform(),
             '_id'           => $this->_nullableIntegerTransform(),
             '_current'      => [
@@ -193,20 +194,25 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * Find items by indexed search by several fields
+     * Find items by external reference
      *
      * @param IDb $db
-     * @param $player
-     * @param $event
-     * @return Primitive|Primitive[]
+     * @param $playerId
+     * @param $eventId
+     * @return SessionPrimitive[]
      */
-    public static function findByPlayerAndEvent(IDb $db, $player, $event)
+    public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
     {
-        $orm = $db->table(static::$_table);
+        $playerId = intval($playerId);
+        $eventId = intval($eventId);
 
-        $player = intval($player);
-        $orm->where('event_id', $event)->whereRaw("FIND_IN_SET('players', {$player})"); // TODO: check sqlite and postgres syntax
-
+        // TODO: here we can precache players, ids are known as GROUP_CONCAT(player_id)
+        $orm = $db->table(self::REL_USER)
+            ->select(self::$_table . '.*')
+            ->join(self::$_table, [self::$_table . '.id', '=', self::REL_USER . '.session_id'])
+            ->where(self::REL_USER . '.user_id', $playerId)
+            ->where(self::$_table . '.id', $eventId)
+            ->groupBy(self::$_table . '.id');
         $result = $orm->findArray();
         if (empty($result)) {
             return [];
