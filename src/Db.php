@@ -74,6 +74,14 @@ class Db implements IDb
         return ORM::forTable($tableName);
     }
 
+    public function debug()
+    {
+        return [
+            'LAST_QUERY' => ORM::getLastStatement()->queryString,
+            'ERROR_INFO' => ORM::getLastStatement()->errorInfo()
+        ];
+    }
+
     public function lastInsertId()
     {
         switch (true) {

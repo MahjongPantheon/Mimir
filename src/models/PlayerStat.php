@@ -108,6 +108,7 @@ class PlayerStatModel extends Model
 
         return [
             'scores'    => $scoreHistory,
+            // TODO: FIXME - чот ерунда какая-то возвращается отсюда
             'players'   => $this->_fetchPlayersInfo($scoreHistory)
         ];
     }
@@ -191,6 +192,7 @@ class PlayerStatModel extends Model
                 break;
                 default:;
             }
+            return $acc;
         }, [
             'ron'       => 0,
             'tsumo'     => 0,
@@ -269,6 +271,7 @@ class PlayerStatModel extends Model
     protected function _fetchGamesHistory(EventPrimitive $event, PlayerPrimitive $player)
     {
         $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $player->getId(), $event->getId());
+
         $sessionIds = array_map(function(SessionPrimitive $s) {
             return $s->getId();
         }, $sessions);

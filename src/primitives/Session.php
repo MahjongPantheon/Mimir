@@ -207,13 +207,14 @@ class SessionPrimitive extends Primitive
         $eventId = intval($eventId);
 
         // TODO: here we can precache players, ids are known as GROUP_CONCAT(player_id)
-        $orm = $db->table(self::REL_USER)
+        $orm = $db->table(self::$_table)
             ->select(self::$_table . '.*')
-            ->join(self::$_table, [self::$_table . '.id', '=', self::REL_USER . '.session_id'])
+            ->leftOuterJoin(self::REL_USER, [self::REL_USER . '.session_id', '=', self::$_table . '.id'])
             ->where(self::REL_USER . '.user_id', $playerId)
-            ->where(self::$_table . '.id', $eventId)
+            ->where(self::$_table . '.event_id', $eventId)
             ->groupBy(self::$_table . '.id');
         $result = $orm->findArray();
+
         if (empty($result)) {
             return [];
         }

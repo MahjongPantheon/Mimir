@@ -37,4 +37,6 @@ interface IDb
      * @return string
      */
     public function upsertQuery($table, $data);
+
+    public function debug();
 }
