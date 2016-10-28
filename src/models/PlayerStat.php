@@ -27,19 +27,19 @@ class PlayerStatModel extends Model
      * @param $eventId
      * @param $playerId
      * @return array
-     * @throws InvalidParametersException
+     * @throws EntityNotFoundException
      */
     public function getStats($eventId, $playerId)
     {
         $event = EventPrimitive::findById($this->_db, [$eventId]);
         if (empty($event)) {
-            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+            throw new EntityNotFoundException('Event id#' . $eventId . ' not found in DB');
         }
         $event = $event[0];
 
         $player = PlayerPrimitive::findById($this->_db, [$playerId]);
         if (empty($player)) {
-            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
+            throw new EntityNotFoundException('Player id#' . $playerId . ' not found in DB');
         }
         $player = $player[0];
 

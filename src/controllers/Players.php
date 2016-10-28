@@ -86,4 +86,19 @@ class PlayersController extends Controller
         $this->_log->addInfo('Successfully updated player id #' . $player->getId());
         return $player->getId();
     }
+
+    /**
+     * @param int $playerId player to get stats for
+     * @param int $eventId event to get stats for
+     * @throws EntityNotFoundException
+     * @return array of statistics
+     */
+    public function getStats($playerId, $eventId)
+    {
+        $this->_log->addInfo('Getting stats for player id #' . $playerId . ' at event id #' . $eventId);
+        $stats = (new PlayerStatModel($this->_db))
+            ->getStats($eventId, $playerId);
+        $this->_log->addInfo('Successfully got stats for player id #' . $playerId . ' at event id #' . $eventId);
+        return $stats;
+    }
 }
