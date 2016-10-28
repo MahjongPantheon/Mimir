@@ -98,10 +98,10 @@ class PlayerStatModel extends Model
 
             return array_map(function (SessionResultsPrimitive $sr, $playerId) {
                 return [
-                    'player_id'     => $playerId,
-                    'score'         => $sr->getScore(),
-                    'rating_delta'  => $sr->getRatingDelta(),
-                    'place'         => $sr->getPlace()
+                    'player_id'     => (int)$playerId,
+                    'score'         => (int)$sr->getScore(),
+                    'rating_delta'  => (float)$sr->getRatingDelta(),
+                    'place'         => (int)$sr->getPlace()
                 ];
             }, array_values($results), array_keys($results));
         }, $games);
@@ -129,9 +129,9 @@ class PlayerStatModel extends Model
         }, []);
         $players = array_map(function (PlayerPrimitive $p) {
             return [
-                'id' => $p->getId(),
-                'display_name' => $p->getDisplayName(),
-                'tenhou_id' => $p->getTenhouId(),
+                'id'            => (int)$p->getId(),
+                'display_name'  => $p->getDisplayName(),
+                'tenhou_id'     => $p->getTenhouId(),
             ];
         }, PlayerPrimitive::findById($this->_db, $playerIds));
 
