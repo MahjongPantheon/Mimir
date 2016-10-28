@@ -108,7 +108,6 @@ class PlayerStatModel extends Model
 
         return [
             'scores'    => $scoreHistory,
-            // TODO: FIXME - чот ерунда какая-то возвращается отсюда
             'players'   => $this->_fetchPlayersInfo($scoreHistory)
         ];
     }
@@ -124,9 +123,9 @@ class PlayerStatModel extends Model
     protected function _fetchPlayersInfo($scoreHistory)
     {
         $playerIds = array_reduce($scoreHistory, function ($acc, $item) {
-            return $acc + array_map(function ($playerInfo) {
+            return array_merge($acc, array_map(function ($playerInfo) {
                 return $playerInfo['player_id'];
-            }, $item);
+            }, $item));
         }, []);
         $players = array_map(function (PlayerPrimitive $p) {
             return [

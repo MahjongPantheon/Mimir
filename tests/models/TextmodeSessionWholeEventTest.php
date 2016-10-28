@@ -67,11 +67,15 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         foreach ($games as $log) {
             $model->addGame($this->_event->getId(), $log);
         }
-
         // no exceptions - ok!
 
+        // Make some stats and check them
         $statModel = new PlayerStatModel($this->_db);
         $stats = $statModel->getStats($this->_event->getId(), '10');
-        print_r($stats);
+        $this->assertEquals(8 + 1, $stats['rating_history']); // initial + 8 games
+        $this->assertEquals(8, count($stats['score_history']));
+        $this->assertGreaterThan(12, $statModel['players_info']);
+        $this->assertEquals(8, array_sum($statModel['places_summary']));
+        
     }
 }
