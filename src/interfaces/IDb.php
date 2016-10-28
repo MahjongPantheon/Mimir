@@ -30,4 +30,13 @@ interface IDb
      * @return int
      */
     public function lastInsertId();
+
+    /**
+     * @param $table
+     * @param $data
+     * @return string
+     */
+    public function upsertQuery($table, $data);
+
+    public function debug();
 }

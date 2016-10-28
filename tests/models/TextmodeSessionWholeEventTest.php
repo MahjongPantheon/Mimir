@@ -19,9 +19,12 @@ namespace Riichi;
 
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/TextmodeSession.php';
+require_once __DIR__ . '/../../src/models/PlayerStat.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../util/Db.php';
+
+use \JsonSchema\Validator;
 
 /**
  * Class SessionTest: integration test suite
@@ -61,10 +64,32 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
             return $p;
         }, $playerNames);
 
-        $model = (new TextmodeSessionModel($this->_db));
+        $model = new TextmodeSessionModel($this->_db);
 
         foreach ($games as $log) {
             $model->addGame($this->_event->getId(), $log);
         }
+        // no exceptions - ok!
+
+        // Make some stats and check them
+        $statModel = new PlayerStatModel($this->_db);
+        $stats = $statModel->getStats($this->_event->getId(), '10');
+        $this->assertEquals(8 + 1, count($stats['rating_history'])); // initial + 8 games
+        $this->assertEquals(8, count($stats['score_history']));
+        $this->assertGreaterThan(12, count($stats['players_info']));
+        $this->assertEquals(8, array_sum($stats['places_summary']));
+
+        // check schema
+        $validator = new Validator();
+        $schema = json_decode(file_get_contents(__DIR__ . '/../../src/validators/playerStatSchema.json'));
+        $validator->check(json_decode(json_encode($stats)), $schema);
+        $this->assertEquals(
+            true,
+            $validator->isValid(),
+            implode("", array_map(function ($error) {
+                return sprintf("[%s] %s\n", $error['property'], $error['message']);
+            }, $validator->getErrors()))
+        );
+        $this->assertEquals([], $validator->getErrors());
     }
 }

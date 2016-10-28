@@ -22,6 +22,8 @@ require_once __DIR__ . '/Date.php';
 use Monolog\Logger;
 use Idiorm\ORM;
 
+define('EXTERNAL_RELATION_MARKER', '::');
+
 abstract class Primitive
 {
     /**
@@ -65,6 +67,73 @@ abstract class Primitive
         return [
             'serialize' => [$this, '_serializeCsv'],
             'deserialize' => [$this, '_deserializeCsv']
+        ];
+    }
+
+    /**
+     * This serialization should occur after primary entity is saved, to ensure it already has an id.
+     * @see Primitive::save Save logic is handled by this.
+     *
+     * @param $obj object to serialize (usually array of ids)
+     * @param $connectorTable
+     * @param $currentEntityField
+     * @param $foreignEntityField
+     * @return bool
+     */
+    protected function _serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField)
+    {
+        $result = [];
+        $i = 1;
+        foreach ($obj as $id) {
+            $result []= [
+                $currentEntityField => $this->getId(),
+                $foreignEntityField => $id,
+                'order' => $i++ // hardcoded column name; usually order matters, so it should exist in every * <-> *
+            ];
+        }
+
+        return $this->_db->upsertQuery($connectorTable, $result);
+    }
+
+    /**
+     * @param $connectorTable
+     * @param $currentEntityField
+     * @param $foreignEntityField
+     * @return array (usually array of ids)
+     */
+    protected function _deserializeManyToMany($connectorTable, $currentEntityField, $foreignEntityField)
+    {
+        $items = $this->_db
+            ->table($connectorTable)
+            ->where($currentEntityField, $this->getId())
+            ->findArray();
+
+        usort($items, function (&$item1, &$item2) {
+            return $item1['order'] - $item2['order'];
+        });
+
+        return array_map(function ($item) use ($foreignEntityField) {
+            return $item[$foreignEntityField];
+        }, $items);
+    }
+
+    /**
+     * Transform for many-to-many relation fields
+     *
+     * @param $connectorTable
+     * @param $currentEntityField
+     * @param $foreignEntityField
+     * @return array
+     */
+    protected function _externalManyToManyTransform($connectorTable, $currentEntityField, $foreignEntityField)
+    {
+        return [
+            'serialize' => function ($obj) use ($connectorTable, $currentEntityField, $foreignEntityField) {
+                return $this->_serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField);
+            },
+            'deserialize' => function () use ($connectorTable, $currentEntityField, $foreignEntityField) {
+                return $this->_deserializeManyToMany($connectorTable, $currentEntityField, $foreignEntityField);
+            }
         ];
     }
 
@@ -133,11 +202,22 @@ abstract class Primitive
     {
         $id = $this->getId();
         if (empty($id)) {
-            return $this->_create();
+            $result = $this->_create();
+        } else {
+            $instance = $this->_db->table(static::$_table)->findOne($id);
+            $result = ($instance ? $this->_save($instance) : $this->_create());
         }
 
-        $instance = $this->_db->table(static::$_table)->findOne($id);
-        return ($instance ? $this->_save($instance) : $this->_create());
+        // external relations, just call serializer
+        // Need to invoke this after save to ensure current entity has an id
+        $fieldsTransform = $this->_getFieldsTransforms();
+        foreach (static::$_fieldsMapping as $dst => $src) {
+            if (strpos($dst, EXTERNAL_RELATION_MARKER) === 0) {
+                call_user_func($fieldsTransform[$src]['serialize'], $this->$src);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -150,6 +230,10 @@ abstract class Primitive
         $fieldsTransform = $this->_getFieldsTransforms();
 
         foreach (static::$_fieldsMapping as $dst => $src) {
+            if (strpos($dst, EXTERNAL_RELATION_MARKER) === 0) {
+                continue;
+            }
+
             $instance->set(
                 $dst,
                 empty($fieldsTransform[$src]['serialize'])

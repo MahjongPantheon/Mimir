@@ -66,11 +66,20 @@ class Db implements IDb
      * General entry point for all queries
      *
      * @param $tableName
+     * @throws \Exception
      * @return \Idiorm\ORM
      */
     public function table($tableName)
     {
         return ORM::forTable($tableName);
+    }
+
+    public function debug()
+    {
+        return [
+            'LAST_QUERY' => ORM::getLastStatement()->queryString,
+            'ERROR_INFO' => ORM::getLastStatement()->errorInfo()
+        ];
     }
 
     public function lastInsertId()
@@ -87,6 +96,96 @@ class Db implements IDb
             case strpos($this->_connString, 'sqlite') === 0:
                 ORM::rawExecute('SELECT last_insert_rowid()');
                 return ORM::getLastStatement()->fetchColumn();
+                break;
+            default:
+                throw new \Exception(
+                    'Sorry, your DBMS is not supported. You may want to try implementing ' .
+                    'last_insert_id function for your DB in place where this exception thrown from. ' .
+                    'Check it out, this might be enough to make it work!'
+                );
+        }
+    }
+
+    /**
+     * Basic upsert.
+     * All fields are casted to integer for safer operations.
+     * This functionality is used for many-to-many relations,
+     * so integer should be enough.
+     *
+     * This should not be used for external data processing.
+     * May have some vulnerabilities on field names escaping.
+     *
+     * Warning:
+     * Don't touch this crap until you totally know what are you doing :)
+     *
+     * @param $table
+     * @param $data [ [ field => value, field2 => value2 ], [ ... ] ] - nested arrays should be monomorphic
+     * @throws \Exception
+     * @return boolean
+     */
+    public function upsertQuery($table, $data)
+    {
+        $data = array_map(function ($dataset) {
+            foreach ($dataset as $k => $v) {
+                $dataset[$k] = intval($v); // Maybe use PDO::quote here in future
+            }
+            return $dataset;
+        }, $data);
+
+        switch (true) {
+            case strpos($this->_connString, 'mysql') === 0:
+                $fields = implode(', ', array_map(function ($field) {
+                    return '`' . $field . '`';
+                }, array_keys(reset($data))));
+
+                $values = '(' . implode('), (', array_map(function ($dataset) {
+                    return implode(', ', array_values($dataset));
+                }, $data)) . ')';
+
+                $assignments = implode(', ', array_map(function ($field) {
+                    return $field . '=VALUES(' . $field . ')';
+                }, $fields));
+
+                return ORM::rawExecute("
+                    INSERT INTO {$table} ({$fields}) VALUES {$values}
+                    ON DUPLICATE KEY UPDATE {$assignments}
+                ");
+                break;
+            case strpos($this->_connString, 'pgsql') === 0:
+                $fields = implode(', ', array_map(function ($field) {
+                    return '"' . $field . '"';
+                }, array_keys(reset($data))));
+
+                $values = '(' . implode('), (', array_map(function ($dataset) {
+                    return implode(', ', array_values($dataset));
+                }, $data)) . ')';
+
+                $assignments = implode(', ', array_map(function ($field) {
+                    return $field . '= excluded.' . $field;
+                }, $fields));
+
+                // Postgresql >= 9.5
+                return ORM::rawExecute("
+                    INSERT INTO {$table} ({$fields}) VALUES {$values}
+                    ON CONFLICT ({$table}_uniq) DO UPDATE SET {$assignments}
+                ");
+                break;
+            case strpos($this->_connString, 'sqlite') === 0:
+                // sqlite does not support multi-row upsert :( loop manually here
+
+                $fields = implode(', ', array_map(function ($field) {
+                    return '"' . $field . '"';
+                }, array_keys(reset($data))));
+
+                $values = array_map(function ($dataset) {
+                    return implode(', ', array_values($dataset));
+                }, $data);
+
+                return array_reduce($values, function ($acc, $dataset) use ($table, $fields) {
+                    return $acc && ORM::rawExecute("
+                        REPLACE INTO {$table} ({$fields}) VALUES ({$dataset});
+                    ");
+                }, true);
                 break;
             default:
                 throw new \Exception(

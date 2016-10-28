@@ -70,6 +70,14 @@ class Db implements IDb
         return ORM::forTable($tableName);
     }
 
+    public function debug()
+    {
+        return [
+            'LAST_QUERY' => ORM::getLastStatement()->queryString,
+            'ERROR_INFO' => ORM::getLastStatement()->errorInfo()
+        ];
+    }
+
     /**
      * @return int|string
      */
@@ -77,5 +85,36 @@ class Db implements IDb
     {
         ORM::rawExecute('SELECT last_insert_rowid()');
         return ORM::getLastStatement()->fetchColumn();
+    }
+
+    /**
+     * @param $table
+     * @param $data
+     * @return string
+     */
+    public function upsertQuery($table, $data)
+    {
+        $data = array_map(function ($dataset) {
+            foreach ($dataset as $k => $v) {
+                $dataset[$k] = intval($v); // Maybe use PDO::quote here in future
+            }
+            return $dataset;
+        }, $data);
+
+        // sqlite does not support multi-row upsert :( loop manually here
+
+        $fields = implode(', ', array_map(function ($field) {
+            return '"' . $field . '"';
+        }, array_keys(reset($data))));
+
+        $values = array_map(function ($dataset) {
+            return implode(', ', array_values($dataset));
+        }, $data);
+
+        return array_reduce($values, function ($acc, $dataset) use ($table, $fields) {
+            return $acc && ORM::rawExecute("
+                REPLACE INTO {$table} ({$fields}) VALUES ({$dataset});
+            ");
+        }, true);
     }
 }

@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "rating_history": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "score_history": {
+      "type": "object",
+      "patternProperties": {
+        "^\\d+$": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "player_id": {
+                "type": "integer"
+              },
+              "score": {
+                "type": "integer"
+              },
+              "rating_delta": {
+                "type": "number"
+              },
+              "place": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "players_info": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "tenhou_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "places_summary": {
+      "type": "object",
+      "properties": {
+        "1": {
+          "type": "integer"
+        },
+        "2": {
+          "type": "integer"
+        },
+        "3": {
+          "type": "integer"
+        },
+        "4": {
+          "type": "integer"
+        }
+      }
+    },
+    "total_played_games": {
+      "type": "integer"
+    },
+    "win_summary": {
+      "type": "object",
+      "properties": {
+        "ron": {
+          "type": "integer"
+        },
+        "tsumo": {
+          "type": "integer"
+        },
+        "chombo": {
+          "type": "integer"
+        },
+        "feed": {
+          "type": "integer"
+        },
+        "tsumofeed": {
+          "type": "integer"
+        }
+      }
+    },
+    "hands_value_summary": {
+      "type": "object",
+      "patternProperties": {
+        "^-?\\d+$": {
+          "type": "integer"
+        }
+      }
+    },
+    "yaku_summary": {
+      "type": "object",
+      "patternProperties": {
+        "^\\d+$": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "rating_history",
+    "score_history",
+    "players_info",
+    "places_summary",
+    "total_played_games",
+    "win_summary",
+    "hands_value_summary",
+    "yaku_summary"
+  ]
+}
+

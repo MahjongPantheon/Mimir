@@ -32,6 +32,7 @@ require_once __DIR__ . '/SessionResults.php';
 class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';
+    const REL_USER = 'session_user';
 
     protected static $_fieldsMapping = [
         'id'                    => '_id',
@@ -40,7 +41,7 @@ class SessionPrimitive extends Primitive
         'replay_hash'           => '_replayHash',
         'orig_link'             => '_origLink',
         'play_date'             => '_playDate',
-        'players'               => '_playersIds',
+        '::session_user'        => '_playersIds', // external many-to-many relation
         'status'                => '_status',
         'intermediate_results'  => '_current',
     ];
@@ -48,7 +49,7 @@ class SessionPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
-            '_playersIds'   => $this->_csvTransform(),
+            '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'user_id'),
             '_eventId'      => $this->_integerTransform(),
             '_id'           => $this->_nullableIntegerTransform(),
             '_current'      => [
@@ -190,6 +191,37 @@ class SessionPrimitive extends Primitive
     {
         // TODO: Finished games are likely to be too much. Make pagination here.
         return self::_findBy($db, 'status', $stateList);
+    }
+
+    /**
+     * Find items by external reference
+     *
+     * @param IDb $db
+     * @param $playerId
+     * @param $eventId
+     * @return SessionPrimitive[]
+     */
+    public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
+    {
+        $playerId = intval($playerId);
+        $eventId = intval($eventId);
+
+        // TODO: here we can precache players, ids are known as GROUP_CONCAT(player_id)
+        $orm = $db->table(self::$_table)
+            ->select(self::$_table . '.*')
+            ->leftOuterJoin(self::REL_USER, [self::REL_USER . '.session_id', '=', self::$_table . '.id'])
+            ->where(self::REL_USER . '.user_id', $playerId)
+            ->where(self::$_table . '.event_id', $eventId)
+            ->groupBy(self::$_table . '.id');
+        $result = $orm->findArray();
+
+        if (empty($result)) {
+            return [];
+        }
+
+        return array_map(function ($data) use ($db) {
+            return self::_recreateInstance($db, $data);
+        }, $result);
     }
 
     /**

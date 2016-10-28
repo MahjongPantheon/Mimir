@@ -228,6 +228,14 @@ class SessionResultsPrimitive extends Primitive
     /**
      * @return int
      */
+    public function getSessionId()
+    {
+        return $this->_sessionId;
+    }
+
+    /**
+     * @return int
+     */
     public function getId()
     {
         return $this->_id;
