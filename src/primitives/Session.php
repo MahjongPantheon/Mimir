@@ -134,7 +134,7 @@ class SessionPrimitive extends Primitive
      */
     protected $_current;
 
-    public function __construct(Db $db)
+    public function __construct(IDb $db)
     {
         parent::__construct($db);
         $this->_playDate = date('Y-m-d H:i:s'); // may be actualized on restore
@@ -180,17 +180,22 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * Find sessions by state (indexed search)
+     * Find sessions by state (indexed search, paginated)
      *
      * @param IDb $db
-     * @param string[] $stateList
+     * @param integer $eventId
+     * @param string $state
+     * @param integer $offset
+     * @param integer $limit
      * @throws \Exception
      * @return SessionPrimitive[]
      */
-    public static function findByStatus(IDb $db, $stateList)
+    public static function findByEventAndStatus(IDb $db, $eventId, $state, $offset = 0, $limit = null)
     {
-        // TODO: Finished games are likely to be too much. Make pagination here.
-        return self::_findBy($db, 'status', $stateList);
+        return self::_findBySeveral($db,
+            ['status' => [$state], 'event_id' => [$eventId]],
+            ['limit' => $limit, 'offset' => $offset]
+        );
     }
 
     /**

@@ -151,7 +151,7 @@ class PlayerHistoryPrimitive extends Primitive
         return self::_findBySeveral($db, [
             'user_id'  => [$playerId],
             'event_id' => [$eventId]
-        ], true);
+        ], ['onlyLast' => true]);
     }
 
     /**
@@ -165,7 +165,7 @@ class PlayerHistoryPrimitive extends Primitive
         return self::_findBySeveral($db, [
             'user_id'    => [$playerId],
             'session_id' => [$sessionId]
-        ], true); // should be only one or none, getting last is ok
+        ], ['onlyLast' => true]); // should be only one or none, getting last is ok
     }
 
     protected function _create()

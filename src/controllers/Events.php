@@ -76,4 +76,29 @@ class EventsController extends Controller
         $this->_log->addInfo('Successfully received rating table for event id# ' . $eventId);
         return $table;
     }
+
+    /**
+     * Get last games sorted by date (latest go first)
+     *
+     * @param integer $eventId
+     * @param integer $limit
+     * @param integer $offset
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getLastGames($eventId, $limit, $offset)
+    {
+        $this->_log->addInfo('Getting games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $table = (new EventModel($this->_db))
+            ->getLastFinishedGames($event[0], $limit, $offset);
+
+        $this->_log->addInfo('Successfully got games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);
+        return $table;
+    }
 }

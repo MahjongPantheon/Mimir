@@ -319,11 +319,14 @@ abstract class Primitive
      *
      * @param IDb $db
      * @param array $conditions
-     * @param bool $onlyLast return only last item (when sorted by primary key)
+     * @param array $params
+     *      $params.onlyLast => return only last item (when sorted by primary key)
+     *      $params.limit    => return no more items than this value
+     *      $params.offset   => return items starting at this index
      * @throws \Exception
      * @return Primitive|Primitive[]
      */
-    protected static function _findBySeveral(IDb $db, $conditions, $onlyLast = false)
+    protected static function _findBySeveral(IDb $db, $conditions, $params = [])
     {
         if (!is_array($conditions)) {
             throw new \Exception("Conditions should be assoc array: key => [values...]");
@@ -334,7 +337,15 @@ abstract class Primitive
             $orm = $orm->whereIn($key, $identifiers);
         }
 
-        if ($onlyLast) {
+        if (!empty($params['limit'])) {
+            $orm->limit(abs(intval($params['limit'])));
+        }
+
+        if (!empty($params['offset'])) {
+            $orm->offset(abs(intval($params['offset'])));
+        }
+
+        if (!empty($params['onlyLast'])) {
             $orm = $orm->orderByDesc('id'); // primary key
             $item = $orm->findOne();
             if (!empty($item)) {

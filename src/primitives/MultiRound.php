@@ -44,6 +44,7 @@ class MultiRoundPrimitive extends RoundPrimitive
 
     public function __construct(IDb $db)
     {
+        // Should not call parent constructor here
         $this->_db = $db;
     }
 
@@ -62,12 +63,12 @@ class MultiRoundPrimitive extends RoundPrimitive
     }
 
     /**
-     * @param Db $db
+     * @param IDb $db
      * @param SessionPrimitive $session
      * @param $roundData
      * @return RoundPrimitive|MultiRoundPrimitive
      */
-    public static function createFromData(Db $db, SessionPrimitive $session, $roundData)
+    public static function createFromData(IDb $db, SessionPrimitive $session, $roundData)
     {
         if ($roundData['outcome'] !== 'multiron') {
             return RoundPrimitive::createFromData($db, $session, $roundData);
@@ -92,6 +93,18 @@ class MultiRoundPrimitive extends RoundPrimitive
         return $item;
     }
 
+    /**
+     * @param IDb $db
+     * @param RoundPrimitive[] $rounds
+     * @return MultiRoundPrimitive
+     */
+    public static function createFromRounds(IDb $db, $rounds)
+    {
+        $item = new self($db);
+        $item->_rounds = $rounds;
+        return $item;
+    }
+
     public function save()
     {
         $success = true;
@@ -113,6 +126,9 @@ class MultiRoundPrimitive extends RoundPrimitive
     /**
      * @deprecated
      * For unit testing only
+     *
+     * @param $rounds
+     * @return MultiRoundPrimitive
      */
     public function _setRounds($rounds)
     {
@@ -262,7 +278,7 @@ class MultiRoundPrimitive extends RoundPrimitive
 
     public function getSessionId()
     {
-        throw new InvalidParametersException('MultiRound should not be treated as round');
+        return $this->_rounds[0]->getSessionId();
     }
 
     public function getTempaiIds()

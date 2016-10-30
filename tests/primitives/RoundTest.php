@@ -148,57 +148,6 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
     }
 
-    public function testFindRoundByEvent()
-    {
-        $newRound = new RoundPrimitive($this->_db);
-        $newRound
-            ->setSession($this->_session)
-            ->setOutcome('ron')
-            ->setWinner($this->_players[2])
-            ->setLoser($this->_players[3])
-            ->setRoundIndex(1);
-        $newRound->save();
-
-        $roundsCopy = RoundPrimitive::findByEventIds($this->_db, [$this->_event->getId()]);
-        $this->assertEquals(1, count($roundsCopy));
-        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
-        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
-    }
-
-    public function testFindRoundByWinner()
-    {
-        $newRound = new RoundPrimitive($this->_db);
-        $newRound
-            ->setSession($this->_session)
-            ->setWinner($this->_players[0])
-            ->setOutcome('ron')
-            ->setLoser($this->_players[3])
-            ->setRoundIndex(1);
-        $newRound->save();
-
-        $roundsCopy = RoundPrimitive::findByWinnerIds($this->_db, [$this->_players[0]->getId()]);
-        $this->assertEquals(1, count($roundsCopy));
-        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
-        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
-    }
-
-    public function testFindRoundByLoser()
-    {
-        $newRound = new RoundPrimitive($this->_db);
-        $newRound
-            ->setSession($this->_session)
-            ->setWinner($this->_players[2])
-            ->setLoser($this->_players[0])
-            ->setOutcome('ron')
-            ->setRoundIndex(1);
-        $newRound->save();
-
-        $roundsCopy = RoundPrimitive::findByLoserIds($this->_db, [$this->_players[0]->getId()]);
-        $this->assertEquals(1, count($roundsCopy));
-        $this->assertEquals('ron', $roundsCopy[0]->getOutcome());
-        $this->assertTrue($newRound !== $roundsCopy[0]); // different objects!
-    }
-
     public function testUpdateRound()
     {
         $newRound = new RoundPrimitive($this->_db);
