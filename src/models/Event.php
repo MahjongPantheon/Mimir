@@ -33,7 +33,7 @@ class EventModel extends Model
             $playersHistoryItems = array_reverse($playersHistoryItems);
         }
 
-        return array_map(function(PlayerHistoryPrimitive $el) use (&$playerItems) {
+        return array_map(function (PlayerHistoryPrimitive $el) use (&$playerItems) {
             return [
                 'id'            => (int)$el->getPlayerId(),
                 'name'          => $playerItems[$el->getPlayerId()]->getDisplayName(),
@@ -50,7 +50,7 @@ class EventModel extends Model
      */
     protected function _getPlayers($playersHistoryItems)
     {
-        $ids = array_map(function(PlayerHistoryPrimitive $el) {
+        $ids = array_map(function (PlayerHistoryPrimitive $el) {
             return $el->getPlayerId();
         }, $playersHistoryItems);
         $players = PlayerPrimitive::findById($this->_db, $ids);
@@ -73,7 +73,7 @@ class EventModel extends Model
     {
         switch ($orderBy) {
             case 'name':
-                usort($playersHistoryItems, function(
+                usort($playersHistoryItems, function (
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) use (&$playerItems) {
@@ -84,7 +84,7 @@ class EventModel extends Model
                 });
                 break;
             case 'rating':
-                usort($playersHistoryItems, function(
+                usort($playersHistoryItems, function (
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) {
@@ -95,7 +95,7 @@ class EventModel extends Model
                 });
                 break;
             case 'avg_place':
-                usort($playersHistoryItems, function(
+                usort($playersHistoryItems, function (
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) {

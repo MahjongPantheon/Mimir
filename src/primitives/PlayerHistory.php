@@ -140,7 +140,7 @@ class PlayerHistoryPrimitive extends Primitive
             $orm->selectExpr('max(id)', 'mx')
                 ->where('event_id', $eventId)
                 ->groupBy('user_id');
-            $ids = array_map(function($el) {
+            $ids = array_map(function ($el) {
                 return $el['mx'];
             }, $orm->findArray());
 
