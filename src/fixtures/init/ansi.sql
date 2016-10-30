@@ -162,20 +162,9 @@ CREATE TABLE "player_history" (
   "session_id" integer not null,
   "event_id" integer not null,
   "rating" float not null,
+  "avg_place" float not null,
+  "games_played" integer not null,
   foreign key ("user_id") references "user" ("id"),
   foreign key ("session_id") references "session" ("id"),
   foreign key ("event_id") references "event" ("id")
-);
-
--- User stats
-DROP TABLE
--- IF EXISTS
-   "user_stats";
-CREATE TABLE "user_stats" (
-  "id" integer, -- serial
-  primary key ("id"),
-  "user_id" integer not null,
-  "period" integer, -- Aggregation period for stats (in days).
-  "stats" text, -- JSON of many stats: places distribution, count of wins and loses, etc
-  foreign key ("user_id") references "user" ("id")
 );

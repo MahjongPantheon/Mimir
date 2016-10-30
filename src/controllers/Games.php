@@ -24,20 +24,6 @@ require_once __DIR__ . '/../Controller.php';
 
 class GamesController extends Controller
 {
-    /**
-     * Get event rules configuration
-     *
-     * @param $eventId
-     * @return InvalidParametersException
-     */
-    public function getGameConfig($eventId)
-    {
-        $this->_log->addInfo('Getting config for event id# ' . $eventId);
-        $data = (new InteractiveSessionModel($this->_db))->getGameConfig($eventId);
-        $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
-        return $data;
-    }
-
     // INTERACITVE MODE
 
     /**

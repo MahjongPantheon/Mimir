@@ -32,18 +32,22 @@ class PlayerHistoryPrimitive extends Primitive
     protected static $_table = 'player_history';
 
     protected static $_fieldsMapping = [
-        'id'         => '_id',
-        'user_id'    => '_playerId',
-        'session_id' => '_sessionId',
-        'event_id'   => '_eventId',
-        'rating'     => '_rating'
+        'id'            => '_id',
+        'user_id'       => '_playerId',
+        'session_id'    => '_sessionId',
+        'event_id'      => '_eventId',
+        'rating'        => '_rating',
+        'avg_place'     => '_avgPlace',
+        'games_played'  => '_gamesPlayed'
     ];
 
     protected function _getFieldsTransforms()
     {
         return [
-            '_id' => $this->_nullableIntegerTransform(),
-            '_rating' => $this->_floatTransform()
+            '_id'           => $this->_nullableIntegerTransform(),
+            '_rating'       => $this->_floatTransform(),
+            '_avgPlace'     => $this->_floatTransform(),
+            '_gamesPlayed'  => $this->_integerTransform()
         ];
     }
 
@@ -80,6 +84,14 @@ class PlayerHistoryPrimitive extends Primitive
      * @var float
      */
     protected $_rating;
+    /**
+     * @var float
+     */
+    protected $_avgPlace;
+    /**
+     * @var float
+     */
+    protected $_gamesPlayed;
 
     /**
      * Find history items by local ids (primary key)
@@ -96,13 +108,17 @@ class PlayerHistoryPrimitive extends Primitive
 
     /**
      * @param IDb $db
-     * @param $playerId
-     * @param $eventId
+     * @param int $eventId
+     * @param int $playerId  omit this to get all players histories for event
      * @return PlayerHistoryPrimitive[]
      */
-    public static function findAllByEvent(IDb $db, $playerId, $eventId)
+    public static function findAllByEvent(IDb $db, $eventId, $playerId = null)
     {
         // todo: optional pagination and sorting
+
+        if (!$playerId) {
+            return self::_findBy($db, 'event_id', [$eventId]);
+        }
 
         return self::_findBySeveral($db, [
             'user_id'  => [$playerId],
@@ -112,12 +128,26 @@ class PlayerHistoryPrimitive extends Primitive
 
     /**
      * @param IDb $db
-     * @param $playerId
-     * @param $eventId
-     * @return PlayerHistoryPrimitive
+     * @param int $eventId
+     * @param int $playerId  omit this to get list of last results for all players
+     * @return PlayerHistoryPrimitive|PlayerHistoryPrimitive[]
      */
-    public static function findLastByEvent(IDb $db, $playerId, $eventId)
+    public static function findLastByEvent(IDb $db, $eventId, $playerId = null)
     {
+        if (!$playerId) {
+            // 1) select ids of latest player history items
+            $orm = $db->table(static::$_table);
+            $orm->selectExpr('max(id)', 'mx')
+                ->where('event_id', $eventId)
+                ->groupBy('user_id');
+            $ids = array_map(function ($el) {
+                return $el['mx'];
+            }, $orm->findArray());
+
+            // 2) return id-indexed search results
+            return self::findById($db, $ids);
+        }
+
         return self::_findBySeveral($db, [
             'user_id'  => [$playerId],
             'event_id' => [$eventId]
@@ -226,38 +256,77 @@ class PlayerHistoryPrimitive extends Primitive
     }
 
     /**
+     * For unit tests only! Use makeNewHistoryItem to create instances
+     * with new/modified data
+     *
      * @param float $rating
      * @return PlayerHistoryPrimitive
      */
-    public function setRating($rating)
+    public function _setRating($rating)
     {
         $this->_rating = $rating;
         return $this;
     }
 
     /**
+     * For unit tests only! Use makeNewHistoryItem to create instances
+     * with new/modified data
+     *
+     * @param float $avg
+     * @return PlayerHistoryPrimitive
+     */
+    public function _setAvgPlace($avg)
+    {
+        $this->_avgPlace = $avg;
+        return $this;
+    }
+
+    /**
+     * For unit tests only! Use makeNewHistoryItem to create instances
+     * with new/modified data
+     *
+     * @param int $cnt
+     * @return PlayerHistoryPrimitive
+     */
+    public function _setGamesPlayed($cnt)
+    {
+        $this->_gamesPlayed = $cnt;
+        return $this;
+    }
+
+    /**
+     * Create new history item
+     *
+     * @param Db $db
+     * @param PlayerPrimitive $player
+     * @param SessionPrimitive $session
      * @param float $ratingDelta
+     * @param int $place
      * @throws InvalidParametersException
      * @return PlayerHistoryPrimitive
      */
-    public function changeRating($ratingDelta)
+    public static function makeNewHistoryItem(Db $db, PlayerPrimitive $player, SessionPrimitive $session, $ratingDelta, $place)
     {
-        if (empty($this->_playerId) || empty($this->_sessionId)) {
-            throw new InvalidParametersException('You should set player and session before changing rating');
-        }
-        try {
-            $previousItem = self::findBySession($this->_db, $this->getPlayerId(), $this->getSession());
-        } catch (\Exception $e) {
+        $previousItem = self::findLastByEvent($db, $session->getEventId(), $player->getId());
+
+        if (empty($previousItem)) {
             // This may happen if player has just started to participate in event and has no previous results
-            $previousItem = (new self($this->_db))
-                ->setPlayer($this->_player)
-                ->setSession($this->_session)
-                ->setRating($this->getSession()->getEvent()->getRuleset()->startRating()); // TODO: omg :(
+            $previousItem = (new self($db))
+                ->setPlayer($player)
+                ->setSession($session)
+                ->_setGamesPlayed(0)
+                ->_setAvgPlace(0)
+                ->_setRating($session->getEvent()->getRuleset()->startRating()); // TODO: omg :(
             $previousItem->save();
         }
 
-        $this->setRating($previousItem->getRating() + $ratingDelta);
-        return $this;
+        return (new self($db))
+            ->setPlayer($player)
+            ->setSession($session)
+            ->_setAvgPlace($previousItem->getAvgPlace())
+            ->_setGamesPlayed($previousItem->getGamesPlayed())
+            ->_setRating($previousItem->getRating() + $ratingDelta)
+            ->_updateAvgPlaceAndGamesCount($place);
     }
 
     /**
@@ -266,6 +335,35 @@ class PlayerHistoryPrimitive extends Primitive
     public function getRating()
     {
         return $this->_rating;
+    }
+
+    /**
+     * @param $place
+     * @return PlayerHistoryPrimitive
+     */
+    protected function _updateAvgPlaceAndGamesCount($place)
+    {
+        $placesSum = $this->_gamesPlayed * $this->_avgPlace;
+        $placesSum += $place;
+        $this->_gamesPlayed ++;
+        $this->_avgPlace = floatval($placesSum) / floatval($this->_gamesPlayed);
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAvgPlace()
+    {
+        return $this->_avgPlace;
+    }
+
+    /**
+     * @return float
+     */
+    public function getGamesPlayed()
+    {
+        return $this->_gamesPlayed;
     }
 
     /**

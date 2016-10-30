@@ -30,8 +30,10 @@
  */
 return [
     // client
+    'getGameConfig'     => ['EventsController', 'getGameConfig'],
+    'getRatingTable'    => ['EventsController', 'getRatingTable'],
+
     'addRound'          => ['GamesController', 'addRound'],
-    'getGameConfig'     => ['GamesController', 'getGameConfig'],
     'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
 
     // admin

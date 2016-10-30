@@ -454,10 +454,13 @@ class SessionPrimitive extends Primitive
                 ->setSession($this)
                 ->calc($this->getEvent()->getRuleset(), $this->getCurrentState(), $this->getPlayersIds());
 
-            $userHistoryItem = (new PlayerHistoryPrimitive($this->_db))
-                ->setPlayer($player)
-                ->setSession($this)
-                ->changeRating($result->getRatingDelta());
+            $userHistoryItem = PlayerHistoryPrimitive::makeNewHistoryItem(
+                $this->_db,
+                $player,
+                $this,
+                $result->getRatingDelta(),
+                $result->getPlace()
+            );
 
             return $acc && $result->save() && $userHistoryItem->save();
         }, true);

@@ -339,8 +339,9 @@ abstract class Primitive
             $item = $orm->findOne();
             if (!empty($item)) {
                 $item = $item->asArray();
+            } else {
+                return [];
             }
-
             return self::_recreateInstance($db, $item);
         }
 
