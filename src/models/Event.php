@@ -19,6 +19,204 @@ namespace Riichi;
 
 class EventModel extends Model
 {
+    // ------ Last games related -------
+
+    /**
+     * @param EventPrimitive $event
+     * @param integer $limit
+     * @param integer $offset
+     * @return array
+     */
+    public function getLastFinishedGames(EventPrimitive $event, $limit, $offset)
+    {
+        $games = SessionPrimitive::findByEventAndStatus(
+            $this->_db,
+            $event->getId(),
+            'finished',
+            $offset,
+            $limit
+        );
+
+        $sessionIds = array_map(function (SessionPrimitive $el) {
+            return $el->getId();
+        }, $games);
+
+        /** @var SessionResultsPrimitive[][] $sessionResults */
+        $sessionResults = $this->_getSessionResults($sessionIds); // 1st level: session id, 2nd level: player id
+
+        /** @var RoundPrimitive[][] $rounds */
+        $rounds = $this->_getRounds($sessionIds); // 1st level: session id, 2nd level: numeric index with no meaning
+
+        $result = [
+            'games' => [],
+            'players' => $this->_getPlayersOfGames($games)
+        ];
+
+        foreach ($games as $session) {
+            $result['games'][$session->getId()] = [
+                'date' => $session->getPlayDate(),
+                'players' => array_map('intval', $session->getPlayersIds()),
+                'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
+                    return [
+                        'score'     => (int) $el->getScore(),
+                        'rating'    => (float) $el->getRatingDelta(),
+                        'place'     => (int) $el->getPlace()
+                    ];
+                }, $sessionResults[$session->getId()]),
+                'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $sessionIds
+     * @return RoundPrimitive[][]
+     */
+    protected function _getRounds($sessionIds)
+    {
+        $rounds = RoundPrimitive::findBySessionIds($this->_db, $sessionIds);
+
+        $result = [];
+        foreach ($rounds as $item) {
+            if (empty($result[$item->getSessionId()])) {
+                $result[$item->getSessionId()] = [];
+            }
+            $result[$item->getSessionId()] []= $item;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $sessionIds
+     * @return SessionResultsPrimitive[][]
+     */
+    protected function _getSessionResults($sessionIds)
+    {
+        $results = SessionResultsPrimitive::findBySessionId($this->_db, $sessionIds);
+
+        $result = [];
+        foreach ($results as $item) {
+            if (empty($result[$item->getSessionId()])) {
+                $result[$item->getSessionId()] = [];
+            }
+            $result[$item->getSessionId()][$item->getPlayerId()] = $item;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param SessionPrimitive[] $games
+     * @return array
+     */
+    protected function _getPlayersOfGames($games)
+    {
+        $players = PlayerPrimitive::findById($this->_db, array_reduce($games, function ($acc, SessionPrimitive $el) {
+            return array_merge($acc, $el->getPlayersIds());
+        }, []));
+
+        $result = [];
+        foreach ($players as $player) {
+            $result[$player->getId()] = [
+                'id'            => (int) $player->getId(),
+                'display_name'  => $player->getDisplayName(),
+                'tenhou_id'     => $player->getTenhouId()
+            ];
+        }
+
+        return $result;
+    }
+
+    protected function _formatRound(RoundPrimitive $round)
+    {
+        switch ($round->getOutcome()) {
+            case 'ron':
+                return [
+                    'round_index'   => (int) $round->getRoundIndex(),
+                    'outcome'       => $round->getOutcome(),
+                    'winner_id'     => (int) $round->getWinnerId(),
+                    'loser_id'      => (int) $round->getLoserId(),
+                    'han'           => (int) $round->getHan(),
+                    'fu'            => (int) $round->getFu(),
+                    'yaku'          => $round->getYaku(),
+                    'riichi_bets'   => implode(',', $round->getRiichiIds()),
+                    'dora'          => (int) $round->getDora(),
+                    'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
+                    'kandora'       => (int) $round->getKandora(),
+                    'kanuradora'    => (int) $round->getKanuradora()
+                ];
+            case 'multiron':
+                /** @var MultiRoundPrimitive $mRound */
+                $mRound = $round;
+                $rounds = $mRound->rounds();
+
+                return [
+                    'round_index'   => (int) $rounds[0]->getRoundIndex(),
+                    'outcome'       => $mRound->getOutcome(),
+                    'loser_id'      => (int) $mRound->getLoserId(),
+                    'multi_ron'     => (int) $rounds[0]->getMultiRon(),
+                    'wins'          => array_map(function (RoundPrimitive $round) {
+                        return [
+                            'winner_id'     => (int) $round->getWinnerId(),
+                            'han'           => (int) $round->getHan(),
+                            'fu'            => (int) $round->getFu(),
+                            'yaku'          => $round->getYaku(),
+                            'riichi_bets'   => implode(',', $round->getRiichiIds()),
+                            'dora'          => (int) $round->getDora(),
+                            'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
+                            'kandora'       => (int) $round->getKandora(),
+                            'kanuradora'    => (int) $round->getKanuradora()
+                        ];
+                    }, $rounds)
+                ];
+            case 'tsumo':
+                return [
+                    'round_index'   => (int) $round->getRoundIndex(),
+                    'outcome'       => $round->getOutcome(),
+                    'winner_id'     => (int) $round->getWinnerId(),
+                    'han'           => (int) $round->getHan(),
+                    'fu'            => (int) $round->getFu(),
+                    'yaku'          => $round->getYaku(),
+                    'riichi_bets'   => implode(',', $round->getRiichiIds()),
+                    'dora'          => (int) $round->getDora(),
+                    'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
+                    'kandora'       => (int) $round->getKandora(),
+                    'kanuradora'    => (int) $round->getKanuradora()
+                ];
+            case 'draw':
+                return [
+                    'round_index'   => (int) $round->getRoundIndex(),
+                    'outcome'       => $round->getOutcome(),
+                    'riichi_bets'   => implode(',', $round->getRiichiIds()),
+                    'tempai'        => implode(',', $round->getTempaiIds())
+                ];
+            case 'abort':
+                return [
+                    'round_index'   => $round->getRoundIndex(),
+                    'outcome'       => $round->getOutcome(),
+                    'riichi_bets'   => implode(',', $round->getRiichiIds())
+                ];
+            case 'chombo':
+                return [
+                    'round_index'   => (int) $round->getRoundIndex(),
+                    'outcome'       => $round->getOutcome(),
+                    'loser_id'      => (int) $round->getLoserId()
+                ];
+            default:
+                throw new DatabaseException('Wrong outcome detected! This should not happen - DB corrupted?');
+        }
+    }
+
+    protected function _arrayMapPreserveKeys(callable $cb, $array)
+    {
+        return array_combine(array_keys($array), array_map($cb, array_values($array)));
+    }
+
+    // ------ Rating table related -------
+
     public function getRatingTable(EventPrimitive $event, $orderBy, $order)
     {
         if (!in_array($order, ['asc', 'desc'])) {

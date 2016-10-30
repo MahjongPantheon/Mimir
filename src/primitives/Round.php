@@ -177,8 +177,10 @@ class RoundPrimitive extends Primitive
     protected $_multiRon;
 
     /**
-     * Find rounds by local ids (primary key)
+     * Find rounds by local ids (primary key) - should not be used in business code
+     * because it makes no sense with multi-rounds.
      *
+     * @deprecated
      * @param IDb $db
      * @param int[] $ids
      * @throws \Exception
@@ -190,7 +192,7 @@ class RoundPrimitive extends Primitive
     }
 
     /**
-     * Find rounds by session (foreign key search)
+     * Find rounds and multi-rounds by session (foreign key search)
      *
      * @param IDb $db
      * @param string[] $idList
@@ -199,46 +201,72 @@ class RoundPrimitive extends Primitive
      */
     public static function findBySessionIds(IDb $db, $idList)
     {
-        return self::_findBy($db, 'session_id', $idList);
+        /** @var RoundPrimitive[] $rounds */
+        $rounds = self::_findBy($db, 'session_id', $idList);
+        return self::_mergeMultiRoundsBySession($db, $rounds);
     }
 
-    /**
-     * Find rounds by event (foreign key search)
-     *
-     * @param IDb $db
-     * @param string[] $idList
-     * @throws \Exception
-     * @return RoundPrimitive[]
-     */
-    public static function findByEventIds(IDb $db, $idList)
-    {
-        return self::_findBy($db, 'event_id', $idList);
-    }
+    // Warning: other foreign key search methods should implement multi-rounds logic,
+    // or it will ruin all object model.
 
     /**
-     * Find rounds by winner (foreign key search)
-     *
      * @param IDb $db
-     * @param string[] $idList
-     * @throws \Exception
-     * @return RoundPrimitive[]
+     * @param RoundPrimitive[] $rounds
+     * @return array
      */
-    public static function findByWinnerIds(IDb $db, $idList)
+    protected static function _mergeMultiRoundsBySession(IDb $db, &$rounds)
     {
-        return self::_findBy($db, 'winner_id', $idList);
-    }
+        $splitBySession = [];
+        foreach ($rounds as $round) {
+            if (empty($splitBySession[$round->getSessionId()])) {
+                $splitBySession[$round->getSessionId()] = [];
+            }
+            $splitBySession[$round->getSessionId()] []= $round;
+        }
 
-    /**
-     * Find rounds by loser (foreign key search)
-     *
-     * @param IDb $db
-     * @param string[] $idList
-     * @throws \Exception
-     * @return RoundPrimitive[]
-     */
-    public static function findByLoserIds(IDb $db, $idList)
-    {
-        return self::_findBy($db, 'loser_id', $idList);
+        $splitBySession = array_map(function ($roundsInSession) use ($db) {
+            $result = [];
+            usort($roundsInSession, function (RoundPrimitive $el1, RoundPrimitive $el2) {
+                // sort by id, so consecutive multi-ron ids will
+                // be definitely consequent within array
+                return $el1->getId() - $el2->getId();
+            });
+
+            /** @var RoundPrimitive[] $roundsInSession */
+            for ($i = 0; $i < count($roundsInSession); $i++) {
+                $round = $roundsInSession[$i];
+
+                if ($round->getOutcome() !== 'multiron') {
+                    $result []= $round;
+                    continue;
+                }
+
+                // double ron
+                if ($round->getMultiRon() == 2) {
+                    $result []= MultiRoundPrimitive::createFromRounds($db, [
+                        $round,
+                        $roundsInSession[$i + 1]
+                    ]);
+                    $i ++;
+                    continue;
+                }
+
+                // triple ron
+                if ($round->getMultiRon() == 3) {
+                    $result []= MultiRoundPrimitive::createFromRounds($db, [
+                        $round,
+                        $roundsInSession[$i + 1],
+                        $roundsInSession[$i + 2]
+                    ]);
+                    $i += 2;
+                    continue;
+                }
+            }
+
+            return $result;
+        }, $splitBySession);
+
+        return array_reduce($splitBySession, 'array_merge', []); // flatten and return
     }
 
     protected function _create()
@@ -253,12 +281,12 @@ class RoundPrimitive extends Primitive
     }
 
     /**
-     * @param Db $db
+     * @param IDb $db
      * @param SessionPrimitive $session
      * @param $roundData
      * @return RoundPrimitive|MultiRoundPrimitive
      */
-    public static function createFromData(Db $db, SessionPrimitive $session, $roundData)
+    public static function createFromData(IDb $db, SessionPrimitive $session, $roundData)
     {
         if ($roundData['outcome'] === 'multiron') {
             return MultiRoundPrimitive::createFromData($db, $session, $roundData);

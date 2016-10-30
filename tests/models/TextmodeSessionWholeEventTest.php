@@ -25,7 +25,9 @@ require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../util/Db.php';
 
+use \JsonSchema\SchemaStorage;
 use \JsonSchema\Validator;
+use \JsonSchema\Constraints\Factory;
 
 /**
  * Class SessionTest: integration test suite
@@ -102,8 +104,8 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
 
         // Check rating table schema
         $validatorRating = new Validator();
-        $schema = json_decode(file_get_contents(__DIR__ . '/../../src/validators/ratingTableSchema.json'));
-        $validatorRating->check(json_decode(json_encode($ratings)), $schema);
+        $schemaRating = json_decode(file_get_contents(__DIR__ . '/../../src/validators/ratingTableSchema.json'));
+        $validatorRating->check(json_decode(json_encode($ratings)), $schemaRating);
         $this->assertEquals(
             true,
             $validatorRating->isValid(),
@@ -112,5 +114,27 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
             }, $validatorRating->getErrors()))
         );
         $this->assertEquals([], $validatorRating->getErrors());
+
+        // Try getting last games list
+        $data = $eventModel->getLastFinishedGames($this->_event, 10, 0);
+        $this->assertNotEmpty($data['games']);
+        $this->assertNotEmpty($data['players']);
+        $this->assertEquals(10, count($data['games']));
+
+        // Check games list schema
+        $schemaStorage = new SchemaStorage();
+        $schemaGameList = json_decode(file_get_contents(__DIR__ . '/../../src/validators/gamesListSchema.json'));
+        $schemaStorage->addSchema('file://mySchema', $schemaGameList);
+        $validatorList = new Validator(new Factory($schemaStorage));
+
+        $validatorList->check(json_decode(json_encode($data)), $schemaGameList);
+        $this->assertEquals(
+            true,
+            $validatorList->isValid(),
+            implode("", array_map(function ($error) {
+                return sprintf("[%s] %s\n", $error['property'], $error['message']);
+            }, $validatorList->getErrors()))
+        );
+        $this->assertEquals([], $validatorList->getErrors());
     }
 }
