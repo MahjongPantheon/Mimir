@@ -30,11 +30,14 @@ class EventModel extends Model
     public function getLastFinishedGames(EventPrimitive $event, $limit, $offset)
     {
         $games = SessionPrimitive::findByEventAndStatus(
-            $this->_db, $event->getId(), 'finished',
-            $offset, $limit
+            $this->_db,
+            $event->getId(),
+            'finished',
+            $offset,
+            $limit
         );
 
-        $sessionIds = array_map(function(SessionPrimitive $el) {
+        $sessionIds = array_map(function (SessionPrimitive $el) {
             return $el->getId();
         }, $games);
 
@@ -53,7 +56,7 @@ class EventModel extends Model
             $result['games'][$session->getId()] = [
                 'date' => $session->getPlayDate(),
                 'players' => array_map('intval', $session->getPlayersIds()),
-                'final_results' => $this->_arrayMapPreserveKeys(function(SessionResultsPrimitive $el) {
+                'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
                     return [
                         'score'     => (int) $el->getScore(),
                         'rating'    => (float) $el->getRatingDelta(),
@@ -111,7 +114,7 @@ class EventModel extends Model
      */
     protected function _getPlayersOfGames($games)
     {
-        $players = PlayerPrimitive::findById($this->_db, array_reduce($games, function($acc, SessionPrimitive $el) {
+        $players = PlayerPrimitive::findById($this->_db, array_reduce($games, function ($acc, SessionPrimitive $el) {
             return array_merge($acc, $el->getPlayersIds());
         }, []));
 
@@ -155,7 +158,7 @@ class EventModel extends Model
                     'outcome'       => $mRound->getOutcome(),
                     'loser_id'      => (int) $mRound->getLoserId(),
                     'multi_ron'     => (int) $rounds[0]->getMultiRon(),
-                    'wins'          => array_map(function(RoundPrimitive $round) {
+                    'wins'          => array_map(function (RoundPrimitive $round) {
                         return [
                             'winner_id'     => (int) $round->getWinnerId(),
                             'han'           => (int) $round->getHan(),

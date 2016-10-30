@@ -224,9 +224,9 @@ class RoundPrimitive extends Primitive
             $splitBySession[$round->getSessionId()] []= $round;
         }
 
-        $splitBySession = array_map(function($roundsInSession) use ($db) {
+        $splitBySession = array_map(function ($roundsInSession) use ($db) {
             $result = [];
-            usort($roundsInSession, function(RoundPrimitive $el1, RoundPrimitive $el2) {
+            usort($roundsInSession, function (RoundPrimitive $el1, RoundPrimitive $el2) {
                 // sort by id, so consecutive multi-ron ids will
                 // be definitely consequent within array
                 return $el1->getId() - $el2->getId();

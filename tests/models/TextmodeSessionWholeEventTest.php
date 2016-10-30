@@ -29,7 +29,6 @@ use \JsonSchema\SchemaStorage;
 use \JsonSchema\Validator;
 use \JsonSchema\Constraints\Factory;
 
-
 /**
  * Class SessionTest: integration test suite
  * @package Riichi
