@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "rating": {
+        "type": "number"
+      },
+      "avg_place": {
+        "type": "number"
+      },
+      "games_played": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "rating",
+      "avg_place",
+      "games_played"
+    ]
+  }
+}
+

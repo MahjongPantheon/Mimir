@@ -96,6 +96,21 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         // Make rating table
         $eventModel = new EventModel($this->_db);
         $ratings = $eventModel->getRatingTable($this->_event, 'avg_place', 'asc');
-        var_dump($ratings);
+        $this->assertNotEmpty($ratings);
+        $this->assertEquals(8, $ratings[0]['games_played']);
+        $this->assertEquals(3, $ratings[0]['id']); // we know player 3 to win in current tournament
+
+        // Check rating table schema
+        $validatorRating = new Validator();
+        $schema = json_decode(file_get_contents(__DIR__ . '/../../src/validators/ratingTableSchema.json'));
+        $validatorRating->check(json_decode(json_encode($ratings)), $schema);
+        $this->assertEquals(
+            true,
+            $validatorRating->isValid(),
+            implode("", array_map(function ($error) {
+                return sprintf("[%s] %s\n", $error['property'], $error['message']);
+            }, $validatorRating->getErrors()))
+        );
+        $this->assertEquals([], $validatorRating->getErrors());
     }
 }

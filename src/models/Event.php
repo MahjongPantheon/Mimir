@@ -27,7 +27,50 @@ class EventModel extends Model
 
         $playersHistoryItems = PlayerHistoryPrimitive::findLastByEvent($this->_db, $event->getId());
         $playerItems = $this->_getPlayers($playersHistoryItems);
+        $this->_sortItems($orderBy, $playerItems, $playersHistoryItems);
 
+        if ($order === 'desc') {
+            $playersHistoryItems = array_reverse($playersHistoryItems);
+        }
+
+        return array_map(function(PlayerHistoryPrimitive $el) use (&$playerItems) {
+            return [
+                'id'            => (int)$el->getPlayerId(),
+                'name'          => $playerItems[$el->getPlayerId()]->getDisplayName(),
+                'rating'        => (float)$el->getRating(),
+                'avg_place'     => round($el->getAvgPlace(), 5),
+                'games_played'  => (int)$el->getGamesPlayed()
+            ];
+        }, $playersHistoryItems);
+    }
+
+    /**
+     * @param PlayerHistoryPrimitive[] $playersHistoryItems
+     * @return PlayerPrimitive[]
+     */
+    protected function _getPlayers($playersHistoryItems)
+    {
+        $ids = array_map(function(PlayerHistoryPrimitive $el) {
+            return $el->getPlayerId();
+        }, $playersHistoryItems);
+        $players = PlayerPrimitive::findById($this->_db, $ids);
+
+        $result = [];
+        foreach ($players as $p) {
+            $result[$p->getId()] = $p;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $orderBy
+     * @param PlayerPrimitive[] $playerItems
+     * @param PlayerHistoryPrimitive[] $playersHistoryItems
+     * @throws InvalidParametersException
+     */
+    protected function _sortItems($orderBy, &$playerItems, &$playersHistoryItems)
+    {
         switch ($orderBy) {
             case 'name':
                 usort($playersHistoryItems, function(
@@ -69,38 +112,5 @@ class EventModel extends Model
             default:
                 throw new InvalidParametersException("Parameter orderBy should be either 'name', 'rating' or 'avg_place'");
         }
-
-        if ($order === 'desc') {
-            $playersHistoryItems = array_reverse($playersHistoryItems);
-        }
-
-        return array_map(function(PlayerHistoryPrimitive $el) use (&$playerItems) {
-            return [
-                'id'            => $el->getPlayerId(),
-                'name'          => $playerItems[$el->getPlayerId()]->getDisplayName(),
-                'rating'        => $el->getRating(),
-                'avg_place'     => round($el->getAvgPlace(), 5),
-                'games_played'  => $el->getGamesPlayed()
-            ];
-        }, $playersHistoryItems);
-    }
-
-    /**
-     * @param PlayerHistoryPrimitive[] $playersHistoryItems
-     * @return PlayerPrimitive[]
-     */
-    protected function _getPlayers($playersHistoryItems)
-    {
-        $ids = array_map(function(PlayerHistoryPrimitive $el) {
-            return $el->getPlayerId();
-        }, $playersHistoryItems);
-        $players = PlayerPrimitive::findById($this->_db, $ids);
-
-        $result = [];
-        foreach ($players as $p) {
-            $result[$p->getId()] = $p;
-        }
-
-        return $result;
     }
 }
