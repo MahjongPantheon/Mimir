@@ -307,9 +307,9 @@ class PlayerHistoryPrimitive extends Primitive
      */
     public static function makeNewHistoryItem(Db $db, PlayerPrimitive $player, SessionPrimitive $session, $ratingDelta, $place)
     {
-        try {
-            $previousItem = self::findLastByEvent($db, $session->getEventId(), $player->getId());
-        } catch (\Exception $e) {
+        $previousItem = self::findLastByEvent($db, $session->getEventId(), $player->getId());
+
+        if (empty($previousItem)) {
             // This may happen if player has just started to participate in event and has no previous results
             $previousItem = (new self($db))
                 ->setPlayer($player)
