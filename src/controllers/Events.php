@@ -57,10 +57,11 @@ class EventsController extends Controller
      *
      * @param integer $eventId
      * @param string $orderBy  either 'name', 'rating' or 'avg_place'
+     * @param string $order  either 'asc' or 'desc'
      * @throws InvalidParametersException
      * @return array
      */
-    public function getRatingTable($eventId, $orderBy)
+    public function getRatingTable($eventId, $orderBy, $order)
     {
         $this->_log->addInfo('Getting rating table for event id# ' . $eventId);
 
@@ -70,7 +71,7 @@ class EventsController extends Controller
         }
 
         $table = (new EventModel($this->_db))
-            ->getRatingTable($event, $orderBy);
+            ->getRatingTable($event[0], $orderBy, $order);
 
         $this->_log->addInfo('Successfully received rating table for event id# ' . $eventId);
         return $table;
