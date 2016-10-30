@@ -88,7 +88,9 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500);
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1);
 
         $this->assertEquals($this->_session->getId(), $item->getSessionId());
         $this->assertTrue($this->_session === $item->getSession());
@@ -107,25 +109,31 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
         $item2
             ->setSession($this->_session)
             ->setPlayer($this->_players[1])
-            ->setRating(1600)
+            ->_setRating(1600)
+            ->_setAvgPlace(2)
+            ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
         $item3
             ->setSession($this->_anotherSession)
             ->setPlayer($this->_players[0])
-            ->setRating(1700)
+            ->_setRating(1700)
+            ->_setAvgPlace(1)
+            ->_setGamesPlayed(1)
             ->save();
 
         $itemCopy = PlayerHistoryPrimitive::findLastByEvent(
             $this->_db,
-            $this->_players[0]->getId(),
-            $this->_event->getId()
+            $this->_event->getId(),
+            $this->_players[0]->getId()
         );
 
         $this->assertTrue($itemCopy instanceof PlayerHistoryPrimitive);
@@ -134,31 +142,78 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($itemCopy !== $item); // different objects!
     }
 
+    public function testFindAllPlayersLastItemByEvent()
+    {
+        $item = new PlayerHistoryPrimitive($this->_db);
+        $item
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[0])
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
+            ->save();
+        $item2 = new PlayerHistoryPrimitive($this->_db);
+        $item2
+            ->setSession($this->_session)
+            ->setPlayer($this->_players[1])
+            ->_setRating(1600)
+            ->_setAvgPlace(2)
+            ->_setGamesPlayed(1)
+            ->save();
+        $item3 = new PlayerHistoryPrimitive($this->_db);
+        $item3
+            ->setSession($this->_anotherSession)
+            ->setPlayer($this->_players[0])
+            ->_setRating(1700)
+            ->_setAvgPlace(1)
+            ->_setGamesPlayed(1)
+            ->save();
+
+        $items = PlayerHistoryPrimitive::findLastByEvent(
+            $this->_db,
+            $this->_event->getId()
+        );
+
+        $this->assertTrue($items[0] instanceof PlayerHistoryPrimitive);
+        $this->assertTrue($items[0] !== $item && $items[0] !== $item2 && $items[0] !== $item3); // different objects!
+
+        $this->assertEquals($this->_players[1]->getId(), $items[0]->getPlayerId());
+        $this->assertEquals($this->_players[0]->getId(), $items[1]->getPlayerId());
+        $this->assertEquals(1600, $items[0]->getRating());
+        $this->assertEquals(1700, $items[1]->getRating());
+    }
+
     public function testFindAllItemsByPlayerAndEvent()
     {
         $item1 = new PlayerHistoryPrimitive($this->_db);
         $item1
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
         $item2
             ->setSession($this->_session)
             ->setPlayer($this->_players[1])
-            ->setRating(1600)
+            ->_setRating(1600)
+            ->_setAvgPlace(2)
+            ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
         $item3
             ->setSession($this->_anotherSession)
             ->setPlayer($this->_players[0])
-            ->setRating(1700)
+            ->_setRating(1700)
+            ->_setAvgPlace(1)
+            ->_setGamesPlayed(1)
             ->save();
 
         $items = PlayerHistoryPrimitive::findAllByEvent(
             $this->_db,
-            $this->_players[0]->getId(),
-            $this->_event->getId()
+            $this->_event->getId(),
+            $this->_players[0]->getId()
         );
 
         $this->assertEquals(2, count($items));
@@ -178,19 +233,25 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
         $item2
             ->setSession($this->_session)
             ->setPlayer($this->_players[1])
-            ->setRating(1600)
+            ->_setRating(1600)
+            ->_setAvgPlace(2)
+            ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
         $item3
             ->setSession($this->_anotherSession)
             ->setPlayer($this->_players[0])
-            ->setRating(1700)
+            ->_setRating(1700)
+            ->_setAvgPlace(1)
+            ->_setGamesPlayed(1)
             ->save();
 
         $itemCopy = PlayerHistoryPrimitive::findBySession(
@@ -211,14 +272,18 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
 
         $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()]);
-        $itemCopy[0]->setRating(1000)->save();
+        $itemCopy[0]->_setRating(1000)->_setAvgPlace(4)->_setGamesPlayed(2)->save();
 
         $anotherItemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()]);
         $this->assertEquals(1000, $anotherItemCopy[0]->getRating());
+        $this->assertEquals(4, $anotherItemCopy[0]->getAvgPlace());
+        $this->assertEquals(2, $anotherItemCopy[0]->getGamesPlayed());
     }
 
     public function testRelationSession()
@@ -227,7 +292,9 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
 
         $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()])[0];
@@ -243,7 +310,9 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
 
         $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()])[0];
@@ -259,7 +328,9 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
         $item
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
-            ->setRating(1500)
+            ->_setRating(1500)
+            ->_setAvgPlace(3)
+            ->_setGamesPlayed(1)
             ->save();
 
         $itemCopy = PlayerHistoryPrimitive::findById($this->_db, [$item->getId()])[0];

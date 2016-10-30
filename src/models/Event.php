@@ -19,10 +19,12 @@ namespace Riichi;
 
 class EventModel extends Model
 {
-    public function getRatingTable($event, $orderBy)
+    public function getRatingTable(EventPrimitive $event, $orderBy)
     {
         if (!in_array($orderBy, ['name', 'rating', 'avg_place'])) {
             throw new InvalidParametersException("Parameter orderBy should be either 'name', 'rating' or 'avg_place'");
         }
+
+
     }
 }

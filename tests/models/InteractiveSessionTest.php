@@ -324,7 +324,11 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         // Check that user history items exist in db
         /** @var PlayerHistoryPrimitive[] $items */
         $items = array_map(function (PlayerPrimitive $player) {
-            return PlayerHistoryPrimitive::findLastByEvent($this->_db, $player->getId(), $this->_event->getId());
+            return PlayerHistoryPrimitive::findLastByEvent(
+                $this->_db,
+                $this->_event->getId(),
+                $player->getId()
+            );
         }, $this->_players);
 
         $this->assertEquals(1508, $items[0]->getRating());
