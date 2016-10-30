@@ -308,7 +308,7 @@ class PlayerHistoryPrimitive extends Primitive
     public static function makeNewHistoryItem(Db $db, PlayerPrimitive $player, SessionPrimitive $session, $ratingDelta, $place)
     {
         try {
-            $previousItem = self::findLastByEvent($db, $session->getEvent(), $player->getId());
+            $previousItem = self::findLastByEvent($db, $session->getEventId(), $player->getId());
         } catch (\Exception $e) {
             // This may happen if player has just started to participate in event and has no previous results
             $previousItem = (new self($db))
@@ -323,6 +323,8 @@ class PlayerHistoryPrimitive extends Primitive
         return (new self($db))
             ->setPlayer($player)
             ->setSession($session)
+            ->_setAvgPlace($previousItem->getAvgPlace())
+            ->_setGamesPlayed($previousItem->getGamesPlayed())
             ->_setRating($previousItem->getRating() + $ratingDelta)
             ->_updateAvgPlaceAndGamesCount($place);
     }
@@ -344,7 +346,7 @@ class PlayerHistoryPrimitive extends Primitive
         $placesSum = $this->_gamesPlayed * $this->_avgPlace;
         $placesSum += $place;
         $this->_gamesPlayed ++;
-        $this->_avgPlace = (1. * $placesSum) / $this->_gamesPlayed;
+        $this->_avgPlace = floatval($placesSum) / floatval($this->_gamesPlayed);
         return $this;
     }
 

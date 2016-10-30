@@ -44,22 +44,26 @@ class EventModel extends Model
                 usort($playersHistoryItems, function(
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
-                ) use ($order, &$playerItems) {
+                ) {
                     if ($el1->getRating() == $el2->getRating()) {
-                        return $el1->getAvgPlace() - $el2->getAvgPlace();
+                        return $el2->getAvgPlace() - $el1->getAvgPlace(); // lower avg place is better, so invert
                     }
-                    return $el1->getRating() - $el2->getRating();
+                    return $el1->getRating() - $el2->getRating(); // higher rating is better
                 });
                 break;
             case 'avg_place':
                 usort($playersHistoryItems, function(
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
-                ) use ($order, &$playerItems) {
-                    if ($el1->getAvgPlace() == $el2->getAvgPlace()) {
-                        return $el1->getRating() - $el2->getRating();
+                ) {
+                    if (abs($el1->getAvgPlace() - $el2->getAvgPlace()) < 0.00001) { // floats need epsilon
+                        return $el2->getRating() - $el1->getRating(); // lower rating is worse, so invert
                     }
-                    return $el1->getAvgPlace() - $el2->getAvgPlace();
+                    if ($el1->getAvgPlace() - $el2->getAvgPlace() < 0) { // higher avg place is worse
+                        return -1; // usort casts return result to int, so pass explicit int here.
+                    } else {
+                        return 1;
+                    }
                 });
                 break;
             default:
@@ -67,9 +71,18 @@ class EventModel extends Model
         }
 
         if ($order === 'desc') {
-            return array_reverse($playersHistoryItems);
+            $playersHistoryItems = array_reverse($playersHistoryItems);
         }
-        return $playersHistoryItems;
+
+        return array_map(function(PlayerHistoryPrimitive $el) use (&$playerItems) {
+            return [
+                'id'            => $el->getPlayerId(),
+                'name'          => $playerItems[$el->getPlayerId()]->getDisplayName(),
+                'rating'        => $el->getRating(),
+                'avg_place'     => round($el->getAvgPlace(), 5),
+                'games_played'  => $el->getGamesPlayed()
+            ];
+        }, $playersHistoryItems);
     }
 
     /**
