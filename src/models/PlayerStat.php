@@ -53,14 +53,11 @@ class PlayerStatModel extends Model
             'players_info'          => $scoresAndPlayers['players'],
             'places_summary'        => $this->_getPlacesSummary($playerId, $games),
             'total_played_games'    => count($games),
+            'total_played_rounds'   => count($rounds),
             'win_summary'           => $this->_getOutcomeSummary($playerId, $rounds),
             'hands_value_summary'   => $this->_getHanSummary($playerId, $rounds),
             'yaku_summary'          => $this->_getYakuSummary($playerId, $rounds),
-
-            // TODO:
-            // 1) total played rounds
-            // 2) feed from riichi
-            // 3) riichi bets, also among them: a) won, b) lost
+            'riichi_summary'        => $this->_getRiichiSummary($playerId, $rounds)
         ];
     }
 
@@ -174,6 +171,9 @@ class PlayerStatModel extends Model
     protected function _getOutcomeSummary($playerId, $rounds)
     {
         return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+
+            // TODO: multi-ron fail :( write test?
+
             switch ($r->getOutcome()) {
                 case 'ron':
                     if ($r->getLoserId() == $playerId) {
@@ -217,6 +217,9 @@ class PlayerStatModel extends Model
     protected function _getYakuSummary($playerId, $rounds)
     {
         return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+
+            // TODO: multi-ron fail :( write test?
+
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
                 $acc = array_reduce(explode(',', $r->getYaku()), function ($acc, $yaku) {
                     if (empty($acc[$yaku])) {
@@ -240,6 +243,9 @@ class PlayerStatModel extends Model
     protected function _getHanSummary($playerId, $rounds)
     {
         return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+
+            // TODO: multi-ron fail :( write test?
+
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
                 $acc = array_reduce(explode(',', $r->getHan()), function ($acc, $han) {
                     if (empty($acc[$han])) {
@@ -251,6 +257,41 @@ class PlayerStatModel extends Model
             }
             return $acc;
         }, []);
+    }
+
+    /**
+     * Get riichi win/lose summary stats for player
+     *
+     * @param $playerId
+     * @param $rounds
+     * @return array
+     */
+    protected function _getRiichiSummary($playerId, $rounds)
+    {
+        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+
+            // TODO: multi-ron fail :( write test?
+
+            if ($r->getWinnerId() == $playerId && in_array($playerId, $r->getRiichiIds())) {
+                $acc['riichi_won'] ++;
+            }
+            if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
+                && $r->getWinnerId() != $playerId && in_array($playerId, $r->getRiichiIds())
+            ) {
+                $acc['riichi_lost'] ++;
+            }
+            if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
+                && $r->getLoserId() == $playerId && in_array($playerId, $r->getRiichiIds())
+            ) {
+                $acc['feed_under_riichi'] ++;
+            }
+
+            return $acc;
+        }, [
+            'riichi_won'        => 0,
+            'riichi_lost'       => 0,
+            'feed_under_riichi' => 0
+        ]);
     }
 
     /**

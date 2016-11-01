@@ -39,11 +39,13 @@ return [
     'addRound'          => ['GamesController', 'addRound'],
     'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
 
+    'getAllPlayers'     => ['EventsController', 'getAllRegisteredPlayers'],
+
     // admin
     'startGame'         => ['GamesController', 'start'],
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
-    'getAllPlayers'     => [], // TODO
+    'registerPlayer'    => ['EventsController', 'registerPlayer'],
 
     'addPlayer'         => ['PlayersController', 'add'],
     'updatePlayer'      => ['PlayersController', 'update'],
