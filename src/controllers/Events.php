@@ -39,7 +39,7 @@ class EventsController extends Controller
         }
 
         $players = PlayerPrimitive::findById($this->_db, $event[0]->getRegisteredPlayersIds());
-        $data = array_map(function(PlayerPrimitive $p) {
+        $data = array_map(function (PlayerPrimitive $p) {
             return [
                 'id'            => $p->getId(),
                 'display_name'  => $p->getDisplayName(),

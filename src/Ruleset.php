@@ -153,4 +153,9 @@ abstract class Ruleset
     {
         return static::$_ruleset['autoRegisterUsers'];
     }
+
+    public function gameExpirationTime()
+    {
+        return static::$_ruleset['gameExpirationTime'];
+    }
 }

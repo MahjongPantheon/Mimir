@@ -41,6 +41,7 @@ class RulesetEma extends Ruleset
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'autoRegisterUsers'     => false,
+        'gameExpirationTime'    => false,
         'withLeadingDealerGameOver' => false
     ];
 

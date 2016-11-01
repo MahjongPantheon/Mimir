@@ -41,6 +41,7 @@ class RulesetJpmlA extends Ruleset
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'autoRegisterUsers'     => false,
+        'gameExpirationTime'    => false,
         'withLeadingDealerGameOver' => true
     ];
 

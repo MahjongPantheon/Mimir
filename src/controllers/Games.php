@@ -97,8 +97,6 @@ class GamesController extends Controller
 
     // ONLINE REPLAY MODE
 
-    // TODO: проверка актуальности игры; возможность задавать период актуальности игры для конкретного события
-
     /**
      * Add online replay
      *
