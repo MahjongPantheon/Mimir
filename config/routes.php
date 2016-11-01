@@ -32,6 +32,9 @@ return [
     // client
     'getGameConfig'     => ['EventsController', 'getGameConfig'],
     'getRatingTable'    => ['EventsController', 'getRatingTable'],
+    'getLastGames'      => ['EventsController', 'getLastGames'],
+
+    'getPlayerStats'    => ['PlayerController', 'getStats'],
 
     'addRound'          => ['GamesController', 'addRound'],
     'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
@@ -40,6 +43,7 @@ return [
     'startGame'         => ['GamesController', 'start'],
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
+    'getAllPlayers'     => [], // TODO
 
     'addPlayer'         => ['PlayersController', 'add'],
     'updatePlayer'      => ['PlayersController', 'update'],

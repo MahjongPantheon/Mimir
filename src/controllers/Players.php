@@ -29,6 +29,8 @@ require_once __DIR__ . '/../primitives/Player.php';
  */
 class PlayersController extends Controller
 {
+    // TODO: авторегистрация юзеров в онлайне
+
     /**
      * @param string $ident oauth ident, if any
      * @param string $alias textlog alias for quicker enter

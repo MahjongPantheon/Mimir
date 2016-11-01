@@ -40,11 +40,11 @@ class EventsController extends Controller
 
         $rules = $event[0]->getRuleset();
         $data = [
-            'allowedYaku' => $rules->allowedYaku(),
-            'startPoints' => $rules->startPoints(),
-            'withKazoe' => $rules->withKazoe(),
+            'allowedYaku'       => $rules->allowedYaku(),
+            'startPoints'       => $rules->startPoints(),
+            'withKazoe'         => $rules->withKazoe(),
             'withKiriageMangan' => $rules->withKiriageMangan(),
-            'withAbortives' => $rules->withAbortives(),
+            'withAbortives'     => $rules->withAbortives(),
             'withNagashiMangan' => $rules->withNagashiMangan()
         ];
 

@@ -56,6 +56,11 @@ class PlayerStatModel extends Model
             'win_summary'           => $this->_getOutcomeSummary($playerId, $rounds),
             'hands_value_summary'   => $this->_getHanSummary($playerId, $rounds),
             'yaku_summary'          => $this->_getYakuSummary($playerId, $rounds),
+
+            // TODO:
+            // 1) total played rounds
+            // 2) feed from riichi
+            // 3) riichi bets, also among them: a) won, b) lost
         ];
     }
 
@@ -98,10 +103,10 @@ class PlayerStatModel extends Model
 
             return array_map(function (SessionResultsPrimitive $sr, $playerId) {
                 return [
-                    'player_id'     => (int)$playerId,
-                    'score'         => (int)$sr->getScore(),
-                    'rating_delta'  => (float)$sr->getRatingDelta(),
-                    'place'         => (int)$sr->getPlace()
+                    'player_id'     => (int) $playerId,
+                    'score'         => (int) $sr->getScore(),
+                    'rating_delta'  => (float) $sr->getRatingDelta(),
+                    'place'         => (int) $sr->getPlace()
                 ];
             }, array_values($results), array_keys($results));
         }, $games);
