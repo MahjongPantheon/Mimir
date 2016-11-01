@@ -62,6 +62,7 @@ class TextlogParserTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('tenhou' . $i);
             $p->save();
+            $this->_event->registerPlayer($p)->save();
             return $p;
         }, [1, 2, 3, 4]);
 

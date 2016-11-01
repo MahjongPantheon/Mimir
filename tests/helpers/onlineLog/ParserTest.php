@@ -63,6 +63,7 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('player' . $i);
             $p->save();
+            $this->_event->registerPlayer($p)->save();
             return $p;
         }, [1, 2, 3, 4]);
 

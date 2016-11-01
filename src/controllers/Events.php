@@ -23,6 +23,30 @@ require_once __DIR__ . '/../Controller.php';
 class EventsController extends Controller
 {
     /**
+     * Register for participation in event
+     *
+     * @param integer $eventId
+     * @param integer $playerId
+     * @throws InvalidParametersException
+     * @return bool
+     */
+    public function registerPlayer($eventId, $playerId)
+    {
+        $this->_log->addInfo('Registering player id# ' . $playerId . ' for event id# ' . $eventId);
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
+        if (empty($player)) {
+            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
+        }
+        $success = $event[0]->registerPlayer($player[0])->save();
+        $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
+        return $success;
+    }
+
+    /**
      * Get event rules configuration
      *
      * @param integer $eventId
