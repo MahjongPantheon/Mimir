@@ -45,6 +45,7 @@ class RulesetTenhounet extends Ruleset
         'withNagashiMangan'     => true,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
+        'autoRegisterUsers'     => true,
         'withLeadingDealerGameOver' => true,
         'uma' => [
             1 => 15,
