@@ -111,7 +111,7 @@ class SessionPrimitive extends Primitive
     protected $_playDate;
 
     /**
-     * comma-separated ordered list of player ids, east to north.
+     * ordered list of player ids, east to north.
      * @var int[]
      */
     protected $_playersIds = [];

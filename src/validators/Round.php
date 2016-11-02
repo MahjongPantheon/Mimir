@@ -33,6 +33,7 @@ class RoundsHelper
     public static function checkRound(SessionPrimitive $game, $roundData)
     {
         self::_checkOneOf($roundData, 'outcome', ['ron', 'multiron', 'tsumo', 'draw', 'abort', 'chombo']);
+        self::_checkPlayers($game->getPlayersIds(), $game->getEvent()->getRegisteredPlayersIds());
         $playerIds = implode(',', $game->getPlayersIds());
         $yakuList = $game->getEvent()->getRuleset()->allowedYaku(); // omg :(
         switch ($roundData['outcome']) {
@@ -138,6 +139,17 @@ class RoundsHelper
     protected static function _checkChombo($players, $roundData)
     {
         self::_checkOneOf($roundData, 'loser_id', explode(',', $players));
+    }
+
+    protected static function _checkPlayers($playersInGame, $playersRegisteredInEvent)
+    {
+        foreach ($playersInGame as $playerId) {
+            if (!in_array($playerId, $playersRegisteredInEvent)) {
+                throw new MalformedPayloadException(
+                    'Player id #' . $playerId . ' is not registered for this event'
+                );
+            }
+        }
     }
 
     // === Generic checkers ===

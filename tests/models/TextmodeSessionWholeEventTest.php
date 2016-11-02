@@ -64,6 +64,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
                 ->setIdent($id)
                 ->setTenhouId($id);
             $p->save();
+            $this->_event->registerPlayer($p)->save();
             return $p;
         }, $playerNames);
 

@@ -37,6 +37,8 @@ class OnlineSessionModel extends Model
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
+        $this->_checkGameExpired($gameLink, $event[0]->getRuleset());
+
         $downloader = new Downloader($this->_db);
         $replay = $downloader->getReplay($gameLink);
 
@@ -58,5 +60,30 @@ class OnlineSessionModel extends Model
         }
 
         return $success;
+    }
+
+    /**
+     * Check if game is not older than some amount of time defined in ruleset
+     *
+     * @param $gameLink
+     * @param Ruleset $rules
+     * @throws ParseException
+     */
+    protected function _checkGameExpired($gameLink, Ruleset $rules)
+    {
+        if (!$rules->gameExpirationTime()) {
+            return;
+        }
+
+        $regex = '#(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})gm#is';
+        $matches = [];
+        if (preg_match($regex, $gameLink, $matches)) {
+            $date = mktime($matches['hour'], 0, 0, $matches['month'], $matches['day'], $matches['year']);
+            if (time() - $date < $rules->gameExpirationTime() * 60 * 60) {
+                return;
+            }
+        }
+
+        throw new ParseException('Replay is older than ' . $rules->gameExpirationTime() . ' hours (within JST timezone), so it can\'t be accepted.');
     }
 }

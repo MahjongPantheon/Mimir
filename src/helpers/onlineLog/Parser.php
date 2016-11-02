@@ -153,6 +153,13 @@ class OnlineParser
                 throw new ParseException('Some of players are not found in DB (' . implode(',', array_keys($this->_players)) . ')');
             }
 
+            if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
+                foreach ($players as $player) {
+                    // ok to re-register every time, it just will do nothing in db if record exists
+                    $session->getEvent()->registerPlayer($player);
+                }
+            }
+
             $session->setPlayers($players);
             $this->_players = array_combine(array_keys($this->_players), $players); // players order should persist
         }

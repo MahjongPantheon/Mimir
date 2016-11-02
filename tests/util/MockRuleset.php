@@ -44,6 +44,8 @@ class MockRuleset extends Ruleset
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
+        'autoRegisterUsers'     => false,
+        'gameExpirationTime'    => false,
         'withLeadingDealerGameOver' => false,
         'uma' => [
             1 => 15000,

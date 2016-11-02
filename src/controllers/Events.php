@@ -23,6 +23,60 @@ require_once __DIR__ . '/../Controller.php';
 class EventsController extends Controller
 {
     /**
+     * Get all players registered for event
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getAllRegisteredPlayers($eventId)
+    {
+        $this->_log->addInfo('Getting all players for event id# ' . $eventId);
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $players = PlayerPrimitive::findById($this->_db, $event[0]->getRegisteredPlayersIds());
+        $data = array_map(function (PlayerPrimitive $p) {
+            return [
+                'id'            => $p->getId(),
+                'display_name'  => $p->getDisplayName(),
+                'alias'         => $p->getAlias(),
+                'tenhou_id'     => $p->getTenhouId()
+            ];
+        }, $players);
+
+        $this->_log->addInfo('Successfully received all players for event id# ' . $eventId);
+        return $data;
+    }
+
+    /**
+     * Register for participation in event
+     *
+     * @param integer $eventId
+     * @param integer $playerId
+     * @throws InvalidParametersException
+     * @return bool
+     */
+    public function registerPlayer($eventId, $playerId)
+    {
+        $this->_log->addInfo('Registering player id# ' . $playerId . ' for event id# ' . $eventId);
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
+        if (empty($player)) {
+            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
+        }
+        $success = $event[0]->registerPlayer($player[0])->save();
+        $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
+        return $success;
+    }
+
+    /**
      * Get event rules configuration
      *
      * @param integer $eventId
@@ -40,11 +94,11 @@ class EventsController extends Controller
 
         $rules = $event[0]->getRuleset();
         $data = [
-            'allowedYaku' => $rules->allowedYaku(),
-            'startPoints' => $rules->startPoints(),
-            'withKazoe' => $rules->withKazoe(),
+            'allowedYaku'       => $rules->allowedYaku(),
+            'startPoints'       => $rules->startPoints(),
+            'withKazoe'         => $rules->withKazoe(),
             'withKiriageMangan' => $rules->withKiriageMangan(),
-            'withAbortives' => $rules->withAbortives(),
+            'withAbortives'     => $rules->withAbortives(),
             'withNagashiMangan' => $rules->withNagashiMangan()
         ];
 

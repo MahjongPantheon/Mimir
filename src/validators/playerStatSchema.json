@@ -70,6 +70,9 @@
     "total_played_games": {
       "type": "integer"
     },
+    "total_played_rounds": {
+      "type": "integer"
+    },
     "win_summary": {
       "type": "object",
       "properties": {
@@ -105,6 +108,20 @@
           "type": "integer"
         }
       }
+    },
+    "riichi_summary": {
+      "type": "object",
+      "properties": {
+        "riichi_won": {
+          "type": "integer"
+        },
+        "riichi_lost": {
+          "type": "integer"
+        },
+        "feed_under_riichi": {
+          "type": "integer"
+        }
+      }
     }
   },
   "additionalProperties": false,
@@ -114,9 +131,11 @@
     "players_info",
     "places_summary",
     "total_played_games",
+    "total_played_rounds",
     "win_summary",
     "hands_value_summary",
-    "yaku_summary"
+    "yaku_summary",
+    "riichi_summary"
   ]
 }
 

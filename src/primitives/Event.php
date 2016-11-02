@@ -17,8 +17,6 @@
  */
 namespace Riichi;
 
-use \Idiorm\ORM;
-
 require_once __DIR__ . '/../Primitive.php';
 
 /**
@@ -30,6 +28,7 @@ require_once __DIR__ . '/../Primitive.php';
 class EventPrimitive extends Primitive
 {
     protected static $_table = 'event';
+    const REL_USER = 'event_registered_users';
 
     protected static $_fieldsMapping = [
         'id'                => '_id',
@@ -42,11 +41,13 @@ class EventPrimitive extends Primitive
         'type'              => '_type',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
+        '::event_registered_users' => '_registeredPlayersIds', // external many-to-many relation
     ];
 
     protected function _getFieldsTransforms()
     {
         return [
+            '_registeredPlayersIds' => $this->_externalManyToManyTransform(self::REL_USER, 'event_id', 'user_id'),
             '_ownerFormationId'   => $this->_integerTransform(),
             '_ownerUserId'        => $this->_integerTransform(),
             '_id'                 => $this->_nullableIntegerTransform(),
@@ -122,8 +123,13 @@ class EventPrimitive extends Primitive
      * @var Ruleset
      */
     protected $_ruleset;
+    /**
+     * Players registered for participation
+     * @var int[]
+     */
+    protected $_registeredPlayersIds = [];
 
-    public function __construct(Db $db)
+    public function __construct(IDb $db)
     {
         parent::__construct($db);
         $this->_startTime = date('Y-m-d H:i:s'); // may be actualized on restore
@@ -369,5 +375,23 @@ class EventPrimitive extends Primitive
     public function getType()
     {
         return $this->_type;
+    }
+
+    /**
+     * @return \int[]
+     */
+    public function getRegisteredPlayersIds()
+    {
+        return $this->_registeredPlayersIds;
+    }
+
+    /**
+     * @param PlayerPrimitive $player
+     * @return EventPrimitive
+     */
+    public function registerPlayer(PlayerPrimitive $player)
+    {
+        $this->_registeredPlayersIds []= $player->getId();
+        return $this;
     }
 }

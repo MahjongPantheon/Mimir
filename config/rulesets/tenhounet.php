@@ -45,6 +45,8 @@ class RulesetTenhounet extends Ruleset
         'withNagashiMangan'     => true,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
+        'autoRegisterUsers'     => true,
+        'gameExpirationTime'    => 27, // hours, to cover JST difference
         'withLeadingDealerGameOver' => true,
         'uma' => [
             1 => 15,

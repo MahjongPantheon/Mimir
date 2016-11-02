@@ -69,6 +69,20 @@ CREATE TABLE "event" (
 );
 CREATE INDEX "event_lobby" ON "event"("lobby_id");
 
+-- Users registered in event
+DROP TABLE
+-- IF EXISTS
+   "event_registered_users";
+CREATE TABLE "event_registered_users" (
+  "event_id" integer not null,
+  "user_id" integer not null,
+  "order" integer not null, -- hardcoded order, for orm conformity
+  foreign key ("event_id") references "event" ("id"),
+  foreign key ("user_id") references "user" ("id")
+);
+-- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
+CREATE UNIQUE INDEX "event_registered_users_uniq" ON "event_registered_users"("event_id","user_id");
+
 -- Game session: tonpuusen, hanchan, either online or offline
 DROP TABLE
 -- IF EXISTS
