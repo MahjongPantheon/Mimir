@@ -55,12 +55,13 @@ class EventModel extends Model
         foreach ($games as $session) {
             $result['games'][$session->getId()] = [
                 'date' => $session->getPlayDate(),
+                'replay_link' => $session->getOrigLink(),
                 'players' => array_map('intval', $session->getPlayersIds()),
                 'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
                     return [
-                        'score'     => (int) $el->getScore(),
-                        'rating'    => (float) $el->getRatingDelta(),
-                        'place'     => (int) $el->getPlace()
+                        'score'         => (int) $el->getScore(),
+                        'rating_delta'  => (float) $el->getRatingDelta(),
+                        'place'         => (int) $el->getPlace()
                     ];
                 }, $sessionResults[$session->getId()]),
                 'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
