@@ -232,10 +232,13 @@ class EventModel extends Model
             $playersHistoryItems = array_reverse($playersHistoryItems);
         }
 
+        // TODO: среднеквадратичное отклонение
+        // TODO: показатель того, в какой зоне рейтинга находится игрок (верхняя/нижняя)
+
         return array_map(function (PlayerHistoryPrimitive $el) use (&$playerItems) {
             return [
                 'id'            => (int)$el->getPlayerId(),
-                'name'          => $playerItems[$el->getPlayerId()]->getDisplayName(),
+                'display_name'  => $playerItems[$el->getPlayerId()]->getDisplayName(),
                 'rating'        => (float)$el->getRating(),
                 'avg_place'     => round($el->getAvgPlace(), 5),
                 'games_played'  => (int)$el->getGamesPlayed()

@@ -7,7 +7,7 @@
       "id": {
         "type": "integer"
       },
-      "name": {
+      "display_name": {
         "type": "string"
       },
       "rating": {
