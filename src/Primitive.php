@@ -310,6 +310,10 @@ abstract class Primitive
             throw new \Exception("Identifiers should be an array in search by $key");
         }
 
+        if (empty($identifiers)) {
+            return [];
+        }
+
         $result = $db->table(static::$_table)->whereIn($key, $identifiers)->findArray();
         if (empty($result)) {
             return [];
