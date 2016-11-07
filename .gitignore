@@ -1,4 +1,5 @@
 .idea/
+config/local/*
 vendor/
 data/*
 tests/data/*
