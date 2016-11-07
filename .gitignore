@@ -1,5 +1,4 @@
 .idea/
-config/db.local.php
 vendor/
 data/*
 tests/data/*

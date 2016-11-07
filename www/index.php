@@ -28,8 +28,11 @@ $api->registerImplAutoloading();
 date_default_timezone_set($api->getTimezone());
 
 foreach ($api->getMethods() as $proc => $method) {
-    $api->log("Registered proc: $proc ({$method['className']}::{$method['method']})" . PHP_EOL);
-    $server->getProcedureHandler()->withClassAndMethod($proc, $method['instance'], $method['method']);
+//    $api->log("Registered proc: $proc ({$method['className']}::{$method['method']})" . PHP_EOL);
+    $server
+        ->withLocalException('PDOException')
+        ->getProcedureHandler()
+        ->withClassAndMethod($proc, $method['instance'], $method['method']);
 }
 
 echo $server->execute();

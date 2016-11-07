@@ -16,15 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Local server deployment settings
-if (file_exists(__DIR__ . '/db.local.php')) {
-    return require __DIR__ . '/db.local.php';
-}
-
-trigger_error('Notice: using default DB settings. '
-    . 'It\'s fine on developer machine, but wrong on prod server. '
-    . 'You might want to create config/db.local.php file with production settings.');
-
 return [
     'connection_string' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
     'credentials' => [
