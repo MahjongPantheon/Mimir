@@ -3,6 +3,7 @@
   "type": "array",
   "items": {
     "type": "object",
+    "additionalProperties": false,
     "properties": {
       "id": {
         "type": "integer"
@@ -18,11 +19,14 @@
       },
       "games_played": {
         "type": "integer"
+      },
+      "winner_zone": {
+        "type": "boolean"
       }
     },
     "required": [
       "id",
-      "name",
+      "display_name",
       "rating",
       "avg_place",
       "games_played"
