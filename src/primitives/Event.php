@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Primitive.php';
+require_once __DIR__ . '/../Ruleset.php';
 
 /**
  * Class EventPrimitive
