@@ -34,7 +34,7 @@ return [
     'getRatingTable'    => ['EventsController', 'getRatingTable'],
     'getLastGames'      => ['EventsController', 'getLastGames'],
 
-    'getPlayerStats'    => ['PlayerController', 'getStats'],
+    'getPlayerStats'    => ['PlayersController', 'getStats'],
 
     'addRound'          => ['GamesController', 'addRound'],
     'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],

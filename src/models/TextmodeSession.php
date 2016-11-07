@@ -17,7 +17,10 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../Model.php';
 require_once __DIR__ . '/../helpers/textLog/Parser.php';
+require_once __DIR__ . '/../primitives/Event.php';
+require_once __DIR__ . '/../primitives/Session.php';
 
 class TextmodeSessionModel extends Model
 {

@@ -17,6 +17,14 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../primitives/Event.php';
+require_once __DIR__ . '/../primitives/Player.php';
+require_once __DIR__ . '/../primitives/Round.php';
+require_once __DIR__ . '/../primitives/Session.php';
+require_once __DIR__ . '/../primitives/SessionResults.php';
+require_once __DIR__ . '/../exceptions/EntityNotFound.php';
+
 class PlayerStatModel extends Model
 {
     /**

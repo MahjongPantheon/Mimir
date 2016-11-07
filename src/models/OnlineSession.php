@@ -17,8 +17,13 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../Model.php';
 require_once __DIR__ . '/../helpers/onlineLog/Parser.php';
 require_once __DIR__ . '/../helpers/onlineLog/Downloader.php';
+require_once __DIR__ . '/../primitives/Event.php';
+require_once __DIR__ . '/../primitives/Session.php';
+require_once __DIR__ . '/../exceptions/InvalidParameters.php';
+require_once __DIR__ . '/../exceptions/Parser.php';
 
 class OnlineSessionModel extends Model
 {
