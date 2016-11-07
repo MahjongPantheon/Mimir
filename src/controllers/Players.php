@@ -19,6 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../primitives/Player.php';
+require_once __DIR__ . '/../models/PlayerStat.php';
 
 /**
  * Class PlayersController
