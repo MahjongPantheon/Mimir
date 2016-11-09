@@ -24,7 +24,7 @@ require_once __DIR__ . '/../Controller.php';
 
 class GamesController extends Controller
 {
-    // INTERACITVE MODE
+    // INTERACTIVE MODE
 
     /**
      * Start new interactive game and return its hash
