@@ -54,7 +54,7 @@ class EventPrimitive extends Primitive
             '_startTime'          => $this->_stringTransform(true),
             '_endTime'            => $this->_stringTransform(true),
             '_id'                 => $this->_integerTransform(true),
-            '_lobbyId'            => $this->_integerTransform(true),
+            '_lobbyId'            => $this->_stringTransform(true),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
                     return $rules->title();
