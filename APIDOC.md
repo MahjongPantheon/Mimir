@@ -74,6 +74,15 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### createEvent
+Parameters:
+* **$title** (_string_) 
+* **$description** (_string_) 
+* **$type** (_string_) either 'online' or 'offline'
+* **$ruleset** (_string_) one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
+
+Returns: _bool_ 
+
 ### startGame
 Parameters:
 * **$eventId** (_int_) Event this session belongs to

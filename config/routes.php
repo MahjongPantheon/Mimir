@@ -42,6 +42,7 @@ return [
     'getAllPlayers'     => ['EventsController', 'getAllRegisteredPlayers'],
 
     // admin
+    'createEvent'       => ['EventsController', 'createEvent'],
     'startGame'         => ['GamesController', 'start'],
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
