@@ -46,7 +46,7 @@ class FormationPrimitive extends Primitive
     {
         return [
             '_primaryOwnerId'  => $this->_integerTransform(),
-            '_id'              => $this->_nullableIntegerTransform(),
+            '_id'              => $this->_integerTransform(true),
         ];
     }
 

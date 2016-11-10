@@ -44,7 +44,7 @@ class PlayerHistoryPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
-            '_id'           => $this->_nullableIntegerTransform(),
+            '_id'           => $this->_integerTransform(true),
             '_rating'       => $this->_floatTransform(),
             '_avgPlace'     => $this->_floatTransform(),
             '_gamesPlayed'  => $this->_integerTransform()

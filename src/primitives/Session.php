@@ -51,7 +51,12 @@ class SessionPrimitive extends Primitive
         return [
             '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'user_id'),
             '_eventId'      => $this->_integerTransform(),
-            '_id'           => $this->_nullableIntegerTransform(),
+            '_representationalHash' => $this->_stringTransform(true),
+            '_replayHash'   => $this->_stringTransform(true),
+            '_origLink'     => $this->_stringTransform(true),
+            '_playDate'     => $this->_stringTransform(true),
+            '_status'       => $this->_stringTransform(true),
+            '_id'           => $this->_integerTransform(true),
             '_current'      => [
                 'serialize' => function (SessionState $obj = null) {
                     if (!$obj) {

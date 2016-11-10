@@ -42,7 +42,7 @@ class PlayerPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
-            '_id' => $this->_nullableIntegerTransform(),
+            '_id' => $this->_integerTransform(true),
         ];
     }
 

@@ -64,14 +64,15 @@ class RoundPrimitive extends Primitive
             ],
             '_tempaiIds'  => $this->_csvTransform(),
             '_riichiIds'  => $this->_csvTransform(),
-            '_winnerId'   => $this->_integerTransform(),
-            '_loserId'    => $this->_integerTransform(),
+            '_winnerId'   => $this->_integerTransform(true),
+            '_loserId'    => $this->_integerTransform(true),
             '_sessionId'  => $this->_integerTransform(),
-            '_dora'       => $this->_integerTransform(),
-            '_uradora'    => $this->_integerTransform(),
-            '_kandora'    => $this->_integerTransform(),
-            '_kanuradora' => $this->_integerTransform(),
-            '_id'         => $this->_nullableIntegerTransform(),
+            '_dora'       => $this->_integerTransform(true),
+            '_uradora'    => $this->_integerTransform(true),
+            '_kandora'    => $this->_integerTransform(true),
+            '_kanuradora' => $this->_integerTransform(true),
+            '_multiRon'   => $this->_integerTransform(true),
+            '_id'         => $this->_integerTransform(true),
         ];
     }
 

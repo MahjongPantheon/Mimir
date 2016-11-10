@@ -49,9 +49,12 @@ class EventPrimitive extends Primitive
     {
         return [
             '_registeredPlayersIds' => $this->_externalManyToManyTransform(self::REL_USER, 'event_id', 'user_id'),
-            '_ownerFormationId'   => $this->_integerTransform(),
-            '_ownerUserId'        => $this->_integerTransform(),
-            '_id'                 => $this->_nullableIntegerTransform(),
+            '_ownerFormationId'   => $this->_integerTransform(true),
+            '_ownerUserId'        => $this->_integerTransform(true),
+            '_startTime'          => $this->_stringTransform(true),
+            '_endTime'            => $this->_stringTransform(true),
+            '_id'                 => $this->_integerTransform(true),
+            '_lobbyId'            => $this->_integerTransform(true),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
                     return $rules->title();

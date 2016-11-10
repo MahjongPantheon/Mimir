@@ -50,7 +50,7 @@ class SessionResultsPrimitive extends Primitive
             '_eventId'      => $this->_integerTransform(),
             '_sessionId'    => $this->_integerTransform(),
             '_playerId'     => $this->_integerTransform(),
-            '_id'           => $this->_nullableIntegerTransform()
+            '_id'           => $this->_integerTransform(true)
         ];
     }
 
