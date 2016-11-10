@@ -16,28 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace Riichi;
+use JsonRPC\Client;
 
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/Api.php';
+/**
+ * Class RealApiTest: integration test suite
+ * @package Riichi
+ */
+class RealApiTest extends \PHPUnit_Framework_TestCase
+{
+    /**
+     * @var Client
+     */
+    protected $_client;
 
-use JsonRPC\Server;
+    public function setUp()
+    {
+        $this->_client = new Client('http://127.0.0.1:1349');
+    }
 
-$configPath = null;
-if (!empty(getenv('OVERRIDE_CONFIG_PATH'))) {
-    $configPath = getenv('OVERRIDE_CONFIG_PATH');
+    public function testSomeApiMethod()
+    {
+        sleep(100);
+        $response = $this->_client->execute('getGameConfig', [100500]);
+        var_dump($response);
+    }
 }
-
-$server = new Server();
-$api = new Api($configPath);
-$api->registerImplAutoloading();
-date_default_timezone_set($api->getTimezone());
-
-foreach ($api->getMethods() as $proc => $method) {
-//    $api->log("Registered proc: $proc ({$method['className']}::{$method['method']})" . PHP_EOL);
-    $server
-        ->withLocalException('PDOException')
-        ->getProcedureHandler()
-        ->withClassAndMethod($proc, $method['instance'], $method['method']);
-}
-
-echo $server->execute();

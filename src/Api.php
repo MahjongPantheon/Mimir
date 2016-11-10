@@ -28,9 +28,9 @@ class Api
     protected $_db;
     protected $_syslog;
 
-    public function __construct()
+    public function __construct($configPath = null)
     {
-        $this->_config = new Config(__DIR__ . '/../config/index.php');
+        $this->_config = new Config(empty($configPath) ? __DIR__ . '/../config/index.php' : $configPath);
         $this->_db = new Db($this->_config);
         $this->_syslog = new Logger('RiichiApi');
         $this->_syslog->pushHandler(new ErrorLogHandler());

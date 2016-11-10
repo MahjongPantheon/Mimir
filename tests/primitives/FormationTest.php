@@ -19,7 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/../../src/primitives/Formation.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
-require_once __DIR__ . '/../util/Db.php';
+require_once __DIR__ . '/../../src/Db.php';
 
 class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
@@ -31,7 +31,7 @@ class FormationPrimitiveTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->_db = Db::getCleanInstance();
+        $this->_db = Db::__getCleanTestingInstance();
         $this->_owner = (new PlayerPrimitive($this->_db))
             ->setDisplayName('player')
             ->setIdent('oauth')

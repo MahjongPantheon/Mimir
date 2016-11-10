@@ -24,7 +24,7 @@ require_once __DIR__ . '/../../src/primitives/Round.php';
 require_once __DIR__ . '/../../src/primitives/Session.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../util/MockRuleset.php';
-require_once __DIR__ . '/../util/Db.php';
+require_once __DIR__ . '/../../src/Db.php';
 
 class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
@@ -48,7 +48,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->_db = Db::getCleanInstance();
+        $this->_db = Db::__getCleanTestingInstance();
 
         $this->_players = array_map(function ($i) {
             $p = (new PlayerPrimitive($this->_db))

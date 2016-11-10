@@ -15,29 +15,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-namespace Riichi;
 
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/Api.php';
-
-use JsonRPC\Server;
-
-$configPath = null;
-if (!empty(getenv('OVERRIDE_CONFIG_PATH'))) {
-    $configPath = getenv('OVERRIDE_CONFIG_PATH');
-}
-
-$server = new Server();
-$api = new Api($configPath);
-$api->registerImplAutoloading();
-date_default_timezone_set($api->getTimezone());
-
-foreach ($api->getMethods() as $proc => $method) {
-//    $api->log("Registered proc: $proc ({$method['className']}::{$method['method']})" . PHP_EOL);
-    $server
-        ->withLocalException('PDOException')
-        ->getProcedureHandler()
-        ->withClassAndMethod($proc, $method['instance'], $method['method']);
-}
-
-echo $server->execute();
+return [
+    'db' => [
+        'connection_string' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
+        'credentials' => [
+            'username' => '',
+            'password' => ''
+        ]
+    ],
+    'routes'    => require __DIR__ . '/../../config/routes.php'
+];

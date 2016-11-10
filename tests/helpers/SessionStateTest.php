@@ -23,7 +23,7 @@ require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/primitives/Session.php';
 require_once __DIR__ . '/../../src/primitives/MultiRound.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
-require_once __DIR__ . '/../util/Db.php';
+require_once __DIR__ . '/../../src/Db.php';
 
 class SessionStateTest extends \PHPUnit_Framework_TestCase
 {
@@ -51,7 +51,7 @@ class SessionStateTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->_db = Db::getCleanInstance();
+        $this->_db = Db::__getCleanTestingInstance();
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')
