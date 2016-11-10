@@ -134,9 +134,9 @@ class Db implements IDb
 
         switch (true) {
             case strpos($this->_connString, 'mysql') === 0:
-                $fields = implode(', ', array_map(function ($field) {
+                $fields = array_map(function ($field) {
                     return '`' . $field . '`';
-                }, array_keys(reset($data))));
+                }, array_keys(reset($data)));
 
                 $values = '(' . implode('), (', array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
@@ -146,15 +146,17 @@ class Db implements IDb
                     return $field . '=VALUES(' . $field . ')';
                 }, $fields));
 
+                $fields = implode(', ', $fields);
+
                 return ORM::rawExecute("
                     INSERT INTO {$table} ({$fields}) VALUES {$values}
                     ON DUPLICATE KEY UPDATE {$assignments}
                 ");
                 break;
             case strpos($this->_connString, 'pgsql') === 0:
-                $fields = implode(', ', array_map(function ($field) {
+                $fields = array_map(function ($field) {
                     return '"' . $field . '"';
-                }, array_keys(reset($data))));
+                }, array_keys(reset($data)));
 
                 $values = '(' . implode('), (', array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
@@ -163,6 +165,8 @@ class Db implements IDb
                 $assignments = implode(', ', array_map(function ($field) {
                     return $field . '= excluded.' . $field;
                 }, $fields));
+
+                $fields = implode(', ', $fields);
 
                 // Postgresql >= 9.5
                 return ORM::rawExecute("
