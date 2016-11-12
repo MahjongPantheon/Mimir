@@ -77,6 +77,7 @@ class MultiRoundPrimitive extends RoundPrimitive
         RoundsHelper::checkRound($session, $roundData);
         $roundData['session_id'] = $session->getId();
         $roundData['event_id'] = $session->getEventId();
+        $roundData['round'] = $session->getCurrentState()->getRound();
         $roundData['id'] = null;
 
         $item = new self($db);
