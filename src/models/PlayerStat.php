@@ -301,47 +301,51 @@ class PlayerStatModel extends Model
      * Get riichi win/lose summary stats for player
      *
      * @param $playerId
-     * @param $rounds
+     * @param RoundPrimitive[] $rounds
      * @return array
      */
     protected function _getRiichiSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
-            if ($r->getWinnerId() == $playerId && in_array($playerId, $r->getRiichiIds())) {
-                $acc['riichi_won'] ++;
+        $acc = [
+            'riichi_won'        => 0,
+            'riichi_lost'       => 0,
+            'feed_under_riichi' => 0
+        ];
+
+        foreach ($rounds as $r) {
+            if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
+                && $r->getWinnerId() == $playerId && in_array($playerId, $r->getRiichiIds())
+            ) {
+                $acc['riichi_won']++;
             }
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
                 && $r->getWinnerId() != $playerId && in_array($playerId, $r->getRiichiIds())
             ) {
-                $acc['riichi_lost'] ++;
+                $acc['riichi_lost']++;
             }
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
                 && $r->getLoserId() == $playerId && in_array($playerId, $r->getRiichiIds())
             ) {
-                $acc['feed_under_riichi'] ++;
+                $acc['feed_under_riichi']++;
             }
 
             if ($r->getOutcome() === 'multiron') {
                 /** @var $r MultiRoundPrimitive */
                 foreach ($r->rounds() as $round) {
                     if ($round->getWinnerId() == $playerId && in_array($playerId, $round->getRiichiIds())) {
-                        $acc['riichi_won'] ++;
+                        $acc['riichi_won']++;
                     }
                     if ($round->getWinnerId() != $playerId && in_array($playerId, $round->getRiichiIds())) {
-                        $acc['riichi_lost'] ++;
+                        $acc['riichi_lost']++;
                     }
                     if ($r->getLoserId() == $playerId && in_array($playerId, $round->getRiichiIds())) {
-                        $acc['feed_under_riichi'] ++;
+                        $acc['feed_under_riichi']++;
                     }
                 }
             }
+        }
 
-            return $acc;
-        }, [
-            'riichi_won'        => 0,
-            'riichi_lost'       => 0,
-            'feed_under_riichi' => 0
-        ]);
+        return $acc;
     }
 
     /**
