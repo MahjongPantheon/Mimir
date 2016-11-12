@@ -103,6 +103,30 @@ class PlayersController extends Controller
     }
 
     /**
+     * Get user info by id
+     * @param int $id
+     * @throws EntityNotFoundException
+     * @return array
+     */
+    public function get($id)
+    {
+        $this->_log->addInfo('Fetching info of player id #' . $id);
+        $player = PlayerPrimitive::findById($this->_db, [$id]);
+        if (empty($player)) {
+            throw new EntityNotFoundException('No user with id #' . $id . ' found');
+        }
+
+        $this->_log->addInfo('Successfully fetched info of player id #' . $id);
+        return [
+            'id'            => $player[0]->getId(),
+            'alias'         => $player[0]->getAlias(),
+            'display_name'  => $player[0]->getDisplayName(),
+            'ident'         => $player[0]->getIdent(),
+            'tenhou_id'     => $player[0]->getTenhouId()
+        ];
+    }
+
+    /**
      * @param int $playerId player to get stats for
      * @param int $eventId event to get stats for
      * @throws EntityNotFoundException
