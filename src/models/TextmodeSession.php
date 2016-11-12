@@ -59,7 +59,7 @@ class TextmodeSessionModel extends Model
             throw new ParseException("Calculated scores do not match with given ones: " . PHP_EOL
                 . json_encode(array_combine($aliases, array_values($originalScore)), JSON_PRETTY_PRINT) . PHP_EOL
                 . json_encode(array_combine($aliases, array_values($calculatedScore)), JSON_PRETTY_PRINT) . PHP_EOL
-                . "Here is log changes for your convenience: \n" . implode("\n", $debug), 225);
+                . "Here is log changes list for your convenience: \n" . implode("\n", $debug), 225);
         }
 
         return $success;

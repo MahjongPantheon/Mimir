@@ -88,6 +88,7 @@ class MultiRoundPrimitive extends RoundPrimitive
                 'loser_id'   => $roundData['loser_id'],
                 'session_id' => $roundData['session_id'],
                 'event_id'   => $roundData['event_id'],
+                'round'      => $roundData['round'],
                 'id'         => null
             ]));
         }, $roundData['wins']);
