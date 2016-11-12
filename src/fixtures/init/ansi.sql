@@ -2,20 +2,24 @@
 -- Commented out "IF EXISTS" clauses are expected to be uncommented for every supporting DB
 -- Commented out "serial" clauses indicate fields that should be serial/auto_increment.
 -- Commented out "datewrap" clauses indicate lines to replace with date(...) for supporting DBs
+-- Commented out "CHARACTER SET" clauses force utf8-encoding for tables char fields in supporting DBs
 -- Corresponding modifications to resulting DB-specific dumps are expected.
 
 -- Players, orgs, etc
 DROP TABLE
 -- IF EXISTS
    "user";
-CREATE TABLE "user" (
+CREATE TABLE "user"
+(
   "id" integer, -- serial
   primary key ("id"),
   "ident" varchar(255) not null, -- oauth ident info, for example
   "alias" varchar(255), -- user alias for text-mode game log
   "display_name" varchar(255) not null,
   "tenhou_id" varchar(255)
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 CREATE INDEX "user_alias" ON "user" ("alias");
 CREATE INDEX "user_ident" ON "user" ("ident");
 CREATE INDEX "user_tenhou" ON "user" ("tenhou_id");
@@ -24,7 +28,8 @@ CREATE INDEX "user_tenhou" ON "user" ("tenhou_id");
 DROP TABLE
 -- IF EXISTS
    "formation";
-CREATE TABLE "formation" (
+CREATE TABLE "formation"
+(
   "id" integer, -- serial
   primary key ("id"),
   "title" varchar(255) not null,
@@ -34,25 +39,31 @@ CREATE TABLE "formation" (
   "contact_info" text not null,
   "primary_owner" integer not null,
   foreign key ("primary_owner") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 
 -- Many-to-many relation, primarily for administrative needs. By default user is a player in formation.
 DROP TABLE
 -- IF EXISTS
    "formation_user";
-CREATE TABLE "formation_user" (
+CREATE TABLE "formation_user"
+(
   "formation_id" integer not null,
   "user_id" integer not null,
   "role" varchar(255) not null, -- who is this user in this group?
   foreign key ("formation_id") references "formation" ("id"),
   foreign key ("user_id") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 
 -- Local ratings, tournaments, including online ones
 DROP TABLE
 -- IF EXISTS
    "event";
-CREATE TABLE "event" (
+CREATE TABLE "event"
+(
   "id" integer, -- serial
   primary key ("id"),
   "title" varchar(255) not null,
@@ -66,20 +77,25 @@ CREATE TABLE "event" (
   "ruleset" text not null, -- table rules, in JSON
   foreign key ("owner_formation") references "formation" ("id"),
   foreign key ("owner_user") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 CREATE INDEX "event_lobby" ON "event"("lobby_id");
 
 -- Users registered in event
 DROP TABLE
 -- IF EXISTS
    "event_registered_users";
-CREATE TABLE "event_registered_users" (
+CREATE TABLE "event_registered_users"
+(
   "event_id" integer not null,
   "user_id" integer not null,
   "order" integer not null, -- hardcoded order, for orm conformity
   foreign key ("event_id") references "event" ("id"),
   foreign key ("user_id") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 -- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
 CREATE UNIQUE INDEX "event_registered_users_uniq" ON "event_registered_users"("event_id","user_id");
 
@@ -87,7 +103,8 @@ CREATE UNIQUE INDEX "event_registered_users_uniq" ON "event_registered_users"("e
 DROP TABLE
 -- IF EXISTS
    "session";
-CREATE TABLE "session" (
+CREATE TABLE "session"
+(
   "id" integer, -- serial
   primary key ("id"),
   "event_id" integer not null,
@@ -98,7 +115,9 @@ CREATE TABLE "session" (
   "status" varchar(255), -- planned / inprogress / finished
   "intermediate_results" text, -- json-encoded results for in-progress sessions
   foreign key ("event_id") references "event" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 CREATE INDEX "session_replay" ON "session"("replay_hash");
 CREATE INDEX "session_status" ON "session"("status");
 CREATE INDEX "session_rephash" ON "session"("representational_hash");
@@ -107,13 +126,16 @@ CREATE INDEX "session_rephash" ON "session"("representational_hash");
 DROP TABLE
 -- IF EXISTS
    "session_user";
-CREATE TABLE "session_user" (
+CREATE TABLE "session_user"
+(
   "session_id" integer not null,
   "user_id" integer not null,
   "order" integer not null, -- position in game
   foreign key ("session_id") references "session" ("id"),
   foreign key ("user_id") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 -- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
 CREATE UNIQUE INDEX "session_user_uniq" ON "session_user"("session_id","user_id");
 
@@ -121,7 +143,8 @@ CREATE UNIQUE INDEX "session_user_uniq" ON "session_user"("session_id","user_id"
 DROP TABLE
 -- IF EXISTS
    "session_results";
-CREATE TABLE "session_results" (
+CREATE TABLE "session_results"
+(
   "id" integer, -- serial
   primary key ("id"),
   "event_id" integer not null,
@@ -133,13 +156,16 @@ CREATE TABLE "session_results" (
   foreign key ("event_id") references "event" ("id"),
   foreign key ("session_id") references "session" ("id"),
   foreign key ("player_id") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 
 -- Session round results
 DROP TABLE
 -- IF EXISTS
    "round";
-CREATE TABLE "round" (
+CREATE TABLE "round"
+(
   "id" integer, -- serial
   primary key ("id"),
   "session_id" integer not null,
@@ -162,14 +188,17 @@ CREATE TABLE "round" (
   foreign key ("event_id") references "event" ("id"),
   foreign key ("winner_id") references "user" ("id"),
   foreign key ("loser_id") references "user" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
 CREATE INDEX "round_outcome" ON "round"("outcome");
 
 -- User rating history in context of every event
 DROP TABLE
 -- IF EXISTS
    "player_history";
-CREATE TABLE "player_history" (
+CREATE TABLE "player_history"
+(
   "id" integer, -- serial
   primary key ("id"),
   "user_id" integer not null,
@@ -181,4 +210,6 @@ CREATE TABLE "player_history" (
   foreign key ("user_id") references "user" ("id"),
   foreign key ("session_id") references "session" ("id"),
   foreign key ("event_id") references "event" ("id")
-);
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;

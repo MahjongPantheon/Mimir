@@ -51,6 +51,7 @@ init_mysql:
 	@cat src/fixtures/init/ansi.sql \
 		| tr "\"" "\`" \
 		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
+		| sed 's/--[ ]*CHARACTER SET/   CHARACTER SET/g' \
 		| sed 's/integer,[ ]*--[ ]*serial/integer AUTO_INCREMENT,/g' \
 		| sed 's/timestamp/datetime/g'
 	@echo "SET FOREIGN_KEY_CHECKS=1;"

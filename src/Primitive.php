@@ -242,9 +242,6 @@ abstract class Primitive
                 continue;
             }
 
-            // TODO: не работает с NULLABLE-полями на обновление.
-            // Нужно явно указывать NULL в данных, сейчас это видимо не так.
-
             $instance->set(
                 $dst,
                 empty($fieldsTransform[$src]['serialize'])
