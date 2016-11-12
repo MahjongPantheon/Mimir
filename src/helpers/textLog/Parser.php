@@ -141,7 +141,11 @@ class TextlogParser
             /** @var $score Token */
             $score = array_shift($statement);
 
-            if ($player->type() != Tokenizer::USER_ALIAS || $delimiter->type() != Tokenizer::SCORE_DELIMITER || $score->type() != Tokenizer::SCORE) {
+            if (empty($player) || empty($delimiter) || empty($score)
+                || $player->type() != Tokenizer::USER_ALIAS
+                || $delimiter->type() != Tokenizer::SCORE_DELIMITER
+                || $score->type() != Tokenizer::SCORE
+            ) {
                 throw new ParseException("Wrong score line format: {$player} {$delimiter} {$score}", 106);
             }
 
@@ -286,7 +290,7 @@ class TextlogParser
         }
 
         if (empty($tempai)) {
-            throw new ParseException('Не удалось распознать темпай: не распознаны игроки.', 118);
+            throw new ParseException('Failed to parse tempai: some players are unrecognized.', 118);
         }
         return implode(',', $tempai);
     }
@@ -435,6 +439,11 @@ class TextlogParser
          * @var $from Token
          * @var $loser Token */
         list(/*ron*/, $winner, $from, $loser) = $tokens;
+
+        if (empty($winner) || empty($from) || empty($loser)) {
+            throw new ParseException("Malformed round entry: ron", 130);
+        }
+
         if (empty($participants[$winner->token()])) {
             throw new ParseException("Player {$winner} is not found. Typo?", 104);
         }
@@ -474,6 +483,10 @@ class TextlogParser
 
         /** @var $winner Token */
         list(/*tsumo*/, $winner) = $tokens;
+        if (empty($winner)) {
+            throw new ParseException("Malformed round entry: tsumo", 130);
+        }
+
         if (empty($participants[$winner->token()])) {
             throw new ParseException("Player {$winner} is not found. Typo?", 104);
         }
@@ -533,6 +546,9 @@ class TextlogParser
 
         /** @var $loser Token */
         list(/*chombo*/, $loser) = $tokens;
+        if (empty($loser)) {
+            throw new ParseException("Malformed round entry: tsumo", 130);
+        }
         if (empty($participants[$loser->token()])) {
             throw new ParseException("Player {$loser} is not found. Typo?", 104);
         }
@@ -553,6 +569,10 @@ class TextlogParser
         /** @var $loser Token
          *  @var $from Token */
         list(/*ron*/, /*winner*/, $from, $loser) = $tokens;
+        if (empty($from) || empty($loser)) {
+            throw new ParseException("Malformed round entry: ron/also", 130);
+        }
+
         if ($from->type() != Tokenizer::FROM) {
             throw new ParseException("No 'from' keyword found in ron statement", 103);
         }
@@ -596,6 +616,10 @@ class TextlogParser
 
         /** @var $loser Token */
         list($rons, $loser) = $this->_splitMultiRon($tokens);
+        if (empty($rons) || empty($loser)) {
+            throw new ParseException("Malformed round entry: ron/also", 130);
+        }
+
         if (empty($participants[$loser->token()])) {
             throw new ParseException("Player {$loser} is not found. Typo?", 105);
         }
