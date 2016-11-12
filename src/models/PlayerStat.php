@@ -232,7 +232,7 @@ class PlayerStatModel extends Model
      */
     protected function _getYakuSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+        $summary = array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
                 $acc = array_reduce(explode(',', $r->getYaku()), function ($acc, $yaku) {
                     if (empty($acc[$yaku])) {
@@ -258,6 +258,9 @@ class PlayerStatModel extends Model
             }
             return $acc;
         }, []);
+
+        asort($summary);
+        return $summary;
     }
 
     /**
@@ -269,7 +272,7 @@ class PlayerStatModel extends Model
      */
     protected function _getHanSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+        $summary = array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
                 $acc = array_reduce(explode(',', $r->getHan()), function ($acc, $han) {
                     if (empty($acc[$han])) {
@@ -295,6 +298,9 @@ class PlayerStatModel extends Model
             }
             return $acc;
         }, []);
+
+        ksort($summary);
+        return $summary;
     }
 
     /**
