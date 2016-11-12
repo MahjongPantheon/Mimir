@@ -67,6 +67,8 @@ class RoundPrimitive extends Primitive
             '_winnerId'   => $this->_integerTransform(true),
             '_loserId'    => $this->_integerTransform(true),
             '_sessionId'  => $this->_integerTransform(),
+            '_han'        => $this->_integerTransform(true),
+            '_fu'         => $this->_integerTransform(true),
             '_dora'       => $this->_integerTransform(true),
             '_uradora'    => $this->_integerTransform(true),
             '_kandora'    => $this->_integerTransform(true),
