@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
+use DoctrineTest\InstantiatorTestAsset\ExceptionAsset;
+
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../models/PlayerStat.php';
@@ -36,6 +38,7 @@ class PlayersController extends Controller
      * @param string $displayName how to display user in stats
      * @param string $tenhouId tenhou username
      * @throws MalformedPayloadException
+     * @throws InvalidUserException
      * @return int user id
      */
     public function add($ident, $alias, $displayName, $tenhouId)
@@ -50,7 +53,18 @@ class PlayersController extends Controller
             ->setDisplayName($displayName)
             ->setIdent($ident)
             ->setTenhouId($tenhouId);
-        $player->save();
+
+        try {
+            $player->save();
+        } catch (\PDOException $e) {
+            if ($e->getCode() == '23000') {
+                // duplicate entry
+                throw new InvalidUserException(
+                    'User ident #' . $ident . ' already exists in DB'
+                );
+            }
+            throw $e;
+        }
         $this->_log->addInfo('Successfully added new player id=' . $player->getId());
         return $player->getId();
     }

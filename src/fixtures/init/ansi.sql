@@ -21,7 +21,7 @@ CREATE TABLE "user"
 -- CHARACTER SET utf8 COLLATE utf8_general_ci
 ;
 CREATE INDEX "user_alias" ON "user" ("alias");
-CREATE INDEX "user_ident" ON "user" ("ident");
+CREATE UNIQUE INDEX "user_ident" ON "user" ("ident");
 CREATE INDEX "user_tenhou" ON "user" ("tenhou_id");
 
 -- Local clubs, leagues, etc
