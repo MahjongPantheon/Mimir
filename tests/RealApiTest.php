@@ -32,12 +32,14 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->_client = new Client('http://127.0.0.1:1349');
+        $this->_client = new Client('http://localhost:1349');
     }
 
+    /**
+     * @expectedException \JsonRPC\Exception\ResponseException
+     */
     public function testSomeApiMethod()
     {
-        sleep(100);
         $response = $this->_client->execute('getGameConfig', [100500]);
         var_dump($response);
     }

@@ -20,7 +20,6 @@ namespace Riichi;
 require_once __DIR__ . '/Player.php';
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Event.php';
-require_once __DIR__ . '/MultiRound.php';
 require_once __DIR__ . '/../Primitive.php';
 require_once __DIR__ . '/../validators/Round.php';
 
@@ -219,6 +218,7 @@ class RoundPrimitive extends Primitive
      */
     protected static function _mergeMultiRoundsBySession(IDb $db, &$rounds)
     {
+        require_once __DIR__ . '/MultiRound.php';
         $splitBySession = [];
         foreach ($rounds as $round) {
             if (empty($splitBySession[$round->getSessionId()])) {
@@ -291,6 +291,7 @@ class RoundPrimitive extends Primitive
      */
     public static function createFromData(IDb $db, SessionPrimitive $session, $roundData)
     {
+        require_once __DIR__ . '/MultiRound.php';
         if ($roundData['outcome'] === 'multiron') {
             return MultiRoundPrimitive::createFromData($db, $session, $roundData);
         }
