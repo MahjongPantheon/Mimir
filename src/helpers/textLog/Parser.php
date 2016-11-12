@@ -92,7 +92,7 @@ class TextlogParser
 
                 // some debug info
                 $statementStr = $this->_getStatementAsString($statement);
-                $debug []= '-> ' . $statementStr
+                $debug []= '-> ' . str_replace('also', "\n-> also", $statementStr)
                     . "\n       `+ [\t" . implode(
                         "\t",
                         array_map(function ($sc, $sc2) {

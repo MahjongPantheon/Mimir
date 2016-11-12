@@ -249,7 +249,7 @@ class EventModel extends Model
                 'display_name'  => $playerItems[$el->getPlayerId()]->getDisplayName(),
                 'rating'        => (float)$el->getRating(),
                 'winner_zone'   => ($el->getRating() >= $event->getRuleset()->startRating()),
-                'avg_place'     => round($el->getAvgPlace(), 5),
+                'avg_place'     => round($el->getAvgPlace(), 4),
                 'games_played'  => (int)$el->getGamesPlayed()
             ];
         }, $playersHistoryItems);
@@ -310,7 +310,7 @@ class EventModel extends Model
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) {
-                    if (abs($el1->getAvgPlace() - $el2->getAvgPlace()) < 0.00001) { // floats need epsilon
+                    if (abs($el1->getAvgPlace() - $el2->getAvgPlace()) < 0.0001) { // floats need epsilon
                         return $el2->getRating() - $el1->getRating(); // lower rating is worse, so invert
                     }
                     if ($el1->getAvgPlace() - $el2->getAvgPlace() < 0) { // higher avg place is worse
