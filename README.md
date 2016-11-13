@@ -24,6 +24,11 @@ What's inside?
 - PHP v5.5+ is required to run the API on your own server.
 - [Api doc here](APIDOC.md)
 
+Installation gotchas
+--------------------
+
+- PHP v5.6.x comes with `always_populate_raw_post_data = 0` in default php.ini, and this breaks JSON reply validity, if errors output is not disabled (you should disable it on production anyway! But it will flood your log files with crap :( ). When using this PHP version, you should set `always_populate_raw_post_data = -1` in your ini file.
+
 Developer information
 ---------------------
 
