@@ -80,7 +80,7 @@ class PlayerStatModel extends Model
         $rating = $event->getRuleset()->startRating();
         $ratingHistory = array_filter(
             array_map(
-                function ($game) use ($rating, $playerId) {
+                function ($game) use (&$rating, $playerId) {
                     /** @var $results SessionResultsPrimitive[] */
                     $results = $game['results'];
                     $rating += $results[$playerId]->getRatingDelta();
