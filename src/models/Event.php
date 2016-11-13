@@ -17,6 +17,15 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../primitives/Event.php';
+require_once __DIR__ . '/../primitives/Session.php';
+require_once __DIR__ . '/../primitives/SessionResults.php';
+require_once __DIR__ . '/../primitives/Player.php';
+require_once __DIR__ . '/../primitives/PlayerHistory.php';
+require_once __DIR__ . '/../primitives/Round.php';
+require_once __DIR__ . '/../exceptions/InvalidParameters.php';
+
 class EventModel extends Model
 {
     // ------ Last games related -------
@@ -55,12 +64,13 @@ class EventModel extends Model
         foreach ($games as $session) {
             $result['games'][$session->getId()] = [
                 'date' => $session->getPlayDate(),
+                'replay_link' => $session->getOrigLink(),
                 'players' => array_map('intval', $session->getPlayersIds()),
                 'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
                     return [
-                        'score'     => (int) $el->getScore(),
-                        'rating'    => (float) $el->getRatingDelta(),
-                        'place'     => (int) $el->getPlace()
+                        'score'         => (int) $el->getScore(),
+                        'rating_delta'  => (float) $el->getRatingDelta(),
+                        'place'         => (int) $el->getPlace()
                     ];
                 }, $sessionResults[$session->getId()]),
                 'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
@@ -231,12 +241,15 @@ class EventModel extends Model
             $playersHistoryItems = array_reverse($playersHistoryItems);
         }
 
-        return array_map(function (PlayerHistoryPrimitive $el) use (&$playerItems) {
+        // TODO: среднеквадратичное отклонение
+
+        return array_map(function (PlayerHistoryPrimitive $el) use (&$playerItems, $event) {
             return [
                 'id'            => (int)$el->getPlayerId(),
-                'name'          => $playerItems[$el->getPlayerId()]->getDisplayName(),
+                'display_name'  => $playerItems[$el->getPlayerId()]->getDisplayName(),
                 'rating'        => (float)$el->getRating(),
-                'avg_place'     => round($el->getAvgPlace(), 5),
+                'winner_zone'   => ($el->getRating() >= $event->getRuleset()->startRating()),
+                'avg_place'     => round($el->getAvgPlace(), 4),
                 'games_played'  => (int)$el->getGamesPlayed()
             ];
         }, $playersHistoryItems);
@@ -297,7 +310,7 @@ class EventModel extends Model
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) {
-                    if (abs($el1->getAvgPlace() - $el2->getAvgPlace()) < 0.00001) { // floats need epsilon
+                    if (abs($el1->getAvgPlace() - $el2->getAvgPlace()) < 0.0001) { // floats need epsilon
                         return $el2->getRating() - $el1->getRating(); // lower rating is worse, so invert
                     }
                     if ($el1->getAvgPlace() - $el2->getAvgPlace() < 0) { // higher avg place is worse

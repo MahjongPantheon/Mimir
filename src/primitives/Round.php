@@ -20,7 +20,6 @@ namespace Riichi;
 require_once __DIR__ . '/Player.php';
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Event.php';
-//require_once __DIR__ . '/MultiRound.php';
 require_once __DIR__ . '/../Primitive.php';
 require_once __DIR__ . '/../validators/Round.php';
 
@@ -64,14 +63,17 @@ class RoundPrimitive extends Primitive
             ],
             '_tempaiIds'  => $this->_csvTransform(),
             '_riichiIds'  => $this->_csvTransform(),
-            '_winnerId'   => $this->_integerTransform(),
-            '_loserId'    => $this->_integerTransform(),
+            '_winnerId'   => $this->_integerTransform(true),
+            '_loserId'    => $this->_integerTransform(true),
             '_sessionId'  => $this->_integerTransform(),
-            '_dora'       => $this->_integerTransform(),
-            '_uradora'    => $this->_integerTransform(),
-            '_kandora'    => $this->_integerTransform(),
-            '_kanuradora' => $this->_integerTransform(),
-            '_id'         => $this->_nullableIntegerTransform(),
+            '_han'        => $this->_integerTransform(true),
+            '_fu'         => $this->_integerTransform(true),
+            '_dora'       => $this->_integerTransform(true),
+            '_uradora'    => $this->_integerTransform(true),
+            '_kandora'    => $this->_integerTransform(true),
+            '_kanuradora' => $this->_integerTransform(true),
+            '_multiRon'   => $this->_integerTransform(true),
+            '_id'         => $this->_integerTransform(true),
         ];
     }
 
@@ -216,6 +218,7 @@ class RoundPrimitive extends Primitive
      */
     protected static function _mergeMultiRoundsBySession(IDb $db, &$rounds)
     {
+        require_once __DIR__ . '/MultiRound.php';
         $splitBySession = [];
         foreach ($rounds as $round) {
             if (empty($splitBySession[$round->getSessionId()])) {
@@ -288,6 +291,7 @@ class RoundPrimitive extends Primitive
      */
     public static function createFromData(IDb $db, SessionPrimitive $session, $roundData)
     {
+        require_once __DIR__ . '/MultiRound.php';
         if ($roundData['outcome'] === 'multiron') {
             return MultiRoundPrimitive::createFromData($db, $session, $roundData);
         }
@@ -295,6 +299,7 @@ class RoundPrimitive extends Primitive
         RoundsHelper::checkRound($session, $roundData);
         $roundData['session_id'] = $session->getId();
         $roundData['event_id'] = $session->getEventId();
+        $roundData['round'] = $session->getCurrentState()->getRound();
         $roundData['id'] = null;
 
         // Just set it, as we already checked its perfect validity.

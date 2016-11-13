@@ -11,6 +11,9 @@
             "date": {
               "type": "string"
             },
+            "replay_link": {
+              "type": "string"
+            },
             "players": {
               "type": "array",
               "items": {
@@ -26,7 +29,7 @@
                     "score": {
                       "type": "integer"
                     },
-                    "rating": {
+                    "rating_delta": {
                       "type": "number"
                     },
                     "place": {
@@ -61,7 +64,8 @@
             "date",
             "players",
             "final_results",
-            "rounds"
+            "rounds",
+            "replay_link"
           ]
         }
       }

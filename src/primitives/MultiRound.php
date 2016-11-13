@@ -77,6 +77,7 @@ class MultiRoundPrimitive extends RoundPrimitive
         RoundsHelper::checkRound($session, $roundData);
         $roundData['session_id'] = $session->getId();
         $roundData['event_id'] = $session->getEventId();
+        $roundData['round'] = $session->getCurrentState()->getRound();
         $roundData['id'] = null;
 
         $item = new self($db);
@@ -87,6 +88,7 @@ class MultiRoundPrimitive extends RoundPrimitive
                 'loser_id'   => $roundData['loser_id'],
                 'session_id' => $roundData['session_id'],
                 'event_id'   => $roundData['event_id'],
+                'round'      => $roundData['round'],
                 'id'         => null
             ]));
         }, $roundData['wins']);

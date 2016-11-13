@@ -19,8 +19,9 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require __DIR__ . '/../vendor/heilage-nsk/idiorm/src/idiorm.php';
-require __DIR__ . '/../src/interfaces/IDb.php';
+require_once __DIR__ . '/../vendor/heilage-nsk/idiorm/src/idiorm.php';
+require_once __DIR__ . '/../src/interfaces/IDb.php';
+require_once __DIR__ . '/../src/Config.php';
 
 /**
  * Class Db
@@ -134,9 +135,9 @@ class Db implements IDb
 
         switch (true) {
             case strpos($this->_connString, 'mysql') === 0:
-                $fields = implode(', ', array_map(function ($field) {
+                $fields = array_map(function ($field) {
                     return '`' . $field . '`';
-                }, array_keys(reset($data))));
+                }, array_keys(reset($data)));
 
                 $values = '(' . implode('), (', array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
@@ -146,15 +147,17 @@ class Db implements IDb
                     return $field . '=VALUES(' . $field . ')';
                 }, $fields));
 
+                $fields = implode(', ', $fields);
+
                 return ORM::rawExecute("
                     INSERT INTO {$table} ({$fields}) VALUES {$values}
                     ON DUPLICATE KEY UPDATE {$assignments}
                 ");
                 break;
             case strpos($this->_connString, 'pgsql') === 0:
-                $fields = implode(', ', array_map(function ($field) {
+                $fields = array_map(function ($field) {
                     return '"' . $field . '"';
-                }, array_keys(reset($data))));
+                }, array_keys(reset($data)));
 
                 $values = '(' . implode('), (', array_map(function ($dataset) {
                     return implode(', ', array_values($dataset));
@@ -163,6 +166,8 @@ class Db implements IDb
                 $assignments = implode(', ', array_map(function ($field) {
                     return $field . '= excluded.' . $field;
                 }, $fields));
+
+                $fields = implode(', ', $fields);
 
                 // Postgresql >= 9.5
                 return ORM::rawExecute("
@@ -194,5 +199,25 @@ class Db implements IDb
                     'Check it out, this might be enough to make it work!'
                 );
         }
+    }
+
+    // For testing purposes
+    static protected $__testingInstance = null;
+    public static function __getCleanTestingInstance()
+    {
+        $db = __DIR__ . '/../tests/data/db.sqlite';
+
+        if (!is_dir(dirname($db))) {
+            mkdir(dirname($db));
+        }
+        shell_exec('cd ' . __DIR__ . '/../ && SQLITE_FILE=' . $db . ' make init_sqlite_nointeractive');
+
+        if (self::$__testingInstance === null) {
+            $cfg = new Config(__DIR__ . '/../tests/util/config.php');
+            self::$_ctr = 0;
+            self::$__testingInstance = new self($cfg);
+        }
+
+        return self::$__testingInstance;
     }
 }

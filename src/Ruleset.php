@@ -23,11 +23,15 @@ abstract class Ruleset
 
     /**
      * @param $title
+     * @throws InvalidParametersException
      * @return Ruleset
      */
     public static function instance($title)
     {
         if (empty(self::$_instances[$title])) {
+            if (!file_exists(__DIR__ . '/../config/rulesets/' . $title . '.php')) {
+                throw new InvalidParametersException('No available ruleset with name ' . $title . ' found');
+            }
             require_once __DIR__ . '/../config/rulesets/' . $title . '.php';
             /** @var Ruleset $className */
             $className = 'Riichi\Ruleset' . ucfirst($title);

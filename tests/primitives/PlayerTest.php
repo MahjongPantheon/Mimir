@@ -18,14 +18,14 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../src/primitives/Player.php';
-require_once __DIR__ . '/../util/Db.php';
+require_once __DIR__ . '/../../src/Db.php';
 
 class PlayerPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
     protected $_db;
     public function setUp()
     {
-        $this->_db = Db::getCleanInstance();
+        $this->_db = Db::__getCleanTestingInstance();
     }
 
     public function testNewPlayer()

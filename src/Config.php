@@ -22,7 +22,7 @@ class Config
     protected $_data;
 
     /**
-     * @param $baseFile config file location
+     * @param string $baseFile config file location
      */
     public function __construct($baseFile)
     {

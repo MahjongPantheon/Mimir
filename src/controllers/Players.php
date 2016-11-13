@@ -17,8 +17,11 @@
  */
 namespace Riichi;
 
+use DoctrineTest\InstantiatorTestAsset\ExceptionAsset;
+
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../primitives/Player.php';
+require_once __DIR__ . '/../models/PlayerStat.php';
 
 /**
  * Class PlayersController
@@ -35,6 +38,7 @@ class PlayersController extends Controller
      * @param string $displayName how to display user in stats
      * @param string $tenhouId tenhou username
      * @throws MalformedPayloadException
+     * @throws InvalidUserException
      * @return int user id
      */
     public function add($ident, $alias, $displayName, $tenhouId)
@@ -49,7 +53,18 @@ class PlayersController extends Controller
             ->setDisplayName($displayName)
             ->setIdent($ident)
             ->setTenhouId($tenhouId);
-        $player->save();
+
+        try {
+            $player->save();
+        } catch (\PDOException $e) {
+            if ($e->getCode() == '23000') {
+                // duplicate entry
+                throw new InvalidUserException(
+                    'User ident #' . $ident . ' already exists in DB'
+                );
+            }
+            throw $e;
+        }
         $this->_log->addInfo('Successfully added new player id=' . $player->getId());
         return $player->getId();
     }
@@ -85,6 +100,30 @@ class PlayersController extends Controller
 
         $this->_log->addInfo('Successfully updated player id #' . $player->getId());
         return $player->getId();
+    }
+
+    /**
+     * Get user info by id
+     * @param int $id
+     * @throws EntityNotFoundException
+     * @return array
+     */
+    public function get($id)
+    {
+        $this->_log->addInfo('Fetching info of player id #' . $id);
+        $player = PlayerPrimitive::findById($this->_db, [$id]);
+        if (empty($player)) {
+            throw new EntityNotFoundException('No user with id #' . $id . ' found');
+        }
+
+        $this->_log->addInfo('Successfully fetched info of player id #' . $id);
+        return [
+            'id'            => $player[0]->getId(),
+            'alias'         => $player[0]->getAlias(),
+            'display_name'  => $player[0]->getDisplayName(),
+            'ident'         => $player[0]->getIdent(),
+            'tenhou_id'     => $player[0]->getTenhouId()
+        ];
     }
 
     /**

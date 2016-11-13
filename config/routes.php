@@ -34,7 +34,7 @@ return [
     'getRatingTable'    => ['EventsController', 'getRatingTable'],
     'getLastGames'      => ['EventsController', 'getLastGames'],
 
-    'getPlayerStats'    => ['PlayerController', 'getStats'],
+    'getPlayerStats'    => ['PlayersController', 'getStats'],
 
     'addRound'          => ['GamesController', 'addRound'],
     'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
@@ -42,6 +42,7 @@ return [
     'getAllPlayers'     => ['EventsController', 'getAllRegisteredPlayers'],
 
     // admin
+    'createEvent'       => ['EventsController', 'createEvent'],
     'startGame'         => ['GamesController', 'start'],
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
@@ -49,6 +50,7 @@ return [
 
     'addPlayer'         => ['PlayersController', 'add'],
     'updatePlayer'      => ['PlayersController', 'update'],
+    'getPlayer'         => ['PlayersController', 'get'],
 
     'generateSortition' => ['SortitionController', 'generate']
 ];

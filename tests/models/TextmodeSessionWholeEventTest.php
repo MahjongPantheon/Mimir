@@ -23,7 +23,7 @@ require_once __DIR__ . '/../../src/models/PlayerStat.php';
 require_once __DIR__ . '/../../src/models/Event.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
-require_once __DIR__ . '/../util/Db.php';
+require_once __DIR__ . '/../../src/Db.php';
 
 use \JsonSchema\SchemaStorage;
 use \JsonSchema\Validator;
@@ -49,7 +49,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         $playerNames = array_filter(preg_split('#\s#is', file_get_contents(__DIR__ . '/testdata/players.txt')));
         $games = explode("\n\n\n", file_get_contents(__DIR__ . '/testdata/games.txt'));
 
-        $this->_db = Db::getCleanInstance();
+        $this->_db = Db::__getCleanTestingInstance();
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')

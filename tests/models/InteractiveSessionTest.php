@@ -21,7 +21,7 @@ require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/InteractiveSession.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
-require_once __DIR__ . '/../util/Db.php';
+require_once __DIR__ . '/../../src/Db.php';
 
 /**
  * Class SessionTest: integration test suite
@@ -43,7 +43,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
     protected $_event;
     public function setUp()
     {
-        $this->_db = Db::getCleanInstance();
+        $this->_db = Db::__getCleanTestingInstance();
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')

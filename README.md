@@ -22,6 +22,12 @@ What's inside?
 - API uses JSON-RPC to communicate with clients.
 - Supported RDBMS are sqlite, mysql (v5.5+) and pgsql (v9.5+), others may work too because of PDO under hood, but only after some little coding (you'll see :) ). Anyway, other RDBMS are not tested at all, use them at your own risk.
 - PHP v5.5+ is required to run the API on your own server.
+- [Api doc here](APIDOC.md)
+
+Installation gotchas
+--------------------
+
+- PHP v5.6.x comes with `always_populate_raw_post_data = 0` in default php.ini, and this breaks JSON reply validity, if errors output is not disabled (you should disable it on production anyway! But it will flood your log files with crap :( ). When using this PHP version, you should set `always_populate_raw_post_data = -1` in your ini file.
 
 Developer information
 ---------------------
@@ -35,6 +41,7 @@ You also will need standard `make` utility to use following shortcuts.
 - Use `make req METHOD_NAME [space-separated method args]` to test API methods. Port for the API is hardcoded inside, change it if you run dev server on different port.
 - Use `make unit` to run unit tests and `make lint` to check code style.
 - Use `make autofix` to fix all codestyle problems, that can be fixed automatically.
+- Use `make apidoc` to regenerate api methods documentation file.
 - Remember to use PSR2 coding standards when adding php code.
 - The [DB schema](src/fixtures/init/ansi.sql) should be written in ANSI SQL92 and should pass any compliance tests. If any of DB-specific things are required, use post-processing tools (see Makefile sections for examples of generating sqlite/mysql/pgsql specific schemas).
 

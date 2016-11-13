@@ -145,40 +145,42 @@ abstract class Primitive
 
     /**
      * Default integer cast transform
+     * @param bool $nullable
      * @return array
      */
-    protected function _integerTransform()
+    protected function _integerTransform($nullable = false)
     {
         return [
-            'serialize' => function ($obj) {
-                return (int)$obj;
+            'serialize' => function ($obj) use ($nullable) {
+                return (!$obj && $nullable) ? null : (int)$obj;
             }
         ];
     }
 
     /**
      * Default float cast transform
+     * @param bool $nullable
      * @return array
      */
-    protected function _floatTransform()
+    protected function _floatTransform($nullable = false)
     {
         return [
-            'serialize' => function ($obj) {
-                return (float)$obj;
+            'serialize' => function ($obj) use ($nullable) {
+                return (!$obj && $nullable) ? null : (float)$obj;
             }
         ];
     }
 
     /**
-     * Default integer cast transform
-     * Return null if empty
+     * Default string cast transform
+     * @param bool $nullable
      * @return array
      */
-    protected function _nullableIntegerTransform()
+    protected function _stringTransform($nullable = false)
     {
         return [
-            'serialize' => function ($obj) {
-                return $obj ? (int)$obj : null;
+            'serialize' => function ($obj) use ($nullable) {
+                return (!$obj && $nullable) ? null : (string)$obj;
             }
         ];
     }
@@ -308,6 +310,10 @@ abstract class Primitive
     {
         if (!is_array($identifiers)) {
             throw new \Exception("Identifiers should be an array in search by $key");
+        }
+
+        if (empty($identifiers)) {
+            return [];
         }
 
         $result = $db->table(static::$_table)->whereIn($key, $identifiers)->findArray();

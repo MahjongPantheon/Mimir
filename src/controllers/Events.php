@@ -23,6 +23,35 @@ require_once __DIR__ . '/../Controller.php';
 class EventsController extends Controller
 {
     /**
+     * @param string $title
+     * @param string $description
+     * @param string $type either 'online' or 'offline'
+     * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
+     * @throws BadActionException
+     * @return int
+     */
+    public function createEvent($title, $description, $type, $ruleset)
+    {
+        $this->_log->addInfo('Creating new [' . $type . '] event with [' . $ruleset . '] rules');
+
+        $event = (new EventPrimitive($this->_db))
+            ->setTitle($title)
+            ->setDescription($description)
+            ->setType($type)
+            ->setRuleset(Ruleset::instance($ruleset))
+            // ->setStartTime('')   // TODO
+            // ->setEndTime('')     // TODO
+        ;
+        $success = $event->save();
+        if (!$success) {
+            throw new BadActionException('Somehow we couldn\'t create event - this should not happen');
+        }
+
+        $this->_log->addInfo('Successfully create new event (id# ' . $event->getId() . ')');
+        return $event->getId();
+    }
+
+    /**
      * Get all players registered for event
      *
      * @param integer $eventId

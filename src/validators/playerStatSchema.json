@@ -15,6 +15,7 @@
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
               "player_id": {
                 "type": "integer"
@@ -28,7 +29,13 @@
               "place": {
                 "type": "integer"
               }
-            }
+            },
+            "required": [
+              "player_id",
+              "score",
+              "rating_delta",
+              "place"
+            ]
           }
         }
       }
@@ -37,6 +44,7 @@
       "type": "array",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "id": {
             "type": "integer"
@@ -47,11 +55,17 @@
           "tenhou_id": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "tenhou_id"
+        ]
       }
     },
     "places_summary": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "1": {
           "type": "integer"
@@ -65,7 +79,8 @@
         "4": {
           "type": "integer"
         }
-      }
+      },
+      "required": ["1", "2", "3", "4"]
     },
     "total_played_games": {
       "type": "integer"
@@ -75,6 +90,7 @@
     },
     "win_summary": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "ron": {
           "type": "integer"
@@ -91,7 +107,14 @@
         "tsumofeed": {
           "type": "integer"
         }
-      }
+      },
+      "required": [
+        "ron",
+        "tsumo",
+        "chombo",
+        "feed",
+        "tsumofeed"
+      ]
     },
     "hands_value_summary": {
       "type": "object",
@@ -111,6 +134,7 @@
     },
     "riichi_summary": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "riichi_won": {
           "type": "integer"
@@ -121,7 +145,12 @@
         "feed_under_riichi": {
           "type": "integer"
         }
-      }
+      },
+      "required": [
+        "riichi_won",
+        "riichi_lost",
+        "feed_under_riichi"
+      ]
     }
   },
   "additionalProperties": false,

@@ -17,6 +17,14 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../primitives/Event.php';
+require_once __DIR__ . '/../primitives/Player.php';
+require_once __DIR__ . '/../primitives/Round.php';
+require_once __DIR__ . '/../primitives/Session.php';
+require_once __DIR__ . '/../primitives/SessionResults.php';
+require_once __DIR__ . '/../exceptions/EntityNotFound.php';
+
 class PlayerStatModel extends Model
 {
     /**
@@ -72,7 +80,7 @@ class PlayerStatModel extends Model
         $rating = $event->getRuleset()->startRating();
         $ratingHistory = array_filter(
             array_map(
-                function ($game) use ($rating, $playerId) {
+                function ($game) use (&$rating, $playerId) {
                     /** @var $results SessionResultsPrimitive[] */
                     $results = $game['results'];
                     $rating += $results[$playerId]->getRatingDelta();
@@ -171,9 +179,6 @@ class PlayerStatModel extends Model
     protected function _getOutcomeSummary($playerId, $rounds)
     {
         return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
-
-            // TODO: multi-ron fail :( write test?
-
             switch ($r->getOutcome()) {
                 case 'ron':
                     if ($r->getLoserId() == $playerId) {
@@ -192,6 +197,17 @@ class PlayerStatModel extends Model
                 case 'chombo':
                     if ($r->getLoserId() == $playerId) {
                         $acc['chombo'] ++;
+                    }
+                    break;
+                case 'multiron':
+                    /** @var $r MultiRoundPrimitive */
+                    foreach ($r->rounds() as $round) {
+                        if ($round->getWinnerId() == $playerId) {
+                            $acc['ron'] ++;
+                            break;
+                        } else if ($r->getLoserId() == $playerId) {
+                            $acc['feed'] ++;
+                        }
                     }
                     break;
                 default:
@@ -216,10 +232,7 @@ class PlayerStatModel extends Model
      */
     protected function _getYakuSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
-
-            // TODO: multi-ron fail :( write test?
-
+        $summary = array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
                 $acc = array_reduce(explode(',', $r->getYaku()), function ($acc, $yaku) {
                     if (empty($acc[$yaku])) {
@@ -228,9 +241,26 @@ class PlayerStatModel extends Model
                     $acc[$yaku] ++;
                     return $acc;
                 }, $acc);
+            } else if ($r->getOutcome() === 'multiron') {
+                /** @var $r MultiRoundPrimitive */
+                foreach ($r->rounds() as $round) {
+                    if ($round->getWinnerId() == $playerId) {
+                        $acc = array_reduce(explode(',', $round->getYaku()), function ($acc, $yaku) {
+                            if (empty($acc[$yaku])) {
+                                $acc[$yaku] = 0;
+                            }
+                            $acc[$yaku] ++;
+                            return $acc;
+                        }, $acc);
+                        break;
+                    }
+                }
             }
             return $acc;
         }, []);
+
+        asort($summary);
+        return $summary;
     }
 
     /**
@@ -242,10 +272,7 @@ class PlayerStatModel extends Model
      */
     protected function _getHanSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
-
-            // TODO: multi-ron fail :( write test?
-
+        $summary = array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo') && $r->getWinnerId() == $playerId) {
                 $acc = array_reduce(explode(',', $r->getHan()), function ($acc, $han) {
                     if (empty($acc[$han])) {
@@ -254,44 +281,77 @@ class PlayerStatModel extends Model
                     $acc[$han] ++;
                     return $acc;
                 }, $acc);
+            } else if ($r->getOutcome() === 'multiron') {
+                /** @var $r MultiRoundPrimitive */
+                foreach ($r->rounds() as $round) {
+                    if ($round->getWinnerId() == $playerId) {
+                        $acc = array_reduce(explode(',', $round->getHan()), function ($acc, $han) {
+                            if (empty($acc[$han])) {
+                                $acc[$han] = 0;
+                            }
+                            $acc[$han] ++;
+                            return $acc;
+                        }, $acc);
+                        break;
+                    }
+                }
             }
             return $acc;
         }, []);
+
+        ksort($summary);
+        return $summary;
     }
 
     /**
      * Get riichi win/lose summary stats for player
      *
      * @param $playerId
-     * @param $rounds
+     * @param RoundPrimitive[] $rounds
      * @return array
      */
     protected function _getRiichiSummary($playerId, $rounds)
     {
-        return array_reduce($rounds, function ($acc, RoundPrimitive $r) use ($playerId) {
+        $acc = [
+            'riichi_won'        => 0,
+            'riichi_lost'       => 0,
+            'feed_under_riichi' => 0
+        ];
 
-            // TODO: multi-ron fail :( write test?
-
-            if ($r->getWinnerId() == $playerId && in_array($playerId, $r->getRiichiIds())) {
-                $acc['riichi_won'] ++;
+        foreach ($rounds as $r) {
+            if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
+                && $r->getWinnerId() == $playerId && in_array($playerId, $r->getRiichiIds())
+            ) {
+                $acc['riichi_won']++;
             }
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
                 && $r->getWinnerId() != $playerId && in_array($playerId, $r->getRiichiIds())
             ) {
-                $acc['riichi_lost'] ++;
+                $acc['riichi_lost']++;
             }
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
                 && $r->getLoserId() == $playerId && in_array($playerId, $r->getRiichiIds())
             ) {
-                $acc['feed_under_riichi'] ++;
+                $acc['feed_under_riichi']++;
             }
 
-            return $acc;
-        }, [
-            'riichi_won'        => 0,
-            'riichi_lost'       => 0,
-            'feed_under_riichi' => 0
-        ]);
+            if ($r->getOutcome() === 'multiron') {
+                /** @var $r MultiRoundPrimitive */
+                foreach ($r->rounds() as $round) {
+                    if ($round->getWinnerId() == $playerId && in_array($playerId, $round->getRiichiIds())) {
+                        $acc['riichi_won']++;
+                    }
+                    if ($round->getWinnerId() != $playerId && in_array($playerId, $round->getRiichiIds())) {
+                        $acc['riichi_lost']++;
+                    }
+                    if ($r->getLoserId() == $playerId && in_array($playerId, $round->getRiichiIds())) {
+                        $acc['feed_under_riichi']++;
+                    }
+                }
+            }
+        }
+
+        return $acc;
     }
 
     /**
