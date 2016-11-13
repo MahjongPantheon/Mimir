@@ -17,6 +17,7 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../src/Db.php';
 use JsonRPC\Client;
 
 /**
@@ -32,6 +33,10 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        // Init db! Or bunch of PDOExceptions will appeal
+        Db::__getCleanTestingInstance();
+        sleep(1);
+
         $this->_client = new Client('http://localhost:1349');
     }
 
