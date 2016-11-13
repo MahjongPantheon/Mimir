@@ -33,6 +33,24 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### getAllPlayers
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getTimerState
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### getPlayerStats
 Parameters:
 * **$playerId** (_int_) player to get stats for
@@ -65,23 +83,37 @@ Exceptions:
 * _InvalidParametersException_ 
 * _ParseException_ 
 
-### getAllPlayers
-Parameters:
-* **$eventId** (_integer_) 
-
-Returns: _array_ 
-
-Exceptions:
-* _InvalidParametersException_ 
-
 ### createEvent
 Parameters:
 * **$title** (_string_) 
 * **$description** (_string_) 
 * **$type** (_string_) either 'online' or 'offline'
 * **$ruleset** (_string_) one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
+* **$gameDuration** (_int_) duration of game in this event
+
+Returns: _int_ 
+
+Exceptions:
+* _BadActionException_ 
+
+### startTimer
+Parameters:
+* **$eventId** (_integer_) 
 
 Returns: _bool_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### registerPlayer
+Parameters:
+* **$eventId** (_integer_) 
+* **$playerId** (_integer_) 
+
+Returns: _bool_ 
+
+Exceptions:
+* _InvalidParametersException_ 
 
 ### startGame
 Parameters:
@@ -114,16 +146,6 @@ Exceptions:
 * _InvalidParametersException_ 
 * _ParseException_ 
 
-### registerPlayer
-Parameters:
-* **$eventId** (_integer_) 
-* **$playerId** (_integer_) 
-
-Returns: _bool_ 
-
-Exceptions:
-* _InvalidParametersException_ 
-
 ### addPlayer
 Parameters:
 * **$ident** (_string_) oauth ident, if any
@@ -135,6 +157,7 @@ Returns: _int_ user id
 
 Exceptions:
 * _MalformedPayloadException_ 
+* _InvalidUserException_ 
 
 ### updatePlayer
 Parameters:
@@ -149,6 +172,15 @@ Returns: _int_ user id
 Exceptions:
 * _EntityNotFoundException_ 
 * _MalformedPayloadException_ 
+
+### getPlayer
+Parameters:
+* **$id** (_int_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
 
 ### generateSortition
 Parameters:
