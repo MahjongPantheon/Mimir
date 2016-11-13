@@ -18,6 +18,8 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../src/Db.php';
+require_once __DIR__ . '/../src/primitives/Event.php';
+require_once __DIR__ . '/../src/Ruleset.php';
 use JsonRPC\Client;
 
 /**
@@ -34,18 +36,47 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         // Init db! Or bunch of PDOExceptions will appeal
-        Db::__getCleanTestingInstance();
-        sleep(1);
+        $db = Db::__getCleanTestingInstance();
+        $evt = (new EventPrimitive($db))
+            ->setRuleset(Ruleset::instance('ema'))
+            ->setType('offlime')
+            ->setTitle('test')
+            ->setDescription('test')
+            ->setGameDuration(5); // for timers check
+        $evt->save();
 
         $this->_client = new Client('http://localhost:1349');
     }
 
-    /**
-     * @expectedException \JsonRPC\Exception\ResponseException
-     */
-    public function testSomeApiMethod()
+    public function testGameConfig()
     {
-        $response = $this->_client->execute('getGameConfig', [100500]);
-        var_dump($response);
+        $response = $this->_client->execute('getGameConfig', [1]);
+        $this->assertEquals(false, $response['withAbortives']);
+        $this->assertEquals(30000, $response['startPoints']);
+    }
+
+    public function testTimer()
+    {
+        $response = $this->_client->execute('getTimerState', [1]);
+        $this->assertEquals([
+            'started' => false,
+            'finished' => false,
+            'time_remaining' => null
+        ], $response);
+
+        $this->assertTrue($this->_client->execute('startTimer', [1]));
+        $response = $this->_client->execute('getTimerState', [1]);
+        $this->assertTrue($response['started']);
+        $this->assertFalse($response['finished']);
+        $this->assertTrue($response['time_remaining'] == 5
+            || $response['time_remaining'] == 4); // expect to finish in 1 second max
+
+        sleep(6); // wait unit timer expires
+        $response = $this->_client->execute('getTimerState', [1]);
+        $this->assertEquals([
+            'started' => false,
+            'finished' => true,
+            'time_remaining' => null
+        ], $response);
     }
 }

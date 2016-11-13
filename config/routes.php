@@ -33,24 +33,21 @@ return [
     'getGameConfig'     => ['EventsController', 'getGameConfig'],
     'getRatingTable'    => ['EventsController', 'getRatingTable'],
     'getLastGames'      => ['EventsController', 'getLastGames'],
-
+    'getAllPlayers'     => ['EventsController', 'getAllRegisteredPlayers'],
+    'getTimerState'     => ['EventsController', 'getTimerState'],
     'getPlayerStats'    => ['PlayersController', 'getStats'],
-
     'addRound'          => ['GamesController', 'addRound'],
     'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
 
-    'getAllPlayers'     => ['EventsController', 'getAllRegisteredPlayers'],
-
     // admin
     'createEvent'       => ['EventsController', 'createEvent'],
+    'startTimer'        => ['EventsController', 'startTimer'],
+    'registerPlayer'    => ['EventsController', 'registerPlayer'],
     'startGame'         => ['GamesController', 'start'],
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
-    'registerPlayer'    => ['EventsController', 'registerPlayer'],
-
     'addPlayer'         => ['PlayersController', 'add'],
     'updatePlayer'      => ['PlayersController', 'update'],
     'getPlayer'         => ['PlayersController', 'get'],
-
     'generateSortition' => ['SortitionController', 'generate']
 ];

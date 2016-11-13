@@ -70,6 +70,8 @@ CREATE TABLE "event"
   "description" text not null,
   "start_time" timestamp,
   "end_time" timestamp,
+  "game_duration" integer, -- for timer, duration in seconds
+  "last_timer" integer, -- for timer, unix timestamp of last started timer
   "owner_formation" integer, -- at least one owner id should be set!
   "owner_user" integer,
   "type" varchar(255) not null, -- online or offline, tournament or local rating

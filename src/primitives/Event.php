@@ -37,6 +37,8 @@ class EventPrimitive extends Primitive
         'description'       => '_description',
         'start_time'        => '_startTime',
         'end_time'          => '_endTime',
+        'game_duration'     => '_gameDuration',
+        'last_timer'        => '_lastTimer',
         'owner_formation'   => '_ownerFormationId',
         'owner_user'        => '_ownerUserId',
         'type'              => '_type',
@@ -53,6 +55,8 @@ class EventPrimitive extends Primitive
             '_ownerUserId'        => $this->_integerTransform(true),
             '_startTime'          => $this->_stringTransform(true),
             '_endTime'            => $this->_stringTransform(true),
+            '_gameDuration'       => $this->_integerTransform(true),
+            '_lastTimer'          => $this->_integerTransform(true),
             '_id'                 => $this->_integerTransform(true),
             '_lobbyId'            => $this->_stringTransform(true),
             '_ruleset'            => [
@@ -91,6 +95,16 @@ class EventPrimitive extends Primitive
      * @var string
      */
     protected $_endTime;
+    /**
+     * Last triggered timer timestamp
+     * @var int
+     */
+    protected $_lastTimer;
+    /**
+     * Game duration for current event, in seconds
+     * @var int
+     */
+    protected $_gameDuration;
     /**
      * Owner organisation
      * @var FormationPrimitive|null
@@ -211,6 +225,42 @@ class EventPrimitive extends Primitive
     public function getEndTime()
     {
         return $this->_endTime;
+    }
+
+    /**
+     * @param int $gameDuration
+     * @return EventPrimitive
+     */
+    public function setGameDuration($gameDuration)
+    {
+        $this->_gameDuration = $gameDuration;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGameDuration()
+    {
+        return $this->_gameDuration;
+    }
+
+    /**
+     * @param int $lastTimer
+     * @return EventPrimitive
+     */
+    public function setLastTimer($lastTimer)
+    {
+        $this->_lastTimer = $lastTimer;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastTimer()
+    {
+        return $this->_lastTimer;
     }
 
     /**
