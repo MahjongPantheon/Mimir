@@ -92,15 +92,27 @@ class InteractiveSessionModel extends Model
     /**
      * @param $gameHashcode string Hashcode of game
      * @param $roundData array Structure of round data
+     * @param $dry boolean Dry run (no save to DB)
      * @throws InvalidParametersException
      * @throws BadActionException
      * @return bool Success?
      */
-    public function addRound($gameHashcode, $roundData)
+    public function addRound($gameHashcode, $roundData, $dry)
     {
+        // TODO #4 - dry
         $session = $this->_findGame($gameHashcode, 'inprogress');
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
         return $round->save() && $session->updateCurrentState($round);
+    }
+
+    public function getSessionOverview($sessionId)
+    {
+        // TODO #1
+        // data for overview screen:
+        // - seating
+        // - scores
+        // - user info
+        // - current game state (riichi, honba, round index)
     }
 
     /**

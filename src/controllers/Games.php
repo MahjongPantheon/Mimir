@@ -64,14 +64,15 @@ class GamesController extends Controller
      *
      * @param string $gameHashcode Hashcode of game
      * @param array $roundData Structure of round data
+     * @param boolean $dry Dry run (without saving to db)
      * @throws DatabaseException
      * @throws BadActionException
      * @return bool Success?
      */
-    public function addRound($gameHashcode, $roundData)
+    public function addRound($gameHashcode, $roundData, $dry = false)
     {
         $this->_log->addInfo('Adding new round to game # ' . $gameHashcode);
-        $result = (new InteractiveSessionModel($this->_db))->addRound($gameHashcode, $roundData);
+        $result = (new InteractiveSessionModel($this->_db))->addRound($gameHashcode, $roundData, $dry);
         $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
         return $result;
     }

@@ -140,4 +140,15 @@ class PlayersController extends Controller
         $this->_log->addInfo('Successfully got stats for player id #' . $playerId . ' at event id #' . $eventId);
         return $stats;
     }
+
+    public function getCurrentSession($playerId, $eventId)
+    {
+        // TODO #2
+        // session id
+    }
+
+    public function getIdByName($playerName)
+    {
+        // TODO #3
+    }
 }
