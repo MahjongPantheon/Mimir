@@ -64,15 +64,70 @@ class GamesController extends Controller
      *
      * @param string $gameHashcode Hashcode of game
      * @param array $roundData Structure of round data
+     * @param boolean $dry Dry run (without saving to db)
      * @throws DatabaseException
      * @throws BadActionException
-     * @return bool Success?
+     * @return bool|array Success|Results of dry run
      */
-    public function addRound($gameHashcode, $roundData)
+    public function addRound($gameHashcode, $roundData, $dry = false)
     {
         $this->_log->addInfo('Adding new round to game # ' . $gameHashcode);
-        $result = (new InteractiveSessionModel($this->_db))->addRound($gameHashcode, $roundData);
+        $result = (new InteractiveSessionModel($this->_db))->addRound($gameHashcode, $roundData, $dry);
         $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
+        return $result;
+    }
+
+    /**
+     * Get session overview
+     * [
+     *      id => sessionId,
+     *      players => [ ..[
+     *          id => playerId,
+     *          display_name,
+     *          ident
+     *      ].. ],
+     *      state => [
+     *          dealer => playerId,
+     *          round => int,
+     *          riichi => [ ..playerId.. ],
+     *          honba => int,
+     *          scores => [ ..int.. ]
+     *      ]
+     * ]
+     *
+     * @param int $sessionId
+     * @throws EntityNotFoundException
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getSessionOverview($sessionId)
+    {
+        $this->_log->addInfo('Getting session overview for game # ' . $sessionId);
+        $session = SessionPrimitive::findById($this->_db, [$sessionId]);
+        if (empty($session)) {
+            throw new InvalidParametersException("Couldn't find session in DB");
+        }
+
+        $result = [
+            'id'    => $session[0]->getId(),
+            'players' => array_map(function (PlayerPrimitive $player) {
+                return [
+                    'id' => $player->getId(),
+                    'display_name' => $player->getDisplayName(),
+                    'ident' => $player->getIdent()
+                ];
+            }, $session[0]->getPlayers()),
+
+            'state' => [
+                'dealer'    => $session[0]->getCurrentState()->getCurrentDealer(),
+                'round'     => $session[0]->getCurrentState()->getRound(),
+                'riichi'    => $session[0]->getCurrentState()->getRiichiBets(),
+                'honba'     => $session[0]->getCurrentState()->getHonba(),
+                'scores'    => $session[0]->getCurrentState()->getScores()
+            ]
+        ];
+
+        $this->_log->addInfo('Successfully got session overview for game # ' . $sessionId);
         return $result;
     }
 

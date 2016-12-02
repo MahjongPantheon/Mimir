@@ -210,9 +210,10 @@ class SessionPrimitive extends Primitive
      * @param IDb $db
      * @param $playerId
      * @param $eventId
+     * @param $withStatus
      * @return SessionPrimitive[]
      */
-    public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
+    public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId, $withStatus = '*')
     {
         $playerId = intval($playerId);
         $eventId = intval($eventId);
@@ -224,8 +225,11 @@ class SessionPrimitive extends Primitive
             ->where(self::REL_USER . '.user_id', $playerId)
             ->where(self::$_table . '.event_id', $eventId)
             ->groupBy(self::$_table . '.id');
-        $result = $orm->findArray();
+        if ($withStatus !== '*') {
+            $orm->where(self::$_table . '.status', $withStatus);
+        }
 
+        $result = $orm->findArray();
         if (empty($result)) {
             return [];
         }
@@ -440,6 +444,17 @@ class SessionPrimitive extends Primitive
         }
 
         return $success;
+    }
+
+    /**
+     * @param RoundPrimitive $round
+     * @return SessionState
+     */
+    public function dryRunUpdateCurrentState(RoundPrimitive $round)
+    {
+        $cloneState = clone $this->getCurrentState();
+        $cloneState->update($round);
+        return $cloneState;
     }
 
     /**

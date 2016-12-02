@@ -140,4 +140,41 @@ class PlayersController extends Controller
         $this->_log->addInfo('Successfully got stats for player id #' . $playerId . ' at event id #' . $eventId);
         return $stats;
     }
+
+    /**
+     * @param int $playerId
+     * @param int $eventId
+     * @return array of session data
+     */
+    public function getCurrentSessions($playerId, $eventId)
+    {
+        $this->_log->addInfo('Getting current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+        $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
+        $this->_log->addInfo('Successfully got current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+
+        return array_map(function (SessionPrimitive $session) {
+            return [
+                'id'        => $session->getId(),
+                'players'   => $session->getPlayersIds(),
+                'status'    => $session->getStatus()
+            ];
+        }, $sessions);
+    }
+
+    /**
+     * @param string $playerIdent unique identifying string
+     * @throws EntityNotFoundException
+     * @return int player id
+     */
+    public function getIdByIdent($playerIdent)
+    {
+        $this->_log->addInfo('Getting id for player #' . $playerIdent);
+        $player = PlayerPrimitive::findByIdent($this->_db, [$playerIdent]);
+        if (empty($player)) {
+            throw new EntityNotFoundException('No user with ident #' . $playerIdent . ' found');
+        }
+
+        $this->_log->addInfo('Successfully got id for player #' . $playerIdent);
+        return $player[0]->getId();
+    }
 }

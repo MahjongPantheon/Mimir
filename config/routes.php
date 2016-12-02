@@ -30,14 +30,17 @@
  */
 return [
     // client
-    'getGameConfig'     => ['EventsController', 'getGameConfig'],
-    'getRatingTable'    => ['EventsController', 'getRatingTable'],
-    'getLastGames'      => ['EventsController', 'getLastGames'],
-    'getAllPlayers'     => ['EventsController', 'getAllRegisteredPlayers'],
-    'getTimerState'     => ['EventsController', 'getTimerState'],
-    'getPlayerStats'    => ['PlayersController', 'getStats'],
-    'addRound'          => ['GamesController', 'addRound'],
-    'addOnlineReplay'   => ['GamesController', 'addOnlineReplay'],
+    'getGameConfig'      => ['EventsController', 'getGameConfig'],
+    'getRatingTable'     => ['EventsController', 'getRatingTable'],
+    'getLastGames'       => ['EventsController', 'getLastGames'],
+    'getCurrentGames'    => ['PlayersController', 'getCurrentSessions'],
+    'getAllPlayers'      => ['EventsController', 'getAllRegisteredPlayers'],
+    'getPlayerIdByIdent' => ['PlayersController', 'getIdByIdent'],
+    'getTimerState'      => ['EventsController', 'getTimerState'],
+    'getGameOverview'    => ['GamesController', 'getSessionOverview'],
+    'getPlayerStats'     => ['PlayersController', 'getStats'],
+    'addRound'           => ['GamesController', 'addRound'],
+    'addOnlineReplay'    => ['GamesController', 'addOnlineReplay'],
 
     // admin
     'createEvent'       => ['EventsController', 'createEvent'],
