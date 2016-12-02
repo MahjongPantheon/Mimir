@@ -147,8 +147,20 @@ class PlayersController extends Controller
         // session id
     }
 
-    public function getIdByName($playerName)
+    /**
+     * @param string $playerIdent unique identifying string
+     * @throws EntityNotFoundException
+     * @return int player id
+     */
+    public function getIdByIdent($playerIdent)
     {
-        // TODO #3
+        $this->_log->addInfo('Getting id for player #' . $playerIdent);
+        $player = PlayerPrimitive::findByIdent($this->_db, [$playerIdent]);
+        if (empty($player)) {
+            throw new EntityNotFoundException('No user with ident #' . $playerIdent . ' found');
+        }
+
+        $this->_log->addInfo('Successfully got id for player #' . $playerIdent);
+        return $player[0]->getId();
     }
 }
