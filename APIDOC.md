@@ -33,6 +33,13 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### getCurrentGames
+Parameters:
+* **$playerId** (_int_) 
+* **$eventId** (_int_) 
+
+Returns: _array_ of session data
+
 ### getAllPlayers
 Parameters:
 * **$eventId** (_integer_) 
@@ -42,6 +49,15 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### getPlayerIdByIdent
+Parameters:
+* **$playerIdent** (_string_) unique identifying string
+
+Returns: _int_ player id
+
+Exceptions:
+* _EntityNotFoundException_ 
+
 ### getTimerState
 Parameters:
 * **$eventId** (_integer_) 
@@ -49,6 +65,16 @@ Parameters:
 Returns: _array_ 
 
 Exceptions:
+* _InvalidParametersException_ 
+
+### getGameOverview
+Parameters:
+* **$sessionId** (_int_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
 * _InvalidParametersException_ 
 
 ### getPlayerStats
@@ -65,8 +91,9 @@ Exceptions:
 Parameters:
 * **$gameHashcode** (_string_) Hashcode of game
 * **$roundData** (_array_) Structure of round data
+* **$dry** (_boolean_) Dry run (without saving to db)
 
-Returns: _bool_ Success?
+Returns: _bool|array_ Success|Results of dry run
 
 Exceptions:
 * _DatabaseException_ 
