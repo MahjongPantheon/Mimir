@@ -67,7 +67,7 @@ class GamesController extends Controller
      * @param boolean $dry Dry run (without saving to db)
      * @throws DatabaseException
      * @throws BadActionException
-     * @return bool Success?
+     * @return bool|array Success|Results of dry run
      */
     public function addRound($gameHashcode, $roundData, $dry = false)
     {

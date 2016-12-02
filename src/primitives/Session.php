@@ -447,6 +447,17 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * @param RoundPrimitive $round
+     * @return SessionState
+     */
+    public function dryRunUpdateCurrentState(RoundPrimitive $round)
+    {
+        $cloneState = clone $this->getCurrentState();
+        $cloneState->update($round);
+        return $cloneState;
+    }
+
+    /**
      * @return bool
      */
     public function finish()

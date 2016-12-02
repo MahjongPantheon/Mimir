@@ -95,13 +95,27 @@ class InteractiveSessionModel extends Model
      * @param $dry boolean Dry run (no save to DB)
      * @throws InvalidParametersException
      * @throws BadActionException
-     * @return bool Success?
+     * @return bool|array Success?|Results of dry run
      */
     public function addRound($gameHashcode, $roundData, $dry)
     {
-        // TODO #4 - dry
         $session = $this->_findGame($gameHashcode, 'inprogress');
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
+
+        if ($dry) {
+            $state = $session->dryRunUpdateCurrentState($round);
+            return [
+                'dealer'    => $state->getCurrentDealer(),
+                'round'     => $state->getRound(),
+                'riichi'    => $state->getRiichiBets(),
+                'honba'     => $state->getHonba(),
+                'scores'    => $state->getScores(),
+                'scores_delta' => array_map(function($actual, $afterUpdate) {
+                    return $afterUpdate - $actual;
+                }, $session->getCurrentState()->getScores(), $state->getScores())
+            ];
+        }
+
         return $round->save() && $session->updateCurrentState($round);
     }
 
