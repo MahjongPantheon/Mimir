@@ -141,10 +141,24 @@ class PlayersController extends Controller
         return $stats;
     }
 
-    public function getCurrentSession($playerId, $eventId)
+    /**
+     * @param int $playerId
+     * @param int $eventId
+     * @return array of session data
+     */
+    public function getCurrentSessions($playerId, $eventId)
     {
-        // TODO #2
-        // session id
+        $this->_log->addInfo('Getting current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+        $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
+        $this->_log->addInfo('Successfully got current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+
+        return array_map(function (SessionPrimitive $session) {
+            return [
+                'id'        => $session->getId(),
+                'players'   => $session->getPlayersIds(),
+                'status'    => $session->getStatus()
+            ];
+        }, $sessions);
     }
 
     /**
