@@ -37,6 +37,7 @@ return [
     'getAllPlayers'      => ['EventsController', 'getAllRegisteredPlayers'],
     'getPlayerIdByIdent' => ['PlayersController', 'getIdByIdent'],
     'getTimerState'      => ['EventsController', 'getTimerState'],
+    'getGameOverview'    => ['GamesController', 'getSessionOverview'],
     'getPlayerStats'     => ['PlayersController', 'getStats'],
     'addRound'           => ['GamesController', 'addRound'],
     'addOnlineReplay'    => ['GamesController', 'addOnlineReplay'],

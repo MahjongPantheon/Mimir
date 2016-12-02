@@ -77,6 +77,60 @@ class GamesController extends Controller
         return $result;
     }
 
+    /**
+     * Get session overview
+     * [
+     *      id => sessionId,
+     *      players => [ ..[
+     *          id => playerId,
+     *          display_name,
+     *          ident
+     *      ].. ],
+     *      state => [
+     *          dealer => playerId,
+     *          round => int,
+     *          riichi => [ ..playerId.. ],
+     *          honba => int,
+     *          scores => [ ..int.. ]
+     *      ]
+     * ]
+     *
+     * @param int $sessionId
+     * @throws EntityNotFoundException
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getSessionOverview($sessionId)
+    {
+        $this->_log->addInfo('Getting session overview for game # ' . $sessionId);
+        $session = SessionPrimitive::findById($this->_db, [$sessionId]);
+        if (empty($session)) {
+            throw new InvalidParametersException("Couldn't find session in DB");
+        }
+
+        $result = [
+            'id'    => $session[0]->getId(),
+            'players' => array_map(function(PlayerPrimitive $player) {
+                return [
+                    'id' => $player->getId(),
+                    'display_name' => $player->getDisplayName(),
+                    'ident' => $player->getIdent()
+                ];
+            }, $session[0]->getPlayers()),
+
+            'state' => [
+                'dealer'    => $session[0]->getCurrentState()->getCurrentDealer(),
+                'round'     => $session[0]->getCurrentState()->getRound(),
+                'riichi'    => $session[0]->getCurrentState()->getRiichiBets(),
+                'honba'     => $session[0]->getCurrentState()->getHonba(),
+                'scores'    => $session[0]->getCurrentState()->getScores()
+            ]
+        ];
+
+        $this->_log->addInfo('Successfully added new round to game # ' . $sessionId);
+        return $result;
+    }
+
     // TEXT LOG MODE
 
     /**

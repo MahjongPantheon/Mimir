@@ -105,16 +105,6 @@ class InteractiveSessionModel extends Model
         return $round->save() && $session->updateCurrentState($round);
     }
 
-    public function getSessionOverview($sessionId)
-    {
-        // TODO #1
-        // data for overview screen:
-        // - seating
-        // - scores
-        // - user info
-        // - current game state (riichi, honba, round index)
-    }
-
     /**
      * @param $gameHash
      * @param $withStatus
