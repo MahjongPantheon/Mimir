@@ -110,7 +110,7 @@ class GamesController extends Controller
 
         $result = [
             'id'    => $session[0]->getId(),
-            'players' => array_map(function(PlayerPrimitive $player) {
+            'players' => array_map(function (PlayerPrimitive $player) {
                 return [
                     'id' => $player->getId(),
                     'display_name' => $player->getDisplayName(),
@@ -127,7 +127,7 @@ class GamesController extends Controller
             ]
         ];
 
-        $this->_log->addInfo('Successfully added new round to game # ' . $sessionId);
+        $this->_log->addInfo('Successfully got session overview for game # ' . $sessionId);
         return $result;
     }
 

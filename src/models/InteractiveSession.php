@@ -97,7 +97,7 @@ class InteractiveSessionModel extends Model
      * @throws BadActionException
      * @return bool|array Success?|Results of dry run
      */
-    public function addRound($gameHashcode, $roundData, $dry)
+    public function addRound($gameHashcode, $roundData, $dry = false)
     {
         $session = $this->_findGame($gameHashcode, 'inprogress');
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
@@ -110,7 +110,7 @@ class InteractiveSessionModel extends Model
                 'riichi'    => $state->getRiichiBets(),
                 'honba'     => $state->getHonba(),
                 'scores'    => $state->getScores(),
-                'scores_delta' => array_map(function($actual, $afterUpdate) {
+                'scores_delta' => array_map(function ($actual, $afterUpdate) {
                     return $afterUpdate - $actual;
                 }, $session->getCurrentState()->getScores(), $state->getScores())
             ];
