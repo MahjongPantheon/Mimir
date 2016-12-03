@@ -95,15 +95,15 @@ class GamesController extends Controller
      *      ]
      * ]
      *
-     * @param int $sessionId
+     * @param string $sessionHashcode
      * @throws EntityNotFoundException
      * @throws InvalidParametersException
      * @return array
      */
-    public function getSessionOverview($sessionId)
+    public function getSessionOverview($sessionHashcode)
     {
-        $this->_log->addInfo('Getting session overview for game # ' . $sessionId);
-        $session = SessionPrimitive::findById($this->_db, [$sessionId]);
+        $this->_log->addInfo('Getting session overview for game # ' . $sessionHashcode);
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$sessionHashcode]);
         if (empty($session)) {
             throw new InvalidParametersException("Couldn't find session in DB");
         }
@@ -127,7 +127,7 @@ class GamesController extends Controller
             ]
         ];
 
-        $this->_log->addInfo('Successfully got session overview for game # ' . $sessionId);
+        $this->_log->addInfo('Successfully got session overview for game # ' . $sessionHashcode);
         return $result;
     }
 

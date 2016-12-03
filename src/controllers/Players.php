@@ -154,9 +154,17 @@ class PlayersController extends Controller
 
         return array_map(function (SessionPrimitive $session) {
             return [
-                'id'        => $session->getId(),
-                'players'   => $session->getPlayersIds(),
-                'status'    => $session->getStatus()
+                'hashcode'  => $session->getRepresentationalHash(),
+                'status'    => $session->getStatus(),
+                'players'   => array_map(function (PlayerPrimitive $p, $score) use (&$session) {
+                    return [
+                        'id'            => $p->getId(),
+                        'alias'         => $p->getAlias(),
+                        'ident'         => $p->getIdent(),
+                        'display_name'  => $p->getDisplayName(),
+                        'score'         => $score
+                    ];
+                }, $session->getPlayers(), $session->getCurrentState()->getScores())
             ];
         }, $sessions);
     }
