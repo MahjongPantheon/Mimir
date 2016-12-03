@@ -103,16 +103,15 @@ class InteractiveSessionModel extends Model
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         if ($dry) {
-            $state = $session->dryRunUpdateCurrentState($round);
+            /** @var $state SessionState */
+            list($state, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
             return [
                 'dealer'    => $state->getCurrentDealer(),
                 'round'     => $state->getRound(),
                 'riichi'    => $state->getRiichiBets(),
                 'honba'     => $state->getHonba(),
                 'scores'    => $state->getScores(),
-                'scores_delta' => array_map(function ($actual, $afterUpdate) {
-                    return $afterUpdate - $actual;
-                }, $session->getCurrentState()->getScores(), $state->getScores())
+                'payments'  => $paymentsInfo
             ];
         }
 

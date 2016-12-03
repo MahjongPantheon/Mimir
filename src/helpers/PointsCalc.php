@@ -19,6 +19,21 @@ namespace Riichi;
 
 class PointsCalc
 {
+    private static $_lastPaymentsInfo = [];
+
+    private static function resetPaymentsInfo()
+    {
+        self::$_lastPaymentsInfo = [
+            'direct' => [],
+            'riichi' => []
+        ];
+    }
+
+    public static function lastPaymentsInfo()
+    {
+        return self::$_lastPaymentsInfo;
+    }
+
     public static function ron(
         Ruleset $rules,
         $isDealer,
@@ -31,6 +46,7 @@ class PointsCalc
         $honba,
         $riichiBetsCount
     ) {
+        self::resetPaymentsInfo();
         $pointsDiff = self::_calcPoints($rules, $han, $fu, false, $isDealer);
 
         if (empty($winnerId) || empty($loserId)) {
@@ -39,6 +55,7 @@ class PointsCalc
 
         $currentScores[$winnerId] += $pointsDiff['winner'];
         $currentScores[$loserId] += $pointsDiff['loser'];
+        self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $loserId] = $pointsDiff['winner'] + 300 * $honba;
 
         if (empty($riichiIds)) {
             $riichiIds = [];
@@ -46,12 +63,14 @@ class PointsCalc
 
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
+            self::$_lastPaymentsInfo['riichi'][$winnerId . '<-' . $playerId] = 1000;
         }
 
         $currentScores[$winnerId] += 1000 * count($riichiIds);
         $currentScores[$winnerId] += 1000 * $riichiBetsCount;
-        $currentScores[$winnerId] += 300 * $honba;
+        self::$_lastPaymentsInfo['riichi'][$winnerId . '<-'] = 1000 * $riichiBetsCount;
 
+        $currentScores[$winnerId] += 300 * $honba;
         $currentScores[$loserId] -= 300 * $honba;
 
         return $currentScores;
@@ -68,6 +87,7 @@ class PointsCalc
         $honba,
         $riichiBetsCount
     ) {
+        self::resetPaymentsInfo();
         $pointsDiff = self::_calcPoints($rules, $han, $fu, true, $currentDealer == $winnerId);
 
         if (empty($winnerId)) {
@@ -82,6 +102,7 @@ class PointsCalc
                     continue;
                 }
                 $currentScores[$playerId] += $pointsDiff['dealer'];
+                self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['dealer'] + 100 * $honba;
             }
         } else {
             foreach ($currentScores as $playerId => $value) {
@@ -90,8 +111,10 @@ class PointsCalc
                 }
                 if ($playerId == $currentDealer) {
                     $currentScores[$playerId] += $pointsDiff['dealer'];
+                    self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['dealer'] + 100 * $honba;
                 } else {
                     $currentScores[$playerId] += $pointsDiff['player'];
+                    self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['player'] + 100 * $honba;
                 }
             }
         }
@@ -102,10 +125,12 @@ class PointsCalc
 
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
+            self::$_lastPaymentsInfo['riichi'][$winnerId . '<-' . $playerId] = 1000;
         }
 
         $currentScores[$winnerId] += 1000 * count($riichiIds);
         $currentScores[$winnerId] += 1000 * $riichiBetsCount;
+        self::$_lastPaymentsInfo['riichi'][$winnerId . '<-'] = 1000 * $riichiBetsCount;
         $currentScores[$winnerId] += 300 * $honba;
 
         foreach ($currentScores as $playerId => $value) {
@@ -123,12 +148,14 @@ class PointsCalc
         $tempaiIds,
         $riichiIds
     ) {
+        self::resetPaymentsInfo();
         if (empty($riichiIds)) {
             $riichiIds = [];
         }
 
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
+            self::$_lastPaymentsInfo['riichi']['<-' . $playerId] = 1000;
         }
 
         if (count($tempaiIds) === 0 || count($tempaiIds) === 4) {
@@ -141,17 +168,20 @@ class PointsCalc
                     $currentScores[$playerId] += 3000;
                 } else {
                     $currentScores[$playerId] -= 1000;
+                    self::$_lastPaymentsInfo['direct'][$tempaiIds[0] . '<-' . $playerId] = 1000;
                 }
             }
             return $currentScores;
         }
 
         if (count($tempaiIds) === 2) {
+            $i = 0;
             foreach ($currentScores as $playerId => $value) {
                 if (in_array($playerId, $tempaiIds)) {
                     $currentScores[$playerId] += 1500;
                 } else {
                     $currentScores[$playerId] -= 1500;
+                    self::$_lastPaymentsInfo['direct'][$tempaiIds[$i++] . '<-' . $playerId] = 1500;
                 }
             }
             return $currentScores;
@@ -163,6 +193,9 @@ class PointsCalc
                     $currentScores[$playerId] += 1000;
                 } else {
                     $currentScores[$playerId] -= 3000;
+                    self::$_lastPaymentsInfo['direct'][$tempaiIds[0] . '<-' . $playerId] = 1000;
+                    self::$_lastPaymentsInfo['direct'][$tempaiIds[1] . '<-' . $playerId] = 1000;
+                    self::$_lastPaymentsInfo['direct'][$tempaiIds[2] . '<-' . $playerId] = 1000;
                 }
             }
             return $currentScores;
@@ -175,12 +208,14 @@ class PointsCalc
         $currentScores,
         $riichiIds
     ) {
+        self::resetPaymentsInfo();
         if (empty($riichiIds)) {
             $riichiIds = [];
         }
 
         foreach ($riichiIds as $playerId) {
             $currentScores[$playerId] -= 1000;
+            self::$_lastPaymentsInfo['riichi']['<-' . $playerId] = 1000;
         }
 
         return $currentScores;
@@ -192,6 +227,7 @@ class PointsCalc
         $loserId,
         $currentScores
     ) {
+        self::$_lastPaymentsInfo = [];
         if (empty($loserId)) {
             throw new InvalidParametersException('Chombo must have loser');
         }

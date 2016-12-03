@@ -437,8 +437,8 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        $success = $this->getCurrentState()->update($round);
-        $success = $success && $this->save();
+        $this->getCurrentState()->update($round);
+        $success = $this->save();
         if ($this->getCurrentState()->isFinished()) {
             $success = $success && $this->finish();
         }
@@ -448,13 +448,13 @@ class SessionPrimitive extends Primitive
 
     /**
      * @param RoundPrimitive $round
-     * @return SessionState
+     * @return array [SessionState, array]
      */
     public function dryRunUpdateCurrentState(RoundPrimitive $round)
     {
         $cloneState = clone $this->getCurrentState();
-        $cloneState->update($round);
-        return $cloneState;
+        $paymentsInfo = $cloneState->update($round);
+        return [$cloneState, $paymentsInfo];
     }
 
     /**

@@ -225,7 +225,7 @@ class SessionState
      * Register new round in current session
      * @param RoundPrimitive|MultiRoundPrimitive $round
      * @throws InvalidParametersException
-     * @return bool
+     * @return array
      */
     public function update(RoundPrimitive $round)
     {
@@ -252,7 +252,7 @@ class SessionState
                 ;
         }
 
-        return true; // todo: can be here any errors?
+        return PointsCalc::lastPaymentsInfo();
     }
 
     public function giveRiichiBetsToPlayer($id)
