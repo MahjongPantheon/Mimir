@@ -57,6 +57,16 @@ class InteractiveSessionModel extends Model
         }
 
         $players = PlayerPrimitive::findById($this->_db, $playerIds);
+        $players = array_filter(array_map(function ($id) use (&$players) {
+            // Re-sort players to match request order - important!
+            foreach ($players as $p) {
+                if ($p->getId() == $id) {
+                    return $p;
+                }
+            }
+            return null;
+        }, $playerIds));
+
         if (count($players) !== 4) {
             throw new InvalidUserException('Some players do not exist in DB, check ids');
         }

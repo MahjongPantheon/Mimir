@@ -358,6 +358,16 @@ class SessionPrimitive extends Primitive
                 $this->_players = null;
                 throw new EntityNotFoundException("Not all players were found in DB (among id#" . implode(',', $this->_playersIds));
             }
+
+            $this->_players = array_filter(array_map(function ($id) {
+                // Re-sort players to match request order - important!
+                foreach ($this->_players as $p) {
+                    if ($p->getId() == $id) {
+                        return $p;
+                    }
+                }
+                return null;
+            }, $this->_playersIds));
         }
         return $this->_players;
     }

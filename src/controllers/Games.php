@@ -105,7 +105,7 @@ class GamesController extends Controller
         $this->_log->addInfo('Getting session overview for game # ' . $sessionHashcode);
         $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$sessionHashcode]);
         if (empty($session)) {
-            throw new InvalidParametersException("Couldn't find session in DB");
+            throw new InvalidParametersException("Couldn't find session in DB", 404);
         }
 
         $result = [
