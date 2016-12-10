@@ -61,6 +61,6 @@ class RulesetJpmlB extends Ruleset
      */
     public function uma($scores = [])
     {
-        return [1 => 15000, 5000, -5000, -15000];
+        return [1 => 150, 50, -50, -150];
     }
 }
