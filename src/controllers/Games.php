@@ -91,7 +91,8 @@ class GamesController extends Controller
      *          round => int,
      *          riichi => [ ..playerId.. ],
      *          honba => int,
-     *          scores => [ ..int.. ]
+     *          scores => [ ..int.. ],
+     *          finished => boolean
      *      ]
      * ]
      *
@@ -123,7 +124,8 @@ class GamesController extends Controller
                 'round'     => $session[0]->getCurrentState()->getRound(),
                 'riichi'    => $session[0]->getCurrentState()->getRiichiBets(),
                 'honba'     => $session[0]->getCurrentState()->getHonba(),
-                'scores'    => $session[0]->getCurrentState()->getScores()
+                'scores'    => $session[0]->getCurrentState()->getScores(),
+                'finished'  => $session[0]->getCurrentState()->isFinished()
             ]
         ];
 
