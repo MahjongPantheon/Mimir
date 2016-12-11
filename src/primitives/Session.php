@@ -185,7 +185,7 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * Find sessions by state (indexed search, paginated)
+     * Find sessions by state (indexed search, paginated), ordered by play_date
      *
      * @param IDb $db
      * @param integer $eventId
@@ -200,7 +200,8 @@ class SessionPrimitive extends Primitive
         return self::_findBySeveral(
             $db,
             ['status' => [$state], 'event_id' => [$eventId]],
-            ['limit' => $limit, 'offset' => $offset]
+            ['limit' => $limit, 'offset' => $offset],
+            'play_date'
         );
     }
 
