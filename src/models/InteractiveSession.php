@@ -57,6 +57,16 @@ class InteractiveSessionModel extends Model
         }
 
         $players = PlayerPrimitive::findById($this->_db, $playerIds);
+        $players = array_filter(array_map(function ($id) use (&$players) {
+            // Re-sort players to match request order - important!
+            foreach ($players as $p) {
+                if ($p->getId() == $id) {
+                    return $p;
+                }
+            }
+            return null;
+        }, $playerIds));
+
         if (count($players) !== 4) {
             throw new InvalidUserException('Some players do not exist in DB, check ids');
         }
@@ -103,16 +113,15 @@ class InteractiveSessionModel extends Model
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         if ($dry) {
-            $state = $session->dryRunUpdateCurrentState($round);
+            /** @var $state SessionState */
+            list($state, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
             return [
                 'dealer'    => $state->getCurrentDealer(),
                 'round'     => $state->getRound(),
                 'riichi'    => $state->getRiichiBets(),
                 'honba'     => $state->getHonba(),
                 'scores'    => $state->getScores(),
-                'scores_delta' => array_map(function ($actual, $afterUpdate) {
-                    return $afterUpdate - $actual;
-                }, $session->getCurrentState()->getScores(), $state->getScores())
+                'payments'  => $paymentsInfo
             ];
         }
 

@@ -358,6 +358,16 @@ class SessionPrimitive extends Primitive
                 $this->_players = null;
                 throw new EntityNotFoundException("Not all players were found in DB (among id#" . implode(',', $this->_playersIds));
             }
+
+            $this->_players = array_filter(array_map(function ($id) {
+                // Re-sort players to match request order - important!
+                foreach ($this->_players as $p) {
+                    if ($p->getId() == $id) {
+                        return $p;
+                    }
+                }
+                return null;
+            }, $this->_playersIds));
         }
         return $this->_players;
     }
@@ -437,8 +447,8 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        $success = $this->getCurrentState()->update($round);
-        $success = $success && $this->save();
+        $this->getCurrentState()->update($round);
+        $success = $this->save();
         if ($this->getCurrentState()->isFinished()) {
             $success = $success && $this->finish();
         }
@@ -448,13 +458,13 @@ class SessionPrimitive extends Primitive
 
     /**
      * @param RoundPrimitive $round
-     * @return SessionState
+     * @return array [SessionState, array]
      */
     public function dryRunUpdateCurrentState(RoundPrimitive $round)
     {
         $cloneState = clone $this->getCurrentState();
-        $cloneState->update($round);
-        return $cloneState;
+        $paymentsInfo = $cloneState->update($round);
+        return [$cloneState, $paymentsInfo];
     }
 
     /**
