@@ -24,7 +24,7 @@ if (file_exists(__DIR__ . '/local/index.php')) {
     trigger_error(
         'Notice: using default config & DB settings. '
         . 'It\'s fine on developer machine, but wrong on prod server. '
-        . 'You might want to create config/db.local.php file with production settings.'
+        . 'You might want to create config/local/* files with production settings.'
     );
 }
 
