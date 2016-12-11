@@ -335,10 +335,11 @@ abstract class Primitive
      *      $params.onlyLast => return only last item (when sorted by primary key)
      *      $params.limit    => return no more items than this value
      *      $params.offset   => return items starting at this index
+     * @param string $desc_order_by
      * @throws \Exception
      * @return Primitive|Primitive[]
      */
-    protected static function _findBySeveral(IDb $db, $conditions, $params = [])
+    protected static function _findBySeveral(IDb $db, $conditions, $params = [], $desc_order_by = '')
     {
         if (!is_array($conditions)) {
             throw new \Exception("Conditions should be assoc array: key => [values...]");
@@ -366,6 +367,10 @@ abstract class Primitive
                 return [];
             }
             return self::_recreateInstance($db, $item);
+        }
+
+        if ($desc_order_by) {
+            $orm = $orm->orderByDesc($desc_order_by);
         }
 
         $result = $orm->findArray();
