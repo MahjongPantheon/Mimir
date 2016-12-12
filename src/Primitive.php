@@ -335,6 +335,8 @@ abstract class Primitive
      *      $params.onlyLast => return only last item (when sorted by primary key)
      *      $params.limit    => return no more items than this value
      *      $params.offset   => return items starting at this index
+     *      $params.order    => asc or desc
+     *      $params.orderBy  => field name for results ordering
      * @throws \Exception
      * @return Primitive|Primitive[]
      */
@@ -366,6 +368,15 @@ abstract class Primitive
                 return [];
             }
             return self::_recreateInstance($db, $item);
+        }
+
+        if (!empty($params['order']) && !empty($params['orderBy'])) {
+            $orderBy = $params['orderBy'];
+            if ($params['order'] == 'desc') {
+                $orm = $orm->orderByDesc($orderBy);
+            } else if ($params['order'] == 'asc') {
+                $orm = $orm->orderByAsc($orderBy);
+            }
         }
 
         $result = $orm->findArray();

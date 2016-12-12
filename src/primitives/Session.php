@@ -200,7 +200,10 @@ class SessionPrimitive extends Primitive
         return self::_findBySeveral(
             $db,
             ['status' => [$state], 'event_id' => [$eventId]],
-            ['limit' => $limit, 'offset' => $offset]
+            [
+                'limit' => $limit, 'offset' => $offset,
+                'order' => 'desc',  'orderBy' => 'play_date'
+            ]
         );
     }
 
