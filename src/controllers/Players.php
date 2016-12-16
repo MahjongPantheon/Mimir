@@ -150,9 +150,8 @@ class PlayersController extends Controller
     {
         $this->_log->addInfo('Getting current sessions for player id #' . $playerId . ' at event id #' . $eventId);
         $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
-        $this->_log->addInfo('Successfully got current sessions for player id #' . $playerId . ' at event id #' . $eventId);
 
-        return array_map(function (SessionPrimitive $session) {
+        $result = array_map(function (SessionPrimitive $session) {
             return [
                 'hashcode'  => $session->getRepresentationalHash(),
                 'status'    => $session->getStatus(),
@@ -167,6 +166,39 @@ class PlayersController extends Controller
                 }, $session->getPlayers(), $session->getCurrentState()->getScores())
             ];
         }, $sessions);
+
+        $this->_log->addInfo('Successfully got current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+        return $result;
+    }
+
+    /**
+     * Get last game results of user in event
+     *
+     * @param int $playerId
+     * @param int $eventId
+     * @throws EntityNotFoundException
+     * @return array|null
+     */
+    public function getLastResults($playerId, $eventId)
+    {
+        $this->_log->addInfo('Getting last session results for player id #' . $playerId . ' at event id #' . $eventId);
+        $session = SessionPrimitive::findLastByPlayerAndEvent($this->_db, $playerId, $eventId, 'finished');
+        if (empty($session)) {
+            return null;
+        }
+
+        $result = array_map(function (PlayerPrimitive $p, $score) use (&$session) {
+            return [
+                'id'            => $p->getId(),
+                'alias'         => $p->getAlias(),
+                'ident'         => $p->getIdent(),
+                'display_name'  => $p->getDisplayName(),
+                'score'         => $score
+            ];
+        }, $session->getPlayers(), $session->getCurrentState()->getScores());
+
+        $this->_log->addInfo('Successfully got last session results for player id #' . $playerId . ' at event id #' . $eventId);
+        return $result;
     }
 
     /**

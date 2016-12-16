@@ -208,7 +208,7 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * Find items by external reference
+     * Find session by player/event
      *
      * @param IDb $db
      * @param $playerId
@@ -240,6 +240,28 @@ class SessionPrimitive extends Primitive
         return array_map(function ($data) use ($db) {
             return self::_recreateInstance($db, $data);
         }, $result);
+    }
+
+    /**
+     * Find last session of player in event
+     *
+     * @param IDb $db
+     * @param $playerId
+     * @param $eventId
+     * @param string $withStatus
+     * @return SessionPrimitive
+     */
+    public static function findLastByPlayerAndEvent(IDb $db, $playerId, $eventId, $withStatus = '*')
+    {
+        $conditions = [
+            'user_id'  => [$playerId],
+            'event_id' => [$eventId]
+        ];
+        if ($withStatus !== '*') {
+            $conditions['status'] = $withStatus;
+        }
+
+        return self::_findBySeveral($db, $conditions, ['onlyLast' => true]);
     }
 
     /**
