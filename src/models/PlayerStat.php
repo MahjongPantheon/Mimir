@@ -65,7 +65,8 @@ class PlayerStatModel extends Model
             'win_summary'           => $this->_getOutcomeSummary($playerId, $rounds),
             'hands_value_summary'   => $this->_getHanSummary($playerId, $rounds),
             'yaku_summary'          => $this->_getYakuSummary($playerId, $rounds),
-            'riichi_summary'        => $this->_getRiichiSummary($playerId, $rounds)
+            'riichi_summary'        => $this->_getRiichiSummary($playerId, $rounds),
+            'scores_summary'        => $this->_getScoresSummary($playerId, $scoresAndPlayers['scores'])
         ];
     }
 
@@ -352,6 +353,47 @@ class PlayerStatModel extends Model
         }
 
         return $acc;
+    }
+
+    /**
+     * Get scores summary stats for player
+     *
+     * @param $playerId
+     * @param [] $scores
+     * @return array
+     */
+    protected function _getScoresSummary($playerId, $scoresData)
+    {
+        $totalScores = 0;
+        $playedGames = 0;
+
+        $minScores = 0;
+        $maxScores = 0;
+        foreach ($scoresData as $key => $value) {
+            foreach ($value as $roundKey => $hanchanResult) {
+                if ($hanchanResult['player_id'] == $playerId) {
+                    $scores = $hanchanResult['score'];
+                    $playedGames += 1;
+                    $totalScores += $scores;
+
+                    if (!$minScores) {
+                        $minScores = $scores;
+                    }
+                    if ($scores > $maxScores) {
+                        $maxScores = $scores;
+                    }
+                    if ($scores < $minScores) {
+                        $minScores = $scores;
+                    }
+                }
+            }
+        }
+
+        return [
+            'min_scores' => $minScores,
+            'max_scores' => $maxScores,
+            'average_scores' => $totalScores ? $totalScores / $playedGames : 0,
+        ];
     }
 
     /**
