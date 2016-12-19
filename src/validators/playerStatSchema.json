@@ -151,6 +151,26 @@
         "riichi_lost",
         "feed_under_riichi"
       ]
+    },
+    "scores_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_scores": {
+          "type": "integer"
+        },
+        "min_scores": {
+          "type": "integer"
+        },
+        "average_scores": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_scores",
+        "min_scores",
+        "average_scores"
+      ]
     }
   },
   "additionalProperties": false,
@@ -164,7 +184,8 @@
     "win_summary",
     "hands_value_summary",
     "yaku_summary",
-    "riichi_summary"
+    "riichi_summary",
+    "scores_summary"
   ]
 }
 

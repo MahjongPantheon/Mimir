@@ -392,7 +392,7 @@ class PlayerStatModel extends Model
         return [
             'min_scores' => $minScores,
             'max_scores' => $maxScores,
-            'average_scores' => $totalScores ? $totalScores / $playedGames : 0,
+            'average_scores' => $totalScores ? (int) ($totalScores / $playedGames) : 0,
         ];
     }
 
