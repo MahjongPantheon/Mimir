@@ -69,7 +69,7 @@ Exceptions:
 
 ### getGameOverview
 Parameters:
-* **$sessionId** (_int_) 
+* **$sessionHashcode** (_string_) 
 
 Returns: _array_ 
 
@@ -109,6 +109,16 @@ Returns: _bool_
 Exceptions:
 * _InvalidParametersException_ 
 * _ParseException_ 
+
+### getLastResults
+Parameters:
+* **$playerId** (_int_) 
+* **$eventId** (_int_) 
+
+Returns: _array|null_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
 
 ### createEvent
 Parameters:

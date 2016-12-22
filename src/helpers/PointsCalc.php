@@ -25,7 +25,8 @@ class PointsCalc
     {
         self::$_lastPaymentsInfo = [
             'direct' => [],
-            'riichi' => []
+            'riichi' => [],
+            'honba'  => []
         ];
     }
 
@@ -55,7 +56,7 @@ class PointsCalc
 
         $currentScores[$winnerId] += $pointsDiff['winner'];
         $currentScores[$loserId] += $pointsDiff['loser'];
-        self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $loserId] = $pointsDiff['winner'] + 300 * $honba;
+        self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $loserId] = $pointsDiff['winner'];
 
         if (empty($riichiIds)) {
             $riichiIds = [];
@@ -72,6 +73,7 @@ class PointsCalc
 
         $currentScores[$winnerId] += 300 * $honba;
         $currentScores[$loserId] -= 300 * $honba;
+        self::$_lastPaymentsInfo['honba'][$winnerId . '<-' . $loserId] = 300 * $honba;
 
         return $currentScores;
     }
@@ -102,7 +104,7 @@ class PointsCalc
                     continue;
                 }
                 $currentScores[$playerId] += $pointsDiff['dealer'];
-                self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['dealer'] + 100 * $honba;
+                self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['dealer'];
             }
         } else {
             foreach ($currentScores as $playerId => $value) {
@@ -111,10 +113,10 @@ class PointsCalc
                 }
                 if ($playerId == $currentDealer) {
                     $currentScores[$playerId] += $pointsDiff['dealer'];
-                    self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['dealer'] + 100 * $honba;
+                    self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['dealer'];
                 } else {
                     $currentScores[$playerId] += $pointsDiff['player'];
-                    self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['player'] + 100 * $honba;
+                    self::$_lastPaymentsInfo['direct'][$winnerId . '<-' . $playerId] = -$pointsDiff['player'];
                 }
             }
         }
@@ -138,6 +140,7 @@ class PointsCalc
                 continue;
             }
             $currentScores[$playerId] -= 100 * $honba;
+            self::$_lastPaymentsInfo['honba'][$winnerId . '<-' . $playerId] = 100 * $honba;
         }
 
         return $currentScores;

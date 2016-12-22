@@ -208,7 +208,7 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * Find items by external reference
+     * Find session by player/event
      *
      * @param IDb $db
      * @param $playerId
@@ -240,6 +240,42 @@ class SessionPrimitive extends Primitive
         return array_map(function ($data) use ($db) {
             return self::_recreateInstance($db, $data);
         }, $result);
+    }
+
+    /**
+     * Find last session of player in event
+     *
+     * @param IDb $db
+     * @param $playerId
+     * @param $eventId
+     * @param string $withStatus
+     * @return SessionPrimitive
+     */
+    public static function findLastByPlayerAndEvent(IDb $db, $playerId, $eventId, $withStatus = '*')
+    {
+        $conditions = [
+            'sp.user_id'  => [$playerId],
+            's.event_id' => [$eventId]
+        ];
+        if ($withStatus !== '*') {
+            $conditions['s.status'] = [$withStatus];
+        }
+
+        $orm = $db->table(static::$_table)->tableAlias('s')
+            ->join(self::REL_USER, ['sp.session_id', '=', 's.id'], 'sp');
+
+        foreach ($conditions as $key => $identifiers) {
+            $orm = $orm->whereIn($key, $identifiers);
+        }
+
+        $orm = $orm->orderByDesc('s.id'); // primary key
+        $item = $orm->findOne();
+        if (!empty($item)) {
+            $item = $item->asArray();
+        } else {
+            return [];
+        }
+        return self::_recreateInstance($db, $item);
     }
 
     /**

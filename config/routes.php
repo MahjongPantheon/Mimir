@@ -41,6 +41,7 @@ return [
     'getPlayerStats'     => ['PlayersController', 'getStats'],
     'addRound'           => ['GamesController', 'addRound'],
     'addOnlineReplay'    => ['GamesController', 'addOnlineReplay'],
+    'getLastResults'     => ['PlayersController', 'getLastResults'],
 
     // admin
     'createEvent'       => ['EventsController', 'createEvent'],
