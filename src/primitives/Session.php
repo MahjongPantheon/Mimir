@@ -254,14 +254,28 @@ class SessionPrimitive extends Primitive
     public static function findLastByPlayerAndEvent(IDb $db, $playerId, $eventId, $withStatus = '*')
     {
         $conditions = [
-            'user_id'  => [$playerId],
-            'event_id' => [$eventId]
+            'sp.user_id'  => [$playerId],
+            's.event_id' => [$eventId]
         ];
         if ($withStatus !== '*') {
-            $conditions['status'] = $withStatus;
+            $conditions['s.status'] = [$withStatus];
         }
 
-        return self::_findBySeveral($db, $conditions, ['onlyLast' => true]);
+        $orm = $db->table(static::$_table)->tableAlias('s')
+            ->join(self::REL_USER, ['sp.session_id', '=', 's.id'], 'sp');
+
+        foreach ($conditions as $key => $identifiers) {
+            $orm = $orm->whereIn($key, $identifiers);
+        }
+
+        $orm = $orm->orderByDesc('s.id'); // primary key
+        $item = $orm->findOne();
+        if (!empty($item)) {
+            $item = $item->asArray();
+        } else {
+            return [];
+        }
+        return self::_recreateInstance($db, $item);
     }
 
     /**
