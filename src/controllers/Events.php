@@ -153,7 +153,7 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $table = (new EventModel($this->_db))
+        $table = (new EventModel($this->_db, $this->_config))
             ->getRatingTable($event[0], $orderBy, $order);
 
         $this->_log->addInfo('Successfully received rating table for event id# ' . $eventId);
@@ -178,7 +178,7 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $table = (new EventModel($this->_db))
+        $table = (new EventModel($this->_db, $this->_config))
             ->getLastFinishedGames($event[0], $limit, $offset);
 
         $this->_log->addInfo('Successfully got games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);

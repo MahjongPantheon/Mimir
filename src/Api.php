@@ -71,7 +71,7 @@ class Api
             } else {
                 class_exists($route[0]); // this will ensure class existence
                 $className = __NAMESPACE__ . '\\' . $route[0];
-                $ret['instance'] = $runtimeCache[$route[0]] = new $className($this->_db, $this->_syslog);
+                $ret['instance'] = $runtimeCache[$route[0]] = new $className($this->_db, $this->_syslog, $this->_config);
             }
 
             return $ret;

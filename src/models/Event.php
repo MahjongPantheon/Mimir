@@ -324,4 +324,39 @@ class EventModel extends Model
                 throw new InvalidParametersException("Parameter orderBy should be either 'name', 'rating' or 'avg_place'");
         }
     }
+
+    // Auth & reg related
+    public function enrollPlayer($eventId, $playerId)
+    {
+        // output: pin
+    }
+
+    public function registerPlayer($pin)
+    {
+        // output: auth token
+    }
+
+    /**
+     * Checks if token is ok.
+     * Reads token value from _SERVER['HTTP_X_AUTH_TOKEN']
+     *
+     * Also should return true to admin-level token to allow everything
+     *
+     * @param $playerId
+     * @param $eventId
+     * @return bool
+     */
+    public function checkToken($playerId, $eventId)
+    {
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        if ($token === $this->_config->getValue('admin.god_token')) {
+            return true;
+        }
+
+
+        // return false on player/event mismatch
+
+        // output: boolean
+        return false;
+    }
 }

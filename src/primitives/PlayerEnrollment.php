@@ -23,20 +23,20 @@ require_once __DIR__ . '/../Primitive.php';
 require_once __DIR__ . '/Player.php';
 
 /**
- * Class PlayerRegistrationPrimitive
+ * Class PlayerEnrollmentPrimitive
  *
  * Low-level model with basic CRUD operations and relations
  * @package Riichi
  */
-class PlayerRegistrationPrimitive extends Primitive
+class PlayerEnrollmentPrimitive extends Primitive
 {
-    protected static $_table = 'event_registered_users';
+    protected static $_table = 'event_enrolled_users';
 
     protected static $_fieldsMapping = [
         'id' => '_id',
         'event_id' => '_eventId',
         'user_id' => '_playerId',
-        'auth_token' => '_token',
+        'reg_pin' => '_pin',
     ];
 
     protected function _getFieldsTransforms()
@@ -64,13 +64,13 @@ class PlayerRegistrationPrimitive extends Primitive
     /**
      * @var string
      */
-    protected $_token;
+    protected $_pin;
 
     protected function _create()
     {
         $userReg = $this->_db->table(self::$_table)->create();
-        if (empty($this->_token)) {
-            $this->_token = sha1('PlayerReg' . microtime());
+        if (empty($this->_pin)) {
+            $this->_pin = crc32('PlayerReg' . microtime());
         }
 
         try {
@@ -84,7 +84,7 @@ class PlayerRegistrationPrimitive extends Primitive
                 $this->_id = $existingItem->_id;
                 $this->_eventId = $existingItem->_eventId;
                 $this->_playerId = $existingItem->_playerId;
-                $this->_token = $existingItem->_token;
+                $this->_pin = $existingItem->_pin;
                 $success = true;
             } else {
                 $success = false;
@@ -105,16 +105,16 @@ class PlayerRegistrationPrimitive extends Primitive
     /**
      * @return string
      */
-    public function getToken()
+    public function getPin()
     {
-        return $this->_token;
+        return $this->_pin;
     }
 
     /**
      * @param IDb $db
      * @param $playerId
      * @param $eventId
-     * @return PlayerRegistrationPrimitive | []
+     * @return PlayerEnrollmentPrimitive | []
      * @throws \Exception
      */
     public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
@@ -128,7 +128,7 @@ class PlayerRegistrationPrimitive extends Primitive
     /**
      * @param PlayerPrimitive $player
      * @param EventPrimitive $event
-     * @return PlayerRegistrationPrimitive
+     * @return PlayerEnrollmentPrimitive
      */
     public function setReg(PlayerPrimitive $player, EventPrimitive $event)
     {
@@ -139,42 +139,13 @@ class PlayerRegistrationPrimitive extends Primitive
 
     /**
      * @param IDb $db
-     * @param $eventId
-     * @return int[]
+     * @param $pin
+     * @return null|PlayerEnrollmentPrimitive
      * @throws \Exception
      */
-    public static function findRegisteredPlayersIdsByEvent(IDb $db, $eventId)
+    public static function findEventAndPlayerByPin(IDb $db, $pin)
     {
-        return array_map(function (PlayerRegistrationPrimitive $p) {
-            return $p->_playerId;
-        }, self::_findBy($db, 'event_id', [$eventId]));
-    }
-
-    /**
-     * @param IDb $db
-     * @param $eventId
-     * @return PlayerPrimitive[]
-     * @throws \Exception
-     */
-    public static function findRegisteredPlayersByEvent(IDb $db, $eventId)
-    {
-        $ids = self::findRegisteredPlayersIdsByEvent($db, $eventId);
-        if (empty($ids)) {
-            return [];
-        }
-
-        return PlayerPrimitive::findById($db, $ids);
-    }
-
-    /**
-     * @param IDb $db
-     * @param $token
-     * @return null|PlayerRegistrationPrimitive
-     * @throws \Exception
-     */
-    public static function findEventAndPlayerByToken(IDb $db, $token)
-    {
-        $result = self::_findBy($db, 'auth_token', [$token]);
+        $result = self::_findBy($db, 'reg_pin', [$pin]);
         if (empty($result)) {
             return null;
         }

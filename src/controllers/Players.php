@@ -17,11 +17,10 @@
  */
 namespace Riichi;
 
-use DoctrineTest\InstantiatorTestAsset\ExceptionAsset;
-
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../models/PlayerStat.php';
+require_once __DIR__ . '/../models/Event.php';
 
 /**
  * Class PlayersController
@@ -135,7 +134,7 @@ class PlayersController extends Controller
     public function getStats($playerId, $eventId)
     {
         $this->_log->addInfo('Getting stats for player id #' . $playerId . ' at event id #' . $eventId);
-        $stats = (new PlayerStatModel($this->_db))
+        $stats = (new PlayerStatModel($this->_db, $this->_config))
             ->getStats($eventId, $playerId);
         $this->_log->addInfo('Successfully got stats for player id #' . $playerId . ' at event id #' . $eventId);
         return $stats;
@@ -144,11 +143,16 @@ class PlayersController extends Controller
     /**
      * @param int $playerId
      * @param int $eventId
+     * @throws AuthFailedException
      * @return array of session data
      */
     public function getCurrentSessions($playerId, $eventId)
     {
         $this->_log->addInfo('Getting current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+        if (!(new EventModel($this->_db, $this->_config))->checkToken($playerId, $eventId)) {
+            throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
+        }
+
         $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
 
         $result = array_map(function (SessionPrimitive $session) {
