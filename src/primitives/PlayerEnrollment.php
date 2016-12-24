@@ -97,7 +97,10 @@ class PlayerEnrollmentPrimitive extends Primitive
 
     public function drop()
     {
-        $success = $this->_db->table(self::$_table)->whereIdIs($this->_id)->delete();
+        $success = $this->_db->table(self::$_table)
+            ->findOne($this->_id)
+            ->delete();
+        
         if ($success) {
             $this->_id = null;
         }
