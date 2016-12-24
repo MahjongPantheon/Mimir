@@ -274,7 +274,7 @@ abstract class Primitive
      * @param $data
      * @return $this
      */
-    protected function _restore($data)
+    protected function _restore(array $data)
     {
         $fieldsTransform = $this->_getFieldsTransforms();
 

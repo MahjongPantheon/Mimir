@@ -21,6 +21,7 @@ require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/TextmodeSession.php';
 require_once __DIR__ . '/../../src/models/PlayerStat.php';
 require_once __DIR__ . '/../../src/models/Event.php';
+require_once __DIR__ . '/../../src/primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/Db.php';
@@ -64,7 +65,9 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
                 ->setIdent($id)
                 ->setTenhouId($id);
             $p->save();
-            $this->_event->registerPlayer($p)->save();
+            (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($p, $this->_event)
+                ->save();
             return $p;
         }, $playerNames);
 

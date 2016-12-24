@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Primitive.php';
+require_once __DIR__ . '/PlayerRegistration.php';
 require_once __DIR__ . '/../Ruleset.php';
 
 /**
@@ -44,13 +45,11 @@ class EventPrimitive extends Primitive
         'type'              => '_type',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
-        '::event_registered_users' => '_registeredPlayersIds', // external many-to-many relation
     ];
 
     protected function _getFieldsTransforms()
     {
         return [
-            '_registeredPlayersIds' => $this->_externalManyToManyTransform(self::REL_USER, 'event_id', 'user_id'),
             '_ownerFormationId'   => $this->_integerTransform(true),
             '_ownerUserId'        => $this->_integerTransform(true),
             '_startTime'          => $this->_stringTransform(true),
@@ -141,11 +140,6 @@ class EventPrimitive extends Primitive
      * @var Ruleset
      */
     protected $_ruleset;
-    /**
-     * Players registered for participation
-     * @var int[]
-     */
-    protected $_registeredPlayersIds = [];
 
     public function __construct(IDb $db)
     {
@@ -436,16 +430,6 @@ class EventPrimitive extends Primitive
      */
     public function getRegisteredPlayersIds()
     {
-        return $this->_registeredPlayersIds;
-    }
-
-    /**
-     * @param PlayerPrimitive $player
-     * @return EventPrimitive
-     */
-    public function registerPlayer(PlayerPrimitive $player)
-    {
-        $this->_registeredPlayersIds []= $player->getId();
-        return $this;
+        return PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $this->getId());
     }
 }

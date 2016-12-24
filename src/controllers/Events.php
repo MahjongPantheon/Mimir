@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../models/Event.php';
+require_once __DIR__ . '/../primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../Controller.php';
 
 class EventsController extends Controller
@@ -64,12 +65,7 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting all players for event id# ' . $eventId);
 
-        $event = EventPrimitive::findById($this->_db, [$eventId]);
-        if (empty($event)) {
-            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
-        }
-
-        $players = PlayerPrimitive::findById($this->_db, $event[0]->getRegisteredPlayersIds());
+        $players = PlayerRegistrationPrimitive::findRegisteredPlayersByEvent($this->_db, $eventId);
         $data = array_map(function (PlayerPrimitive $p) {
             return [
                 'id'            => $p->getId(),
@@ -102,7 +98,9 @@ class EventsController extends Controller
         if (empty($player)) {
             throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
         }
-        $success = $event[0]->registerPlayer($player[0])->save();
+        $success = (new PlayerRegistrationPrimitive($this->_db))
+            ->setReg($player[0], $event[0])
+            ->save();
         $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
         return $success;
     }

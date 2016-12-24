@@ -20,6 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/InteractiveSession.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
+require_once __DIR__ . '/../../src/primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/Db.php';
 
@@ -57,7 +58,9 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('tenhou' . $i);
             $p->save();
-            $this->_event->registerPlayer($p)->save();
+            (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($p, $this->_event)
+                ->save();
             return $p;
         }, [1, 2, 3, 4]);
     }
