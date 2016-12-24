@@ -94,6 +94,16 @@ class PlayerEnrollmentPrimitive extends Primitive
         return $success;
     }
 
+    public function drop()
+    {
+        $success = $this->_db->table(self::$_table)->whereIdIs($this->_id)->delete();
+        if ($success) {
+            $this->_id = null;
+        }
+
+        return $this;
+    }
+
     /**
      * @return int
      */
@@ -108,6 +118,16 @@ class PlayerEnrollmentPrimitive extends Primitive
     public function getPin()
     {
         return $this->_pin;
+    }
+
+    public function getEventId()
+    {
+        return $this->_eventId;
+    }
+
+    public function getPlayerId()
+    {
+        return $this->_playerId;
     }
 
     /**
@@ -143,7 +163,7 @@ class PlayerEnrollmentPrimitive extends Primitive
      * @return null|PlayerEnrollmentPrimitive
      * @throws \Exception
      */
-    public static function findEventAndPlayerByPin(IDb $db, $pin)
+    public static function findByPin(IDb $db, $pin)
     {
         $result = self::_findBy($db, 'reg_pin', [$pin]);
         if (empty($result)) {

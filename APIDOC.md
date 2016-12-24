@@ -40,6 +40,9 @@ Parameters:
 
 Returns: _array_ of session data
 
+Exceptions:
+* _AuthFailedException_ 
+
 ### getAllPlayers
 Parameters:
 * **$eventId** (_integer_) 
@@ -144,12 +147,23 @@ Exceptions:
 
 ### registerPlayer
 Parameters:
-* **$eventId** (_integer_) 
-* **$playerId** (_integer_) 
+* **$pin** (_integer_) 
 
-Returns: _bool_ 
+Returns: _string_ Auth token
 
 Exceptions:
+* _InvalidParametersException_ 
+
+### enrollPlayer
+Parameters:
+* **$playerId** (_integer_) 
+* **$eventId** (_integer_) 
+
+Returns: _string_ Secret pin code for self-registration
+
+Exceptions:
+* _AuthFailedException_ 
+* _BadActionException_ 
 * _InvalidParametersException_ 
 
 ### startGame

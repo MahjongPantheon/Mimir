@@ -325,15 +325,70 @@ class EventModel extends Model
         }
     }
 
-    // Auth & reg related
+    // --------- Auth & reg related ------------
+
+    /**
+     * Enroll player to event
+     *
+     * @param $eventId
+     * @param $playerId
+     * @throws AuthFailedException
+     * @throws BadActionException
+     * @throws InvalidParametersException
+     * @return string secret pin code
+     */
     public function enrollPlayer($eventId, $playerId)
     {
-        // output: pin
+        if (!$this->checkAdminToken()) {
+            throw new AuthFailedException('Only administrators are allowed to enroll players to event');
+        }
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
+        if (empty($player)) {
+            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
+        }
+
+        $regItem = (new PlayerEnrollmentPrimitive($this->_db))
+            ->setReg($player[0], $event[0]);
+        $success = $regItem->save();
+
+        if (!$success) {
+            throw new BadActionException('Something went wrong: enrollment failed while saving to db');
+        }
+
+        return $regItem->getPin();
     }
 
+    /**
+     * Self-register player to event by pin
+     *
+     * @param $pin
+     * @throws BadActionException
+     * @return string auth token
+     */
     public function registerPlayer($pin)
     {
-        // output: auth token
+        $success = false;
+        $token = null;
+        $eItem = PlayerEnrollmentPrimitive::findByPin($this->_db, $pin);
+        if ($eItem) {
+            $event = EventPrimitive::findById($this->_db, [$eItem->getEventId()]);
+            $player = PlayerPrimitive::findById($this->_db, [$eItem->getPlayerId()]);
+            $regItem = (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($player[0], $event[0]);
+            $success = $regItem->save();
+            $token = $regItem->getToken();
+        }
+        if (!$success || empty($regItem)) {
+            throw new BadActionException('Something went wrong: registration failed while saving to db');
+        }
+
+        $eItem->drop();
+        return $token;
     }
 
     /**
@@ -348,15 +403,20 @@ class EventModel extends Model
      */
     public function checkToken($playerId, $eventId)
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        if ($token === $this->_config->getValue('admin.god_token')) {
+        if ($this->checkAdminToken()) {
             return true;
         }
 
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        $regItem = PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $token);
+        return $regItem
+            && $regItem->getEventId() == $eventId
+            && $regItem->getPlayerId() == $playerId;
+    }
 
-        // return false on player/event mismatch
-
-        // output: boolean
-        return false;
+    public function checkAdminToken()
+    {
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        return $token === $this->_config->getValue('admin.god_token');
     }
 }

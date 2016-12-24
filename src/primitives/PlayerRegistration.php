@@ -110,6 +110,16 @@ class PlayerRegistrationPrimitive extends Primitive
         return $this->_token;
     }
 
+    public function getEventId()
+    {
+        return $this->_eventId;
+    }
+
+    public function getPlayerId()
+    {
+        return $this->_playerId;
+    }
+
     /**
      * @param IDb $db
      * @param $playerId

@@ -82,27 +82,34 @@ class EventsController extends Controller
     /**
      * Register for participation in event
      *
-     * @param integer $eventId
-     * @param integer $playerId
+     * @param integer $pin
      * @throws InvalidParametersException
-     * @return bool
+     * @return string Auth token
      */
-    public function registerPlayer($eventId, $playerId)
+    public function registerPlayer($pin)
     {
-        $this->_log->addInfo('Registering player id# ' . $playerId . ' for event id# ' . $eventId);
-        $event = EventPrimitive::findById($this->_db, [$eventId]);
-        if (empty($event)) {
-            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
-        }
-        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
-        if (empty($player)) {
-            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
-        }
-        $success = (new PlayerRegistrationPrimitive($this->_db))
-            ->setReg($player[0], $event[0])
-            ->save();
-        $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
-        return $success;
+        $this->_log->addInfo('Registering pin code #' . $pin);
+        $authToken = (new EventModel($this->_db, $this->_config))
+            ->registerPlayer($pin);
+        $this->_log->addInfo('Successfully registered pin code #' . $pin);
+        return $authToken;
+    }
+
+    /**
+     * @param integer $playerId
+     * @param integer $eventId
+     * @throws AuthFailedException
+     * @throws BadActionException
+     * @throws InvalidParametersException
+     * @return string Secret pin code for self-registration
+     */
+    public function enrollPlayer($playerId, $eventId)
+    {
+        $this->_log->addInfo('Enrolling player id# ' . $playerId . ' for event id# ' . $eventId);
+        $pin = (new EventModel($this->_db, $this->_config))
+            ->enrollPlayer($eventId, $playerId);
+        $this->_log->addInfo('Successfully enrolled player id# ' . $playerId . ' for event id# ' . $eventId);
+        return $pin;
     }
 
     /**

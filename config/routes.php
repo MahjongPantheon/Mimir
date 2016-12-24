@@ -47,6 +47,7 @@ return [
     'createEvent'       => ['EventsController', 'createEvent'],
     'startTimer'        => ['EventsController', 'startTimer'],
     'registerPlayer'    => ['EventsController', 'registerPlayer'],
+    'enrollPlayer'      => ['EventsController', 'enrollPlayer'],
     'startGame'         => ['GamesController', 'start'],
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
