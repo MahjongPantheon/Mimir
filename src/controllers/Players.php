@@ -126,6 +126,19 @@ class PlayersController extends Controller
     }
 
     /**
+     * Get user info by id
+     * @throws EntityNotFoundException
+     * @return array
+     */
+    public function getFromToken()
+    {
+        $this->_log->addInfo('Getting info of player (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->get($data->getPlayerId());
+    }
+
+
+    /**
      * @param int $playerId player to get stats for
      * @param int $eventId event to get stats for
      * @throws EntityNotFoundException
@@ -176,6 +189,17 @@ class PlayersController extends Controller
     }
 
     /**
+     * @throws AuthFailedException
+     * @return array of session data
+     */
+    public function getCurrentSessionsFromToken()
+    {
+        $this->_log->addInfo('Getting current sessions (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getCurrentSessions($data->getPlayerId(), $data->getEventId());
+    }
+
+    /**
      * Get last game results of user in event
      *
      * @param int $playerId
@@ -203,6 +227,19 @@ class PlayersController extends Controller
 
         $this->_log->addInfo('Successfully got last session results for player id #' . $playerId . ' at event id #' . $eventId);
         return $result;
+    }
+
+    /**
+     * Get last game results of user in event
+     *
+     * @throws EntityNotFoundException
+     * @return array|null
+     */
+    public function getLastResultsFromToken()
+    {
+        $this->_log->addInfo('Getting last session results (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getLastResults($data->getPlayerId(), $data->getEventId());
     }
 
     /**

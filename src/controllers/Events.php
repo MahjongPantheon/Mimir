@@ -80,6 +80,19 @@ class EventsController extends Controller
     }
 
     /**
+     * Get all players registered for event
+     *
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getAllRegisteredPlayersFromToken()
+    {
+        $this->_log->addInfo('Getting all players for event (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getAllRegisteredPlayers($data->getEventId());
+    }
+
+    /**
      * Register for participation in event
      *
      * @param integer $pin
@@ -140,6 +153,19 @@ class EventsController extends Controller
 
         $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
         return $data;
+    }
+
+    /**
+     * Get event rules configuration
+     *
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getGameConfigFromToken()
+    {
+        $this->_log->addInfo('Getting config for event (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getGameConfig($data->getEventId());
     }
 
     /**
@@ -232,6 +258,17 @@ class EventsController extends Controller
         $this->_log->addInfo('Successfully got timer data for event id#' . $eventId);
 
         return $response;
+    }
+
+    /**
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getTimerStateFromToken()
+    {
+        $this->_log->addInfo('Getting timer for event (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getTimerState($data->getEventId());
     }
 
     /**

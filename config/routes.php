@@ -43,6 +43,14 @@ return [
     'addOnlineReplay'    => ['GamesController', 'addOnlineReplay'],
     'getLastResults'     => ['PlayersController', 'getLastResults'],
 
+    'getGameConfigT'     => ['EventsController', 'getGameConfigFromToken'],
+    'getTimerStateT'     => ['EventsController', 'getTimerStateFromToken'],
+    'getAllPlayersT'     => ['EventsController', 'getAllRegisteredPlayersFromToken'],
+    'getCurrentGamesT'   => ['PlayersController', 'getCurrentSessionsFromToken'],
+    'getLastResultsT'    => ['PlayersController', 'getLastResultsFromToken'],
+    'getPlayerT'         => ['PlayersController', 'getFromToken'],
+    'startGameT'         => ['GamesController', 'startFromToken'], // for self-starts
+
     // admin
     'createEvent'       => ['EventsController', 'createEvent'],
     'startTimer'        => ['EventsController', 'startTimer'],

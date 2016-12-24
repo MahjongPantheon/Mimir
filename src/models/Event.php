@@ -407,11 +407,16 @@ class EventModel extends Model
             return true;
         }
 
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        $regItem = PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $token);
+        $regItem = $this->dataFromToken();
         return $regItem
             && $regItem->getEventId() == $eventId
             && $regItem->getPlayerId() == $playerId;
+    }
+
+    public function dataFromToken()
+    {
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        return PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $token);
     }
 
     public function checkAdminToken()

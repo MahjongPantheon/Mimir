@@ -44,6 +44,21 @@ class GamesController extends Controller
     }
 
     /**
+     * Start new interactive game and return its hash
+     *
+     * @param array $players Player id list
+     * @throws InvalidUserException
+     * @throws DatabaseException
+     * @return string Hashcode of started game
+     */
+    public function startFromToken($players)
+    {
+        $this->_log->addInfo('Starting new game (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->start($data->getEventId(), $players);
+    }
+
+    /**
      * Explicitly force end of interactive game
      *
      * @param $gameHashcode string Hashcode of game
