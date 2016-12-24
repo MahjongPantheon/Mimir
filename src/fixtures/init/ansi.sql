@@ -110,9 +110,10 @@ DROP TABLE
 "event_enrolled_users";
 CREATE TABLE "event_enrolled_users"
 (
+  "id" integer, -- serial
+  primary key ("id"),
   "event_id" integer not null,
   "user_id" integer not null,
-  "order" integer not null, -- hardcoded order, for orm conformity
   "reg_pin" integer,
   foreign key ("event_id") references "event" ("id"),
   foreign key ("user_id") references "user" ("id")

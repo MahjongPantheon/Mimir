@@ -44,7 +44,8 @@ class PlayerEnrollmentPrimitive extends Primitive
         return [
             '_id' => $this->_integerTransform(true),
             '_eventId' => $this->_integerTransform(),
-            '_playerId' => $this->_integerTransform()
+            '_playerId' => $this->_integerTransform(),
+            '_pin' => $this->_integerTransform()
         ];
     }
 
