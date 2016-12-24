@@ -31,9 +31,15 @@ abstract class Controller
      */
     protected $_log;
 
-    public function __construct(IDb $db, Logger $log)
+    /**
+     * @var Config
+     */
+    protected $_config;
+
+    public function __construct(IDb $db, Logger $log, Config $config)
     {
         $this->_db = $db;
         $this->_log = $log;
+        $this->_config = $config;
     }
 }

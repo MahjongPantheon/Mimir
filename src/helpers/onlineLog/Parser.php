@@ -156,7 +156,9 @@ class OnlineParser
             if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
                 foreach ($players as $player) {
                     // ok to re-register every time, it just will do nothing in db if record exists
-                    $session->getEvent()->registerPlayer($player);
+                    (new PlayerRegistrationPrimitive($this->_db))
+                        ->setReg($player, $session->getEvent())
+                        ->save();
                 }
             }
 

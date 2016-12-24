@@ -90,9 +90,11 @@ DROP TABLE
    "event_registered_users";
 CREATE TABLE "event_registered_users"
 (
+  "id" integer, -- serial
+  primary key ("id"),
   "event_id" integer not null,
   "user_id" integer not null,
-  "order" integer not null, -- hardcoded order, for orm conformity
+  "auth_token" varchar(48),
   foreign key ("event_id") references "event" ("id"),
   foreign key ("user_id") references "user" ("id")
 )
@@ -100,6 +102,27 @@ CREATE TABLE "event_registered_users"
 ;
 -- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
 CREATE UNIQUE INDEX "event_registered_users_uniq" ON "event_registered_users"("event_id","user_id");
+CREATE INDEX "eru_auth_token" ON "event_registered_users"("auth_token");
+
+-- Users to be registered in event (tournament-type auth)
+DROP TABLE
+-- IF EXISTS
+"event_enrolled_users";
+CREATE TABLE "event_enrolled_users"
+(
+  "id" integer, -- serial
+  primary key ("id"),
+  "event_id" integer not null,
+  "user_id" integer not null,
+  "reg_pin" integer,
+  foreign key ("event_id") references "event" ("id"),
+  foreign key ("user_id") references "user" ("id")
+)
+-- CHARACTER SET utf8 COLLATE utf8_general_ci
+;
+-- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
+CREATE UNIQUE INDEX "event_enrolled_users_uniq" ON "event_enrolled_users"("event_id","user_id");
+CREATE INDEX "eeu_pin" ON "event_enrolled_users"("reg_pin");
 
 -- Game session: tonpuusen, hanchan, either online or offline
 DROP TABLE

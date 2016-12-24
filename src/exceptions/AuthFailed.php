@@ -15,17 +15,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+namespace Riichi;
 
-return [
-    'db' => [
-        'connection_string' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
-        'credentials' => [
-            'username' => '',
-            'password' => ''
-        ]
-    ],
-    'admin'     => [
-        'god_token' => '198vdsh904hfbnkjv98whb2iusvd98b29bsdv98svbr9wghj'
-    ],
-    'routes'    => require __DIR__ . '/../../config/routes.php'
-];
+class AuthFailedException extends \Exception
+{
+}

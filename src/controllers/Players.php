@@ -17,11 +17,10 @@
  */
 namespace Riichi;
 
-use DoctrineTest\InstantiatorTestAsset\ExceptionAsset;
-
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../models/PlayerStat.php';
+require_once __DIR__ . '/../models/Event.php';
 
 /**
  * Class PlayersController
@@ -127,6 +126,19 @@ class PlayersController extends Controller
     }
 
     /**
+     * Get user info by id
+     * @throws EntityNotFoundException
+     * @return array
+     */
+    public function getFromToken()
+    {
+        $this->_log->addInfo('Getting info of player (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->get($data->getPlayerId());
+    }
+
+
+    /**
      * @param int $playerId player to get stats for
      * @param int $eventId event to get stats for
      * @throws EntityNotFoundException
@@ -135,7 +147,7 @@ class PlayersController extends Controller
     public function getStats($playerId, $eventId)
     {
         $this->_log->addInfo('Getting stats for player id #' . $playerId . ' at event id #' . $eventId);
-        $stats = (new PlayerStatModel($this->_db))
+        $stats = (new PlayerStatModel($this->_db, $this->_config))
             ->getStats($eventId, $playerId);
         $this->_log->addInfo('Successfully got stats for player id #' . $playerId . ' at event id #' . $eventId);
         return $stats;
@@ -144,11 +156,16 @@ class PlayersController extends Controller
     /**
      * @param int $playerId
      * @param int $eventId
+     * @throws AuthFailedException
      * @return array of session data
      */
     public function getCurrentSessions($playerId, $eventId)
     {
         $this->_log->addInfo('Getting current sessions for player id #' . $playerId . ' at event id #' . $eventId);
+        if (!(new EventModel($this->_db, $this->_config))->checkToken($playerId, $eventId)) {
+            throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
+        }
+
         $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
 
         $result = array_map(function (SessionPrimitive $session) {
@@ -169,6 +186,17 @@ class PlayersController extends Controller
 
         $this->_log->addInfo('Successfully got current sessions for player id #' . $playerId . ' at event id #' . $eventId);
         return $result;
+    }
+
+    /**
+     * @throws AuthFailedException
+     * @return array of session data
+     */
+    public function getCurrentSessionsFromToken()
+    {
+        $this->_log->addInfo('Getting current sessions (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getCurrentSessions($data->getPlayerId(), $data->getEventId());
     }
 
     /**
@@ -199,6 +227,19 @@ class PlayersController extends Controller
 
         $this->_log->addInfo('Successfully got last session results for player id #' . $playerId . ' at event id #' . $eventId);
         return $result;
+    }
+
+    /**
+     * Get last game results of user in event
+     *
+     * @throws EntityNotFoundException
+     * @return array|null
+     */
+    public function getLastResultsFromToken()
+    {
+        $this->_log->addInfo('Getting last session results (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getLastResults($data->getPlayerId(), $data->getEventId());
     }
 
     /**

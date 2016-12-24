@@ -24,8 +24,14 @@ abstract class Model
      */
     protected $_db;
 
-    public function __construct(IDb $db)
+    /**
+     * @var Config
+     */
+    protected $_config;
+
+    public function __construct(IDb $db, Config $config)
     {
         $this->_db = $db;
+        $this->_config = $config;
     }
 }

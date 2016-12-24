@@ -22,6 +22,8 @@ require_once __DIR__ . '/../primitives/Event.php';
 require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../primitives/SessionResults.php';
 require_once __DIR__ . '/../primitives/Player.php';
+require_once __DIR__ . '/../primitives/PlayerRegistration.php';
+require_once __DIR__ . '/../primitives/PlayerEnrollment.php';
 require_once __DIR__ . '/../primitives/PlayerHistory.php';
 require_once __DIR__ . '/../primitives/Round.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
@@ -323,5 +325,105 @@ class EventModel extends Model
             default:
                 throw new InvalidParametersException("Parameter orderBy should be either 'name', 'rating' or 'avg_place'");
         }
+    }
+
+    // --------- Auth & reg related ------------
+
+    /**
+     * Enroll player to event
+     *
+     * @param $eventId
+     * @param $playerId
+     * @throws AuthFailedException
+     * @throws BadActionException
+     * @throws InvalidParametersException
+     * @return string secret pin code
+     */
+    public function enrollPlayer($eventId, $playerId)
+    {
+        if (!$this->checkAdminToken()) {
+            throw new AuthFailedException('Only administrators are allowed to enroll players to event');
+        }
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
+        if (empty($player)) {
+            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
+        }
+
+        $regItem = (new PlayerEnrollmentPrimitive($this->_db))
+            ->setReg($player[0], $event[0]);
+        $success = $regItem->save();
+
+        if (!$success) {
+            throw new BadActionException('Something went wrong: enrollment failed while saving to db');
+        }
+
+        return $regItem->getPin();
+    }
+
+    /**
+     * Self-register player to event by pin
+     *
+     * @param $pin
+     * @throws BadActionException
+     * @return string auth token
+     */
+    public function registerPlayer($pin)
+    {
+        $success = false;
+        $token = null;
+        $eItem = PlayerEnrollmentPrimitive::findByPin($this->_db, $pin);
+        if ($eItem) {
+            $event = EventPrimitive::findById($this->_db, [$eItem->getEventId()]);
+            $player = PlayerPrimitive::findById($this->_db, [$eItem->getPlayerId()]);
+            $regItem = (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($player[0], $event[0]);
+            $success = $regItem->save();
+            $token = $regItem->getToken();
+        }
+        if (!$success || empty($regItem)) {
+            throw new BadActionException('Something went wrong: registration failed while saving to db');
+        }
+
+        $eItem->drop();
+        return $token;
+    }
+
+    /**
+     * Checks if token is ok.
+     * Reads token value from _SERVER['HTTP_X_AUTH_TOKEN']
+     *
+     * Also should return true to admin-level token to allow everything
+     *
+     * @param $playerId
+     * @param $eventId
+     * @return bool
+     */
+    public function checkToken($playerId, $eventId)
+    {
+        if ($this->checkAdminToken()) {
+            return true;
+        }
+
+        $regItem = $this->dataFromToken();
+        return $regItem
+            && $regItem->getEventId() == $eventId
+            && $regItem->getPlayerId() == $playerId;
+    }
+
+    public function dataFromToken()
+    {
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        return PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $token);
+    }
+
+    public function checkAdminToken()
+    {
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        return $token === $this->_config->getValue('admin.god_token');
     }
 }

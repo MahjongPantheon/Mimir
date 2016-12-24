@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../../src/helpers/onlineLog/Parser.php';
+require_once __DIR__ . '/../../../src/primitives/PlayerRegistration.php';
 
 /**
  * Replay parser integration test suite
@@ -63,7 +64,9 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('player' . $i);
             $p->save();
-            $this->_event->registerPlayer($p)->save();
+            (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($p, $this->_event)
+                ->save();
             return $p;
         }, [1, 2, 3, 4]);
 

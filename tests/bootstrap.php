@@ -32,4 +32,6 @@ register_shutdown_function(
     }
 );
 
+putenv("OVERRIDE_CONFIG_PATH=" . __DIR__ . '/util/config.php'); // for units
+
 require_once __DIR__ . '/../vendor/autoload.php';

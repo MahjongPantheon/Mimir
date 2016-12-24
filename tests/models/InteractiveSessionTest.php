@@ -20,6 +20,7 @@ namespace Riichi;
 require_once __DIR__ . '/../../src/Ruleset.php';
 require_once __DIR__ . '/../../src/models/InteractiveSession.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
+require_once __DIR__ . '/../../src/primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/Db.php';
 
@@ -41,6 +42,11 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
      * @var EventPrimitive
      */
     protected $_event;
+    /**
+     * @var Config
+     */
+    protected $_config;
+
     public function setUp()
     {
         $this->_db = Db::__getCleanTestingInstance();
@@ -57,16 +63,21 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('tenhou' . $i);
             $p->save();
-            $this->_event->registerPlayer($p)->save();
+            (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($p, $this->_event)
+                ->save();
             return $p;
         }, [1, 2, 3, 4]);
+
+        $this->_config = new Config(getenv('OVERRIDE_CONFIG_PATH'));
+        $_SERVER['HTTP_X_AUTH_TOKEN'] = $this->_config->getValue('admin.god_token');
     }
 
     // Positive tests
 
     public function testNewGame()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -82,7 +93,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testEndGame()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -106,7 +117,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundRon()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -134,7 +145,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundTsumo()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -161,7 +172,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundDraw()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -180,7 +191,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundAbortiveDraw()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -198,7 +209,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAddRoundChombo()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -226,7 +237,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         }, $this->_players);
         $playerIds[1] = 100400; // non-existing id
 
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $session->startGame($this->_event->getId(), $playerIds);
     }
 
@@ -240,7 +251,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         }, $this->_players);
         array_pop($playerIds); // 3 players instead of 4
 
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $session->startGame($this->_event->getId(), $playerIds);
     }
 
@@ -249,13 +260,13 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
      */
     public function testEndGameWrongHash()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $session->endGame('inexisting_hash');
     }
 
     public function testEndGameButGameAlreadyFinished()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
@@ -279,7 +290,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     public function testAutoEndGameWhenHanchanFinishes()
     {
-        $session = new InteractiveSessionModel($this->_db);
+        $session = new InteractiveSessionModel($this->_db, $this->_config);
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {

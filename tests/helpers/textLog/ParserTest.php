@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../../src/helpers/textLog/Parser.php';
+require_once __DIR__ . '/../../../src/primitives/PlayerRegistration.php';
 
 /**
  * Log parser integration test suite
@@ -62,7 +63,9 @@ class TextlogParserTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId('tenhou' . $i);
             $p->save();
-            $this->_event->registerPlayer($p)->save();
+            (new PlayerRegistrationPrimitive($this->_db))
+                ->setReg($p, $this->_event)
+                ->save();
             return $p;
         }, [1, 2, 3, 4]);
 

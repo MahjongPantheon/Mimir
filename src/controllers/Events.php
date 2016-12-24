@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../models/Event.php';
+require_once __DIR__ . '/../primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../Controller.php';
 
 class EventsController extends Controller
@@ -64,12 +65,7 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting all players for event id# ' . $eventId);
 
-        $event = EventPrimitive::findById($this->_db, [$eventId]);
-        if (empty($event)) {
-            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
-        }
-
-        $players = PlayerPrimitive::findById($this->_db, $event[0]->getRegisteredPlayersIds());
+        $players = PlayerRegistrationPrimitive::findRegisteredPlayersByEvent($this->_db, $eventId);
         $data = array_map(function (PlayerPrimitive $p) {
             return [
                 'id'            => $p->getId(),
@@ -84,27 +80,49 @@ class EventsController extends Controller
     }
 
     /**
+     * Get all players registered for event
+     *
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getAllRegisteredPlayersFromToken()
+    {
+        $this->_log->addInfo('Getting all players for event (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getAllRegisteredPlayers($data->getEventId());
+    }
+
+    /**
      * Register for participation in event
      *
-     * @param integer $eventId
-     * @param integer $playerId
+     * @param integer $pin
      * @throws InvalidParametersException
-     * @return bool
+     * @return string Auth token
      */
-    public function registerPlayer($eventId, $playerId)
+    public function registerPlayer($pin)
     {
-        $this->_log->addInfo('Registering player id# ' . $playerId . ' for event id# ' . $eventId);
-        $event = EventPrimitive::findById($this->_db, [$eventId]);
-        if (empty($event)) {
-            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
-        }
-        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
-        if (empty($player)) {
-            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
-        }
-        $success = $event[0]->registerPlayer($player[0])->save();
-        $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
-        return $success;
+        $this->_log->addInfo('Registering pin code #' . $pin);
+        $authToken = (new EventModel($this->_db, $this->_config))
+            ->registerPlayer($pin);
+        $this->_log->addInfo('Successfully registered pin code #' . $pin);
+        return $authToken;
+    }
+
+    /**
+     * @param integer $playerId
+     * @param integer $eventId
+     * @throws AuthFailedException
+     * @throws BadActionException
+     * @throws InvalidParametersException
+     * @return string Secret pin code for self-registration
+     */
+    public function enrollPlayer($playerId, $eventId)
+    {
+        $this->_log->addInfo('Enrolling player id# ' . $playerId . ' for event id# ' . $eventId);
+        $pin = (new EventModel($this->_db, $this->_config))
+            ->enrollPlayer($eventId, $playerId);
+        $this->_log->addInfo('Successfully enrolled player id# ' . $playerId . ' for event id# ' . $eventId);
+        return $pin;
     }
 
     /**
@@ -138,6 +156,19 @@ class EventsController extends Controller
     }
 
     /**
+     * Get event rules configuration
+     *
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getGameConfigFromToken()
+    {
+        $this->_log->addInfo('Getting config for event (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getGameConfig($data->getEventId());
+    }
+
+    /**
      * Get rating table for event
      *
      * @param integer $eventId
@@ -155,7 +186,7 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $table = (new EventModel($this->_db))
+        $table = (new EventModel($this->_db, $this->_config))
             ->getRatingTable($event[0], $orderBy, $order);
 
         $this->_log->addInfo('Successfully received rating table for event id# ' . $eventId);
@@ -180,7 +211,7 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $table = (new EventModel($this->_db))
+        $table = (new EventModel($this->_db, $this->_config))
             ->getLastFinishedGames($event[0], $limit, $offset);
 
         $this->_log->addInfo('Successfully got games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);
@@ -227,6 +258,17 @@ class EventsController extends Controller
         $this->_log->addInfo('Successfully got timer data for event id#' . $eventId);
 
         return $response;
+    }
+
+    /**
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getTimerStateFromToken()
+    {
+        $this->_log->addInfo('Getting timer for event (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        return $this->getTimerState($data->getEventId());
     }
 
     /**

@@ -23,6 +23,7 @@ require_once __DIR__ . '/../primitives/Event.php';
 require_once __DIR__ . '/../primitives/Round.php';
 require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
+require_once __DIR__ . '/../exceptions/AuthFailed.php';
 require_once __DIR__ . '/../exceptions/InvalidUser.php';
 require_once __DIR__ . '/../exceptions/BadAction.php';
 require_once __DIR__ . '/../exceptions/Database.php';
@@ -47,6 +48,7 @@ class InteractiveSessionModel extends Model
      */
     public function startGame($eventId, $playerIds, $replayHash = null, $origLink = null)
     {
+        $this->_checkAuth($playerIds, $eventId);
         $event = EventPrimitive::findById($this->_db, [$eventId]);
         if (empty($event)) {
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
@@ -96,6 +98,7 @@ class InteractiveSessionModel extends Model
     public function endGame($gameHash)
     {
         $session = $this->_findGame($gameHash, 'inprogress');
+        $this->_checkAuth($session->getPlayersIds(), $session->getEventId());
         return $session->finish();
     }
 
@@ -105,11 +108,13 @@ class InteractiveSessionModel extends Model
      * @param $dry boolean Dry run (no save to DB)
      * @throws InvalidParametersException
      * @throws BadActionException
+     * @throws AuthFailedException
      * @return bool|array Success?|Results of dry run
      */
     public function addRound($gameHashcode, $roundData, $dry = false)
     {
         $session = $this->_findGame($gameHashcode, 'inprogress');
+        $this->_checkAuth($session->getPlayersIds(), $session->getEventId());
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         if ($dry) {
@@ -147,5 +152,18 @@ class InteractiveSessionModel extends Model
         }
 
         return $game[0];
+    }
+
+    protected function _checkAuth($playersIds, $eventId)
+    {
+        // Check that real session player is trying to enter data
+        $evMdl = new EventModel($this->_db, $this->_config);
+        if (!$evMdl->checkToken($playersIds[0], $eventId) &&
+            !$evMdl->checkToken($playersIds[1], $eventId) &&
+            !$evMdl->checkToken($playersIds[2], $eventId) &&
+            !$evMdl->checkToken($playersIds[3], $eventId)
+        ) {
+            throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
+        }
     }
 }
