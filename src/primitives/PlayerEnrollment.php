@@ -71,7 +71,7 @@ class PlayerEnrollmentPrimitive extends Primitive
     {
         $userReg = $this->_db->table(self::$_table)->create();
         if (empty($this->_pin)) {
-            $this->_pin = crc32('PlayerReg' . microtime());
+            $this->_pin = round(crc32('PlayerReg' . microtime()) / 4);
         }
 
         try {
@@ -100,7 +100,7 @@ class PlayerEnrollmentPrimitive extends Primitive
         $success = $this->_db->table(self::$_table)
             ->findOne($this->_id)
             ->delete();
-        
+
         if ($success) {
             $this->_id = null;
         }
