@@ -247,4 +247,24 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_players[0]->getId(), $sessionCopy->getPlayers()[0]->getId());
         $this->assertTrue($this->_players[0] !== $sessionCopy->getPlayers()[0]); // different objects!
     }
+
+    public function testFindSeatings()
+    {
+        $newSession = new SessionPrimitive($this->_db);
+        $newSession
+            ->setStatus('inprogress')
+            ->setOrigLink('test')
+            ->setPlayers($this->_players)
+            ->setReplayHash('hash')
+            ->setEvent($this->_event)
+            ->save();
+
+        $seating = SessionPrimitive::getPlayersSeatingInEvent($this->_db, $this->_event->getId());
+        $this->assertEquals([
+            ['user_id' => 1, 'order' => 1],
+            ['user_id' => 2, 'order' => 2],
+            ['user_id' => 3, 'order' => 3],
+            ['user_id' => 4, 'order' => 4],
+        ], $seating);
+    }
 }

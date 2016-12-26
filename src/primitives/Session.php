@@ -208,6 +208,25 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * Get data of players' seating during all event
+     *
+     * @param IDb $db
+     * @param $eventId
+     * @return array TODO: should it be here? It behaves like non-ORM method :/
+     */
+    public static function getPlayersSeatingInEvent(IDb $db, $eventId)
+    {
+        return $db->table(self::$_table)
+            ->select('user_id')
+            ->select('order')
+            ->join(self::REL_USER, [self::REL_USER . '.session_id', '=', self::$_table . '.id'])
+            ->where(self::$_table . '.event_id', $eventId)
+            ->orderByAsc('session_id')
+            ->orderByAsc('order')
+            ->findArray();
+    }
+
+    /**
      * Find session by player/event
      *
      * @param IDb $db
