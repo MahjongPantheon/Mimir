@@ -123,6 +123,64 @@ Returns: _array|null_
 Exceptions:
 * _EntityNotFoundException_ 
 
+### getGameConfigT
+Parameters:
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getTimerStateT
+Parameters:
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getAllPlayersT
+Parameters:
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getCurrentGamesT
+Parameters:
+
+Returns: _array_ of session data
+
+Exceptions:
+* _AuthFailedException_ 
+
+### getLastResultsT
+Parameters:
+
+Returns: _array|null_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
+
+### getPlayerT
+Parameters:
+
+Returns: _array_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
+
+### startGameT
+Parameters:
+* **$players** (_array_) Player id list
+
+Returns: _string_ Hashcode of started game
+
+Exceptions:
+* _InvalidUserException_ 
+* _DatabaseException_ 
+
 ### createEvent
 Parameters:
 * **$title** (_string_) 
@@ -233,6 +291,14 @@ Returns: _array_
 Exceptions:
 * _EntityNotFoundException_ 
 
-### generateSortition
+### generateSeating
 Parameters:
+* **$eventId** (_int_) 
+* **$groupsCount** (_int_) 
+* **$seed** (_int_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
 
