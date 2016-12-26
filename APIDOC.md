@@ -300,5 +300,18 @@ Parameters:
 Returns: _array_ 
 
 Exceptions:
+* _AuthFailedException_ 
 * _InvalidParametersException_ 
+
+### startGamesWithSeating
+Parameters:
+* **$eventId** (_int_) 
+* **$groupsCount** (_int_) 
+* **$seed** (_int_) 
+
+Returns: _bool_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+* _AuthFailedException_ 
 

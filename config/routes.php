@@ -62,5 +62,7 @@ return [
     'addPlayer'         => ['PlayersController', 'add'],
     'updatePlayer'      => ['PlayersController', 'update'],
     'getPlayer'         => ['PlayersController', 'get'],
-    'generateSeating'   => ['SeatingController', 'generate']
+
+    'generateSeating'   => ['SeatingController', 'generate'],
+    'startGamesWithSeating' => ['SeatingController', 'startGamesWithSeating']
 ];
