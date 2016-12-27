@@ -53,6 +53,7 @@ return [
 
     // admin
     'createEvent'       => ['EventsController', 'createEvent'],
+    'getTablesState'    => ['EventsController', 'getTablesState'],
     'startTimer'        => ['EventsController', 'startTimer'],
     'registerPlayer'    => ['EventsController', 'registerPlayer'],
     'enrollPlayer'      => ['EventsController', 'enrollPlayer'],

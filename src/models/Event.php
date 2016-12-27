@@ -30,6 +30,33 @@ require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 
 class EventModel extends Model
 {
+    /**
+     * Find out currently playing tables state (for tournaments only)
+     * @param integer $eventId
+     */
+    public function getTablesState($eventId)
+    {
+        $reggedPlayers = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
+        $tablesCount = count($reggedPlayers) / 4;
+
+        $lastGames = SessionPrimitive::findByEventAndStatus($this->_db, $eventId, ['finished', 'inprogress'], 0, $tablesCount);
+        $output = [];
+        foreach ($lastGames as $game) {
+            $output []= [
+                'status' => $game->getStatus(),
+                'players' => array_map(function (PlayerPrimitive $p) {
+                    return [
+                        'id' => $p->getId(),
+                        'display_name' => $p->getDisplayName()
+                    ];
+                }, $game->getPlayers())
+            ];
+        }
+        
+        return $output;
+    }
+
+    
     // ------ Last games related -------
 
     /**

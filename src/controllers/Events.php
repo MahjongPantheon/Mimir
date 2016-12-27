@@ -93,6 +93,22 @@ class EventsController extends Controller
     }
 
     /**
+     * Get tables state in tournament
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getTablesState($eventId)
+    {
+        $this->_log->addInfo('Getting tables state for event #' . $eventId);
+        $data = (new EventModel($this->_db, $this->_config))
+            ->getTablesState($eventId);
+        $this->_log->addInfo('Successfully got tables state for event #' . $eventId);
+        return $data;
+    }
+
+    /**
      * Register for participation in event
      *
      * @param integer $pin

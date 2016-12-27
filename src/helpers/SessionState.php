@@ -120,7 +120,7 @@ class SessionState
      * @return bool
      */
     public function isFinished()
-    {        
+    {
         return $this->getRound() > 8
             || ($this->_rules->withButtobi() && $this->_buttobi());
     }
