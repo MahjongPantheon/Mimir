@@ -52,6 +52,11 @@ class SessionState
      * @var int
      */
     protected $_riichiBets = 0;
+    /**
+     * True if game has been finished prematurely (e.g. by timeout)
+     * @var boolean
+     */
+    protected $_prematurelyFinished = false;
 
     public function __construct(Ruleset $rules, $playersIds)
     {
@@ -117,11 +122,21 @@ class SessionState
     }
 
     /**
+     * End game prematurely
+     */
+    public function forceFinish()
+    {
+        $this->_prematurelyFinished = true;
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function isFinished()
     {
         return $this->getRound() > 8
+            || $this->_prematurelyFinished
             || ($this->_rules->withButtobi() && $this->_buttobi());
     }
 

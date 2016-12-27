@@ -511,8 +511,11 @@ class SessionPrimitive extends Primitive
         $isInRedZone = $this->getEvent()->getType() === 'offline' && ( // 10 minutes = 600 seconds
             $this->getEvent()->getLastTimer() + ($this->getEvent()->getGameDuration() * 60 - 600) < time()
         );
+        if ($isInRedZone) {
+            $this->getCurrentState()->forceFinish();
+        }
         
-        if ($this->getCurrentState()->isFinished() || $isInRedZone) {
+        if ($this->getCurrentState()->isFinished()) {
             $success = $success && $this->finish();
         }
 
