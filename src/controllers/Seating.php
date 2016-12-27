@@ -96,14 +96,24 @@ class SeatingController extends Controller
      */
     protected function _getData($eventId)
     {
-        $histories = PlayerHistoryPrimitive::findLastByEvent($this->_db, $eventId);
-        if (empty($histories)) {
+        $playersMap = [];
+        
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
-
-        $playersMap = [];
-        foreach ($histories as $h) {
-            $playersMap[$h->getPlayerId()] = $h->getRating();
+        
+        $histories = PlayerHistoryPrimitive::findLastByEvent($this->_db, $eventId);
+        if (!empty($histories)) {
+            foreach ($histories as $h) {
+                $playersMap[$h->getPlayerId()] = $h->getRating();
+            }
+        } else {
+            $initialRating = $event[0]->getRuleset()->startRating();
+            $playersReg = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
+            foreach ($playersReg as $h) {
+                $playersMap[$h->getPlayerId()] = $initialRating;
+            }
         }
 
         $seatingInfo = SessionPrimitive::getPlayersSeatingInEvent($this->_db, $eventId);
