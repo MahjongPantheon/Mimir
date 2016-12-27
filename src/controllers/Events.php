@@ -246,12 +246,12 @@ class EventsController extends Controller
                 'finished' => false,
                 'time_remaining' => null
             ];
-        } else if ($event[0]->getLastTimer() + $event[0]->getGameDuration() > time()) {
+        } else if ($event[0]->getLastTimer() + $event[0]->getGameDuration() * 60 > time()) {
             // game in progress
             $response = [
                 'started' => true,
                 'finished' => false,
-                'time_remaining' => $event[0]->getLastTimer() + $event[0]->getGameDuration() - time()
+                'time_remaining' => $event[0]->getLastTimer() + $event[0]->getGameDuration() * 60 - time()
             ];
         }
 
