@@ -31,6 +31,31 @@ require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 class EventModel extends Model
 {
     /**
+     * Get data of players' current seating
+     *
+     * @param $eventId
+     * @return array TODO: should it be here? Too low-level :/
+     */
+    public function getCurrentSeating($eventId)
+    {
+        $reggedPlayers = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
+        
+        return $this->_db->table('player_history')
+            ->select('player_history.user_id')
+            ->select('session_user.order')
+            ->select('session_user.session_id')
+            ->select('player_history.rating')
+            ->select('user.display_name')
+            ->join('session_user', 'session_user.session_id = player_history.session_id AND session_user.user_id = player_history.user_id')
+            ->join('user', 'user.id = player_history.user_id')
+            ->where('player_history.event_id', $eventId)
+            ->orderByDesc('games_played')
+            ->orderByAsc('order')
+            ->limit(count($reggedPlayers))
+            ->findArray();
+    }
+    
+    /**
      * Find out currently playing tables state (for tournaments only)
      * @param integer $eventId
      */

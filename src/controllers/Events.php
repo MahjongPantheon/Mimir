@@ -109,6 +109,22 @@ class EventsController extends Controller
     }
 
     /**
+     * Get current seating in tournament
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getCurrentSeating($eventId)
+    {
+        $this->_log->addInfo('Getting current seating for event #' . $eventId);
+        $data = (new EventModel($this->_db, $this->_config))
+            ->getCurrentSeating($eventId);
+        $this->_log->addInfo('Successfully got current seating for event #' . $eventId);
+        return $data;
+    }
+
+    /**
      * Register for participation in event
      *
      * @param integer $pin

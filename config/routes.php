@@ -65,5 +65,6 @@ return [
     'getPlayer'         => ['PlayersController', 'get'],
 
     'generateSeating'   => ['SeatingController', 'generate'],
-    'startGamesWithSeating' => ['SeatingController', 'startGamesWithSeating']
+    'startGamesWithSeating' => ['SeatingController', 'startGamesWithSeating'],
+    'getCurrentSeating' => ['EventsController', 'getCurrentSeating']
 ];

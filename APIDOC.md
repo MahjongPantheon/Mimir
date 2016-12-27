@@ -194,6 +194,15 @@ Returns: _int_
 Exceptions:
 * _BadActionException_ 
 
+### getTablesState
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### startTimer
 Parameters:
 * **$eventId** (_integer_) 
@@ -314,4 +323,13 @@ Returns: _bool_
 Exceptions:
 * _InvalidParametersException_ 
 * _AuthFailedException_ 
+
+### getCurrentSeating
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
 
