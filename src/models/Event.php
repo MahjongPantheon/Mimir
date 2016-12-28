@@ -34,25 +34,47 @@ class EventModel extends Model
      * Get data of players' current seating
      *
      * @param $eventId
-     * @return array TODO: should it be here? Too low-level :/
+     * @throws InvalidParametersException
+     * @return array TODO: should it be here? Looks a bit too low-level :/
      */
     public function getCurrentSeating($eventId)
     {
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+        $startRating = $event[0]->getRuleset()->startRating();
+
+        // get data from primitives, and some raw data
         $reggedPlayers = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
-        
-        return $this->_db->table('player_history')
-            ->select('player_history.user_id')
+        $historyItems = PlayerHistoryPrimitive::findLastByEvent($this->_db, $eventId);
+        $seatings = $this->_db->table('session_user')
+            ->join('session', 'session.id = session_user.session_id')
+            ->join('user', 'user.id = session_user.user_id')
             ->select('session_user.order')
+            ->select('session_user.user_id')
             ->select('session_user.session_id')
-            ->select('player_history.rating')
             ->select('user.display_name')
-            ->join('session_user', 'session_user.session_id = player_history.session_id AND session_user.user_id = player_history.user_id')
-            ->join('user', 'user.id = player_history.user_id')
-            ->where('player_history.event_id', $eventId)
-            ->orderByDesc('games_played')
+            ->where('session.event_id', $eventId)
             ->orderByAsc('order')
             ->limit(count($reggedPlayers))
             ->findArray();
+
+        // merge it all together
+        $ratings = [];
+        foreach ($reggedPlayers as $reg) {
+            $ratings[$reg] = $startRating;
+        }
+        foreach ($historyItems as $item) { // overwrite with real values
+            if (!empty($item->getRating())) {
+                $ratings[$item->getPlayerId()] = $item->getRating();
+            }
+        }
+        
+        return array_map(function ($seat) use (&$ratings) {
+            $seat['rating'] = $ratings[$seat['user_id']];
+            return $seat;
+        }, $seatings);
     }
     
     /**
