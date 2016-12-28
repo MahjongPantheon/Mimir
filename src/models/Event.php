@@ -56,6 +56,7 @@ class EventModel extends Model
             ->select('session_user.session_id')
             ->select('user.display_name')
             ->where('session.event_id', $eventId)
+            ->orderByDesc('session.id')
             ->orderByAsc('order')
             ->limit(count($reggedPlayers))
             ->findArray();
