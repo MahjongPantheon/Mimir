@@ -111,8 +111,8 @@ class SeatingController extends Controller
         } else {
             $initialRating = $event[0]->getRuleset()->startRating();
             $playersReg = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
-            foreach ($playersReg as $h) {
-                $playersMap[$h->getPlayerId()] = $initialRating;
+            foreach ($playersReg as $id) {
+                $playersMap[$id] = $initialRating;
             }
         }
 
