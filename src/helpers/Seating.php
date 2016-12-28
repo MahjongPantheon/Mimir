@@ -68,7 +68,7 @@ class Seating
      * @param $randFactor int - RNG init seed
      * @return array [ id => rating, ... ] flattened players list, each four are a table ordered as eswn.
      */
-    public static function generateTables($playersMap = [], $previousSeatings = [], $groupsCount, $randFactor)
+    public static function generateTables($playersMap, $previousSeatings, $groupsCount, $randFactor)
     {
         /*
          * Simple random search. Too many variables for real optimising methods :(
@@ -89,6 +89,9 @@ class Seating
             return [];
         }
 
+        if (empty($previousSeatings)) {
+            $previousSeatings = [];
+        }
         $groups = array_chunk($playersMap, ceil(count($playersMap) / $groupsCount), true); // 1)
         for ($i = 0; $i < $maxIterations; $i++) {
             srand($randFactor + $i * 17); // 2)

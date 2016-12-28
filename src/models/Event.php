@@ -428,9 +428,18 @@ class EventModel extends Model
     {
         $success = false;
         $token = null;
+
         $eItem = PlayerEnrollmentPrimitive::findByPin($this->_db, $pin);
         if ($eItem) {
             $event = EventPrimitive::findById($this->_db, [$eItem->getEventId()]);
+
+            if ($event[0]->getType() === 'offline_interactive_tournament') {
+                // check that games are not started yet
+                if ($event[0]->getLastTimer()) {
+                    throw new BadActionException('Pin is expired: game sessions are already started.');
+                }
+            }
+
             $player = PlayerPrimitive::findById($this->_db, [$eItem->getPlayerId()]);
             $regItem = (new PlayerRegistrationPrimitive($this->_db))
                 ->setReg($player[0], $event[0]);
