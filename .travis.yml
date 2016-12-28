@@ -30,4 +30,4 @@ script:
 - make init_sqlite_nointeractive
 - make init_mysql | mysql -uroot api_test
 - make init_pgsql | psql -U postgres api_test
-- make check
+- make check_ci
