@@ -26,7 +26,7 @@ class EventsController extends Controller
     /**
      * @param string $title
      * @param string $description
-     * @param string $type either 'online' or 'offline'
+     * @param string $type either 'online' or 'offline' or 'interactive_offline'
      * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
      * @param int $gameDuration duration of game in this event
      * @throws BadActionException

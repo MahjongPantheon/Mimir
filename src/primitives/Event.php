@@ -127,6 +127,7 @@ class EventPrimitive extends Primitive
     /**
      * online/offline
      * tournament/local rating
+     * interactive/simple
      * @var string
      */
     protected $_type;

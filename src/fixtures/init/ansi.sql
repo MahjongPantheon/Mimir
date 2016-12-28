@@ -74,7 +74,7 @@ CREATE TABLE "event"
   "last_timer" integer, -- for timer, unix timestamp of last started timer
   "owner_formation" integer, -- at least one owner id should be set!
   "owner_user" integer,
-  "type" varchar(255) not null, -- online or offline, tournament or local rating
+  "type" varchar(255) not null, -- online or offline, tournament or local rating, interactive or simple
   "lobby_id" integer, -- tenhou lobby id for online events
   "ruleset" text not null, -- table rules, in JSON
   foreign key ("owner_formation") references "formation" ("id"),
