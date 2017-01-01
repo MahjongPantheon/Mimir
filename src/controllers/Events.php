@@ -89,6 +89,9 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting all players for event (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getAllRegisteredPlayers($data->getEventId());
     }
 
@@ -197,6 +200,9 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting config for event (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getGameConfig($data->getEventId());
     }
 
@@ -300,6 +306,9 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting timer for event (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getTimerState($data->getEventId());
     }
 

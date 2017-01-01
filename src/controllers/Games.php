@@ -49,12 +49,16 @@ class GamesController extends Controller
      * @param array $players Player id list
      * @throws InvalidUserException
      * @throws DatabaseException
+     * @throws InvalidParametersException
      * @return string Hashcode of started game
      */
     public function startFromToken($players)
     {
         $this->_log->addInfo('Starting new game (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->start($data->getEventId(), $players);
     }
 
