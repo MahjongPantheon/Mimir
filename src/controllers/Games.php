@@ -66,14 +66,14 @@ class GamesController extends Controller
      * Drop last round from selected game
      * For interactive mode (tournaments), and only for administrative purposes
      *
-     * @param integer $sessionId
+     * @param string $gameHashcode
      * @return boolean Success?
      */
-    public function dropLastRound($sessionId)
+    public function dropLastRound($gameHashcode)
     {
-        $this->_log->addInfo('Dropping last round from session #' . $sessionId);
-        $success = (new EventModel($this->_db, $this->_config))->dropLastRound($sessionId);
-        $this->_log->addInfo('Successfully dropped last round from session #' . $sessionId);
+        $this->_log->addInfo('Dropping last round from session #' . $gameHashcode);
+        $success = (new InteractiveSessionModel($this->_db, $this->_config))->dropLastRound($gameHashcode);
+        $this->_log->addInfo('Successfully dropped last round from session #' . $gameHashcode);
         return $success;
     }
 

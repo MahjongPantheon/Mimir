@@ -254,7 +254,7 @@ abstract class Primitive
     }
 
     /**
-     * Delete round from DB (for rollback functionality)
+     * Delete item from DB
      * @return Primitive
      */
     public function drop()
