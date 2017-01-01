@@ -268,6 +268,12 @@ Exceptions:
 * _InvalidParametersException_ 
 * _ParseException_ 
 
+### dropLastRound
+Parameters:
+* **$gameHashcode** (_string_) 
+
+Returns: _boolean_ Success?
+
 ### addPlayer
 Parameters:
 * **$ident** (_string_) oauth ident, if any
