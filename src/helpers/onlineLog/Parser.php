@@ -64,6 +64,7 @@ class OnlineParser
             $success = $success && $session->updateCurrentState(
                 RoundPrimitive::createFromData($this->_db, $session, $round)
             );
+            // TODO: potential error! RoundPrimitive->save() should be called before updating current state!
 
             $scores []= $session->getCurrentState()->getScores();
         }

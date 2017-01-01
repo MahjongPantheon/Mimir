@@ -209,6 +209,7 @@ CREATE TABLE "round"
   "kanuradora" integer,
   "riichi" varchar(255), -- comma-separated list of user ids who called riichi
   "multi_ron" integer, -- double or triple ron flag to properly display results of round
+  "last_session_state" text, -- session intermediate results before this round was registered
   foreign key ("session_id") references "session" ("id"),
   foreign key ("event_id") references "event" ("id"),
   foreign key ("winner_id") references "user" ("id"),

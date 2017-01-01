@@ -50,7 +50,8 @@ class RoundPrimitive extends Primitive
         'yaku'          => '_yaku',
         'tempai'        => '_tempaiIds',
         'winner_id'     => '_winnerId',
-        'loser_id'      => '_loserId'
+        'loser_id'      => '_loserId',
+        'last_session_state' => '_lastSessionState'
     ];
 
     protected function _getFieldsTransforms()
@@ -74,6 +75,11 @@ class RoundPrimitive extends Primitive
             '_kanuradora' => $this->_integerTransform(true),
             '_multiRon'   => $this->_integerTransform(true),
             '_id'         => $this->_integerTransform(true),
+            '_lastSessionState' => [
+                'serialize' => function () {
+                    return $this->getSession()->getCurrentState()->toJson();
+                } // don't do explicit deserialize here, as it may be not required in client code
+            ]
         ];
     }
 
@@ -177,6 +183,11 @@ class RoundPrimitive extends Primitive
      * @var int
      */
     protected $_multiRon;
+    /**
+     * JSON of last session state - for round rollback functionality
+     * @var string
+     */
+    protected $_lastSessionState;
 
     /**
      * Find rounds by local ids (primary key) - should not be used in business code
@@ -274,13 +285,18 @@ class RoundPrimitive extends Primitive
 
     protected function _create()
     {
-        $session = $this->_db->table(self::$_table)->create();
-        $success = $this->_save($session);
+        $round = $this->_db->table(self::$_table)->create();
+        $success = $this->_save($round);
         if ($success) {
             $this->_id = $this->_db->lastInsertId();
         }
 
         return $success;
+    }
+
+    protected function _deident()
+    {
+        $this->_id = null;
     }
 
     /**
@@ -711,5 +727,19 @@ class RoundPrimitive extends Primitive
     public function getYaku()
     {
         return $this->_yaku;
+    }
+
+    /**
+     * @return SessionState
+     * @throws EntityNotFoundException
+     * @throws InvalidParametersException
+     */
+    public function getLastSessionState()
+    {
+        return SessionState::fromJson(
+            $this->getEvent()->getRuleset(),
+            $this->getSession()->getPlayersIds(),
+            $this->_lastSessionState
+        );
     }
 }

@@ -95,17 +95,9 @@ class PlayerEnrollmentPrimitive extends Primitive
         return $success;
     }
 
-    public function drop()
+    protected function _deident()
     {
-        $success = $this->_db->table(self::$_table)
-            ->findOne($this->_id)
-            ->delete();
-
-        if ($success) {
-            $this->_id = null;
-        }
-
-        return $this;
+        $this->_id = null;
     }
 
     /**

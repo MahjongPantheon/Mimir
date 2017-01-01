@@ -135,6 +135,11 @@ class PlayerPrimitive extends Primitive
         return $success;
     }
 
+    protected function _deident()
+    {
+        $this->_id = null;
+    }
+
     /**
      * @param string $displayName
      * @return $this
