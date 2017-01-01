@@ -81,6 +81,7 @@ class EventModel extends Model
     /**
      * Find out currently playing tables state (for tournaments only)
      * @param integer $eventId
+     * @return array
      */
     public function getTablesState($eventId)
     {
@@ -90,8 +91,29 @@ class EventModel extends Model
         $lastGames = SessionPrimitive::findByEventAndStatus($this->_db, $eventId, ['finished', 'inprogress'], 0, $tablesCount);
         $output = [];
         foreach ($lastGames as $game) {
+            /** @var RoundPrimitive $lastRound */
+            $lastRound = array_reduce( // TODO: do it on db side
+                RoundPrimitive::findBySessionIds($this->_db, [$game->getId()]),
+                function ($acc, RoundPrimitive $r) {
+                    /** @var RoundPrimitive $acc */
+                    // find max id
+                    return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
+                },
+                null
+            );
+
             $output []= [
                 'status' => $game->getStatus(),
+                'hash' => $game->getRepresentationalHash(),
+                'last_round' => $lastRound ? [
+                    'outcome' => $lastRound->getOutcome(),
+                    'winner'  => $lastRound->getWinnerId(),
+                    'loser'   => $lastRound->getLoserId(),
+                    'tempai'  => $lastRound->getTempaiIds(),
+                    'riichi'  => $lastRound->getRiichiIds(),
+                    'han'     => $lastRound->getHan(),
+                    'fu'      => $lastRound->getFu()
+                ] : [],
                 'players' => array_map(function (PlayerPrimitive $p) {
                     return [
                         'id' => $p->getId(),
