@@ -254,12 +254,36 @@ abstract class Primitive
     }
 
     /**
+     * Delete item from DB
+     * @return Primitive
+     */
+    public function drop()
+    {
+        $success = $this->_db->table(static::$_table)
+            ->findOne($this->getId())
+            ->delete();
+
+        if ($success) {
+            $this->_deident();
+        }
+
+        return $this;
+    }
+
+    /**
      * Create instance to db
      * @return mixed
      */
     abstract protected function _create();
 
     abstract public function getId();
+
+    /**
+     * Remove identifier from primitive
+     * Used for deletion
+     * @return void
+     */
+    abstract protected function _deident();
 
     /**
      * @overrideMe

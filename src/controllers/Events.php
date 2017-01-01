@@ -26,7 +26,7 @@ class EventsController extends Controller
     /**
      * @param string $title
      * @param string $description
-     * @param string $type either 'online' or 'offline' or 'interactive_offline'
+     * @param string $type either 'online' or 'offline' or 'offline_interactive_tournament'
      * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
      * @param int $gameDuration duration of game in this event
      * @throws BadActionException
@@ -89,6 +89,9 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting all players for event (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getAllRegisteredPlayers($data->getEventId());
     }
 
@@ -197,6 +200,9 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting config for event (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getGameConfig($data->getEventId());
     }
 
@@ -300,6 +306,9 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting timer for event (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getTimerState($data->getEventId());
     }
 

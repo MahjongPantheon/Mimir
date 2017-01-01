@@ -154,6 +154,7 @@ Returns: _array_ of session data
 
 Exceptions:
 * _AuthFailedException_ 
+* _InvalidParametersException_ 
 
 ### getLastResultsT
 Parameters:
@@ -161,6 +162,7 @@ Parameters:
 Returns: _array|null_ 
 
 Exceptions:
+* _InvalidParametersException_ 
 * _EntityNotFoundException_ 
 
 ### getPlayerT
@@ -169,6 +171,7 @@ Parameters:
 Returns: _array_ 
 
 Exceptions:
+* _InvalidParametersException_ 
 * _EntityNotFoundException_ 
 
 ### startGameT
@@ -180,12 +183,13 @@ Returns: _string_ Hashcode of started game
 Exceptions:
 * _InvalidUserException_ 
 * _DatabaseException_ 
+* _InvalidParametersException_ 
 
 ### createEvent
 Parameters:
 * **$title** (_string_) 
 * **$description** (_string_) 
-* **$type** (_string_) either 'online' or 'offline'
+* **$type** (_string_) either 'online' or 'offline' or 'offline_interactive_tournament'
 * **$ruleset** (_string_) one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
 * **$gameDuration** (_int_) duration of game in this event
 
@@ -263,6 +267,12 @@ Returns: _bool_
 Exceptions:
 * _InvalidParametersException_ 
 * _ParseException_ 
+
+### dropLastRound
+Parameters:
+* **$gameHashcode** (_string_) 
+
+Returns: _boolean_ Success?
 
 ### addPlayer
 Parameters:

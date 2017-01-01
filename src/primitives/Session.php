@@ -318,6 +318,11 @@ class SessionPrimitive extends Primitive
         return $success;
     }
 
+    protected function _deident()
+    {
+        $this->_id = null;
+    }
+
     /**
      * @param \Riichi\EventPrimitive $event
      * @return $this
@@ -500,6 +505,9 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * Update current session intermediate state
+     * WARNING: This should be called strictly AFTER round is saved to DB!
+     *
      * @param RoundPrimitive $round
      * @return bool
      */
@@ -566,5 +574,18 @@ class SessionPrimitive extends Primitive
 
             return $acc && $result->save() && $userHistoryItem->save();
         }, true);
+    }
+
+    /**
+     * Rollback round in current session
+     * @param RoundPrimitive|MultiRoundPrimitive $round
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function rollback(RoundPrimitive $round)
+    {
+        $this->_current = $round->getLastSessionState();
+        $round->drop();
+        $this->save();
     }
 }

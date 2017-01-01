@@ -267,7 +267,7 @@ class SessionState
                 ;
         }
 
-        return PointsCalc::lastPaymentsInfo();
+        return PointsCalc::lastPaymentsInfo(); // for dry run
     }
 
     public function giveRiichiBetsToPlayer($id)

@@ -127,6 +127,7 @@ class PlayersController extends Controller
 
     /**
      * Get user info by id
+     * @throws InvalidParametersException
      * @throws EntityNotFoundException
      * @return array
      */
@@ -134,6 +135,9 @@ class PlayersController extends Controller
     {
         $this->_log->addInfo('Getting info of player (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->get($data->getPlayerId());
     }
 
@@ -190,12 +194,16 @@ class PlayersController extends Controller
 
     /**
      * @throws AuthFailedException
+     * @throws InvalidParametersException
      * @return array of session data
      */
     public function getCurrentSessionsFromToken()
     {
         $this->_log->addInfo('Getting current sessions (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getCurrentSessions($data->getPlayerId(), $data->getEventId());
     }
 
@@ -232,6 +240,7 @@ class PlayersController extends Controller
     /**
      * Get last game results of user in event
      *
+     * @throws InvalidParametersException
      * @throws EntityNotFoundException
      * @return array|null
      */
@@ -239,6 +248,9 @@ class PlayersController extends Controller
     {
         $this->_log->addInfo('Getting last session results (by token)');
         $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token');
+        }
         return $this->getLastResults($data->getPlayerId(), $data->getEventId());
     }
 
