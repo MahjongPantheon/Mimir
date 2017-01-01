@@ -348,4 +348,55 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1496, $items[2]->getRating());
         $this->assertEquals(1492, $items[3]->getRating());
     }
+
+    public function testRoundRollback()
+    {
+        $sessionMdl = new InteractiveSessionModel($this->_db, $this->_config);
+        $hash = $sessionMdl->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
+        );
+
+        $round1Data = [
+            'outcome'   => 'draw',
+            'riichi'    => '1,3',
+            'tempai'    => '1,3'
+        ];
+        $this->assertTrue($sessionMdl->addRound($hash, $round1Data)); // here it should be 28500/30500/28500/30500 with 2 riichi on bet
+
+        // save current state for check
+        /** @var SessionPrimitive $session */
+        list($session) = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
+        $stateBeforeTsumo = $session->getCurrentState()->toJson();
+
+        $round2Data = [ // anything...
+            'outcome'   => 'tsumo',
+            'riichi'    => '',
+            'winner_id' => 2,
+            'han'       => 2,
+            'fu'        => 30,
+            'multi_ron' => null,
+            'dora'      => 0,
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 1,
+            'yaku'      => '3'
+        ];
+        $this->assertTrue($sessionMdl->addRound($hash, $round2Data));
+
+        /** @var SessionPrimitive $session */
+        list($session) = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
+        $this->assertEquals(
+            '{"_scores":{"1":29400,"2":32800,"3":29900,"4":27900},"_penalties":[],"_round":2,"_honba":0,"_riichiBets":0,"_prematurelyFinished":false}',
+            $session->getCurrentState()->toJson()
+        );
+
+        $this->assertTrue($sessionMdl->dropLastRound($hash));
+
+        /** @var SessionPrimitive $session */
+        list($session) = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
+        $this->assertEquals($stateBeforeTsumo, $session->getCurrentState()->toJson()); // restored!
+    }
 }

@@ -518,41 +518,4 @@ class EventModel extends Model
         $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
         return $token === $this->_config->getValue('admin.god_token');
     }
-
-    /**
-     * Drop last round from session (except if this last round has led to session finish)
-     *
-     * @param $sessionId
-     * @throws AuthFailedException
-     * @throws InvalidParametersException
-     * @return boolean
-     */
-    public function dropLastRound($sessionId)
-    {
-        if (!$this->checkAdminToken()) {
-            throw new AuthFailedException('Only administrators are allowed to drop last round');
-        }
-
-        $session = SessionPrimitive::findById($this->_db, $sessionId);
-        if (empty($session)) {
-            throw new InvalidParametersException('Session id#' . $sessionId . ' not found in DB');
-        }
-
-        if ($session[0]->getStatus() === 'finished') {
-            throw new InvalidParametersException('Session id#' . $sessionId . ' is already finished. Can\'t alter finished sessions');
-        }
-
-        $rounds = RoundPrimitive::findBySessionIds($this->_db, [$sessionId]);
-        if (empty($rounds)) {
-            throw new InvalidParametersException('No recorded rounds found for session id#' . $sessionId);
-        }
-
-        $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
- // find max id
-            return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
-        }, null);
-
-        $session[0]->rollback($lastRound); // this also does session save & drop round
-        return true;
-    }
 }

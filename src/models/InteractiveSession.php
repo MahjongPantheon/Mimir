@@ -166,4 +166,53 @@ class InteractiveSessionModel extends Model
             throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
         }
     }
+
+    /**
+     * Check if token allows administrative operations
+     * @return bool
+     */
+    public function checkAdminToken()
+    {
+        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
+        return $token === $this->_config->getValue('admin.god_token');
+    }
+
+    /**
+     * Drop last round from session (except if this last round has led to session finish)
+     *
+     * @param $gameHash
+     * @throws AuthFailedException
+     * @throws InvalidParametersException
+     * @return boolean
+     */
+    public function dropLastRound($gameHash)
+    {
+        if (!$this->checkAdminToken()) {
+            throw new AuthFailedException('Only administrators are allowed to drop last round');
+        }
+
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$gameHash]);
+        if (empty($session)) {
+            throw new InvalidParametersException("Couldn't find session in DB");
+        }
+
+        if ($session[0]->getStatus() === 'finished') {
+            throw new InvalidParametersException('Session id#' . $session[0]->getId() . ' is already finished. '
+                . 'Can\'t alter finished sessions');
+        }
+
+        $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session[0]->getId()]);
+        if (empty($rounds)) {
+            throw new InvalidParametersException('No recorded rounds found for session id#' . $session[0]->getId());
+        }
+
+        $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
+            /** @var RoundPrimitive $acc */
+            // find max id
+            return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
+        }, null);
+
+        $session[0]->rollback($lastRound); // this also does session save & drop round
+        return true;
+    }
 }
