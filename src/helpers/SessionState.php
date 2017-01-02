@@ -40,6 +40,10 @@ class SessionState
      */
     protected $_penalties = [];
     /**
+     * @var array
+     */
+    protected $_extraPenaltyLog = [];
+    /**
      * @var int
      */
     protected $_round = 1; // 1e-4s
@@ -478,5 +482,34 @@ class SessionState
             $this->_penalties[$round->getLoserId()] = 0;
         }
         $this->_penalties[$round->getLoserId()] -= $this->_rules->chomboPenalty();
+    }
+
+    /**
+     * Add extra penalty points for player in current game
+     * Used for penalties that are not related to main game process. Do not use this to apply chombo!
+     *
+     * @param $playerId
+     * @param $amount
+     * @param $reason
+     */
+    public function addPenalty($playerId, $amount, $reason)
+    {
+        if (empty($this->_penalties[$playerId])) {
+            $this->_penalties[$playerId] = 0;
+        }
+        $this->_penalties[$playerId] -= $amount;
+        $this->_extraPenaltyLog []= [
+            'who' => $playerId,
+            'amount' => $amount,
+            'reason' => $reason
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getPenaltiesLog()
+    {
+        return $this->_extraPenaltyLog;
     }
 }

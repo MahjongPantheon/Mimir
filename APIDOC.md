@@ -274,6 +274,19 @@ Parameters:
 
 Returns: _boolean_ Success?
 
+### addPenalty
+Parameters:
+* **$eventId** (_integer_) Hashcode of game
+* **$playerId** (_integer_) Id of penalized player
+* **$amount** (_integer_) Penalty amount
+* **$reason** (_string_) Panelty reason
+
+Returns: _bool_ Success?
+
+Exceptions:
+* _DatabaseException_ 
+* _BadActionException_ 
+
 ### addPlayer
 Parameters:
 * **$ident** (_string_) oauth ident, if any

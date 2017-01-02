@@ -143,6 +143,35 @@ class InteractiveSessionModel extends Model
     }
 
     /**
+     * @param int $eventId
+     * @param int $playerId
+     * @param int $amount
+     * @param string $reason
+     * @return bool
+     * @throws AuthFailedException
+     * @throws InvalidParametersException
+     */
+    public function addPenalty($eventId, $playerId, $amount, $reason)
+    {
+        if (!$this->checkAdminToken()) {
+            throw new AuthFailedException('Only administrators are allowed to drop last round');
+        }
+
+        $session = SessionPrimitive::findLastByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
+        if (empty($session)) {
+            throw new InvalidParametersException("Couldn't find session in DB");
+        }
+
+        if (!in_array($playerId, $session->getPlayersIds())) {
+            throw new InvalidParametersException("This player does not play this game");
+        }
+
+        // TODO: save extra penalties in extra table, so round rollback would not affect them
+        $session->getCurrentState()->addPenalty($playerId, $amount, $reason);
+        return $session->save();
+    }
+
+    /**
      * @param $gameHash
      * @param $withStatus
      * @return SessionPrimitive

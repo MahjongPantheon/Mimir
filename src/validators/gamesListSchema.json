@@ -45,6 +45,29 @@
                 }
               }
             },
+            "penalties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "who": {
+                    "type": "integer"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "who",
+                    "amount",
+                    "reason"
+                  ]
+                }
+              }
+            },
             "rounds": {
               "type": "array",
               "items": {

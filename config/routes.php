@@ -61,6 +61,7 @@ return [
     'endGame'           => ['GamesController', 'end'],
     'addTextLog'        => ['GamesController', 'addTextLog'],
     'dropLastRound'     => ['GamesController', 'dropLastRound'],
+    'addPenalty'        => ['GamesController', 'addPenalty'],
     'addPlayer'         => ['PlayersController', 'add'],
     'updatePlayer'      => ['PlayersController', 'update'],
     'getPlayer'         => ['PlayersController', 'get'],

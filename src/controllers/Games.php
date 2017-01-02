@@ -112,6 +112,26 @@ class GamesController extends Controller
     }
 
     /**
+     * Add penalty in interactive game
+     *
+     * @param integer $eventId Hashcode of game
+     * @param integer $playerId Id of penalized player
+     * @param integer $amount Penalty amount
+     * @param string $reason Panelty reason
+     * @throws DatabaseException
+     * @throws BadActionException
+     * @return bool Success?
+     */
+    public function addPenalty($eventId, $playerId, $amount, $reason)
+    {
+        $this->_log->addInfo('Adding penalty for player #' . $playerId. ' to event # ' . $eventId);
+        $result = (new InteractiveSessionModel($this->_db, $this->_config))
+            ->addPenalty($eventId, $playerId, $amount, $reason);
+        $this->_log->addInfo('Successfully added penalty for player #' . $playerId. ' to event # ' . $eventId);
+        return $result;
+    }
+
+    /**
      * Get session overview
      * [
      *      id => sessionId,

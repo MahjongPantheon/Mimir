@@ -105,6 +105,7 @@ class EventModel extends Model
             $output []= [
                 'status' => $game->getStatus(),
                 'hash' => $game->getRepresentationalHash(),
+                'penalties' => $game->getCurrentState()->getPenaltiesLog(),
                 'last_round' => $lastRound ? [
                     'outcome' => $lastRound->getOutcome(),
                     'winner'  => $lastRound->getWinnerId(),
@@ -172,6 +173,7 @@ class EventModel extends Model
                         'place'         => (int) $el->getPlace()
                     ];
                 }, $sessionResults[$session->getId()]),
+                'penalties' => $session->getCurrentState()->getPenaltiesLog(),
                 'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
             ];
         }
