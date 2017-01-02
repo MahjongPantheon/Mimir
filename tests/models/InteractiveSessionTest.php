@@ -102,6 +102,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $session->addRound($hash, [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome' => 'draw',
             'tempai' => '',
             'riichi' => ''
@@ -126,6 +128,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $roundData = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'ron',
             'riichi'    => '',
             'winner_id' => $this->_players[1]->getId(),
@@ -154,6 +158,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $roundData = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'tsumo',
             'riichi'    => '',
             'winner_id' => 2,
@@ -181,6 +187,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $roundData = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'draw',
             'riichi'    => '',
             'tempai'    => ''
@@ -200,6 +208,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $roundData = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'abort',
             'riichi'    => ''
         ];
@@ -218,6 +228,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $roundData = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'chombo',
             'loser_id'  => 2,
         ];
@@ -299,18 +311,27 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $roundData = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'draw',
             'riichi'    => '',
             'tempai'    => ''
         ];
 
         $this->assertTrue($session->addRound($hash, $roundData)); // 1e
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 2e
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 3e
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 4e
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 1s
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 2s
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 3s
+        $roundData['round_index'] ++ && $roundData['honba'] ++;
         $this->assertTrue($session->addRound($hash, $roundData)); // 4s, should auto-finish here
 
         $caught = false;
@@ -360,6 +381,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         );
 
         $round1Data = [
+            'round_index' => 1,
+            'honba' => 0,
             'outcome'   => 'draw',
             'riichi'    => '1,3',
             'tempai'    => '1,3'
@@ -372,6 +395,8 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $stateBeforeTsumo = $session->getCurrentState()->toJson();
 
         $round2Data = [ // anything...
+            'round_index' => 1,
+            'honba' => 1,
             'outcome'   => 'tsumo',
             'riichi'    => '',
             'winner_id' => 2,

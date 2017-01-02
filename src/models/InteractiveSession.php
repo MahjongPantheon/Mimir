@@ -115,6 +115,15 @@ class InteractiveSessionModel extends Model
     {
         $session = $this->_findGame($gameHashcode, 'inprogress');
         $this->_checkAuth($session->getPlayersIds(), $session->getEventId());
+
+        // TODO: checks are not atomic
+        // check that same game is not passed
+        $currentHonba = $session->getCurrentState()->getHonba();
+        $currentRound = $session->getCurrentState()->getRound();
+        if ($roundData['round_index'] != $currentRound || $roundData['honba'] != $currentHonba) {
+            throw new InvalidParametersException('This round is already recorded');
+        }
+
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         if ($dry) {
