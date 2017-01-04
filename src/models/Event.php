@@ -400,10 +400,14 @@ class EventModel extends Model
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) {
-                    if ($el1->getRating() == $el2->getRating()) {
+                    if (abs($el1->getRating() - $el2->getRating()) < 0.0001) {
                         return $el2->getAvgPlace() - $el1->getAvgPlace(); // lower avg place is better, so invert
                     }
-                    return $el1->getRating() - $el2->getRating(); // higher rating is better
+                    if ($el1->getRating() - $el2->getRating() < 0) { // higher rating is better
+                        return -1;  // usort casts return result to int, so pass explicit int here.
+                    } else {
+                        return 1;
+                    }
                 });
                 break;
             case 'avg_place':
