@@ -21,12 +21,12 @@ class PointsCalc
 {
     private static $_lastPaymentsInfo = [];
 
-    private static function resetPaymentsInfo()
+    public static function resetPaymentsInfo()
     {
         self::$_lastPaymentsInfo = [
             'direct' => [],
             'riichi' => [],
-            'honba'  => []
+            'honba' => []
         ];
     }
 
