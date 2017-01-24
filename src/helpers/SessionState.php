@@ -250,28 +250,28 @@ class SessionState
     {
         switch ($round->getOutcome()) {
             case 'ron':
-                $this->_updateAfterRon($round);
+                $payments = $this->_updateAfterRon($round);
                 break;
             case 'multiron':
-                $this->_updateAfterMultiRon($round);
+                $payments = $this->_updateAfterMultiRon($round);
                 break;
             case 'tsumo':
-                $this->_updateAfterTsumo($round);
+                $payments = $this->_updateAfterTsumo($round);
                 break;
             case 'draw':
-                $this->_updateAfterDraw($round);
+                $payments = $this->_updateAfterDraw($round);
                 break;
             case 'abort':
-                $this->_updateAfterAbort($round);
+                $payments = $this->_updateAfterAbort($round);
                 break;
             case 'chombo':
-                $this->_updateAfterChombo($round);
+                $payments = $this->_updateAfterChombo($round);
                 break;
             default:
                 ;
         }
 
-        return PointsCalc::lastPaymentsInfo(); // for dry run
+        return $payments; // for dry run
     }
 
     public function giveRiichiBetsToPlayer($id)
@@ -281,6 +281,7 @@ class SessionState
 
     /**
      * @param RoundPrimitive $round
+     * @return array
      */
     protected function _updateAfterRon(RoundPrimitive $round)
     {
@@ -307,6 +308,7 @@ class SessionState
         }
 
         $this->_resetRiichiBets();
+        return PointsCalc::lastPaymentsInfo();
     }
 
     /**
@@ -369,12 +371,15 @@ class SessionState
     /**
      * @param MultiRoundPrimitive $round
      * @throws InvalidParametersException
+     * @return array
      */
     protected function _updateAfterMultiRon(MultiRoundPrimitive $round)
     {
         $riichiWinners = $this->_assignRiichiBets($round->rounds(), $round->getLoserId(), $round->getSession());
 
         $dealerWon = false;
+        PointsCalc::resetPaymentsInfo();
+        $payments = PointsCalc::lastPaymentsInfo();
         foreach ($round->rounds() as $roundItem) {
             $dealerWon = $dealerWon || $this->getCurrentDealer() == $roundItem->getWinnerId();
             $this->_scores = PointsCalc::ron(
@@ -389,6 +394,7 @@ class SessionState
                 $riichiWinners[$roundItem->getWinnerId()]['honba'],
                 $riichiWinners[$roundItem->getWinnerId()]['from_table']
             );
+            $payments = array_merge_recursive($payments, PointsCalc::lastPaymentsInfo());
         }
 
         if ($dealerWon) {
@@ -399,10 +405,12 @@ class SessionState
         }
 
         $this->_resetRiichiBets();
+        return $payments;
     }
 
     /**
      * @param RoundPrimitive $round
+     * @return array
      */
     protected function _updateAfterTsumo(RoundPrimitive $round)
     {
@@ -426,10 +434,12 @@ class SessionState
         }
 
         $this->_resetRiichiBets();
+        return PointsCalc::lastPaymentsInfo();
     }
 
     /**
      * @param RoundPrimitive $round
+     * @return array
      */
     protected function _updateAfterDraw(RoundPrimitive $round)
     {
@@ -445,11 +455,13 @@ class SessionState
         if (!in_array($this->getCurrentDealer(), $round->getTempaiIds())) {
             $this->_nextRound();
         }
+        return PointsCalc::lastPaymentsInfo();
     }
 
     /**
      * @param RoundPrimitive $round
      * @throws InvalidParametersException
+     * @return array
      */
     protected function _updateAfterAbort(RoundPrimitive $round)
     {
@@ -464,10 +476,12 @@ class SessionState
 
         $this->_addHonba()
             ->_addRiichiBets(count($round->getRiichiIds()));
+        return PointsCalc::lastPaymentsInfo();
     }
 
     /**
      * @param RoundPrimitive $round
+     * @return array
      */
     protected function _updateAfterChombo(RoundPrimitive $round)
     {
@@ -482,6 +496,7 @@ class SessionState
             $this->_penalties[$round->getLoserId()] = 0;
         }
         $this->_penalties[$round->getLoserId()] -= $this->_rules->chomboPenalty();
+        return PointsCalc::lastPaymentsInfo();
     }
 
     /**

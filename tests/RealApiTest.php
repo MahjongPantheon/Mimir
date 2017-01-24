@@ -39,13 +39,14 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $db = Db::__getCleanTestingInstance();
         $evt = (new EventPrimitive($db))
             ->setRuleset(Ruleset::instance('ema'))
-            ->setType('offlime')
+            ->setType('offline')
             ->setTitle('test')
             ->setDescription('test')
             ->setGameDuration(1); // for timers check
         $evt->save();
 
         $this->_client = new Client('http://localhost:1349');
+        $this->_client->getHttpClient()->withHeaders(['X-Auth-Token: 198vdsh904hfbnkjv98whb2iusvd98b29bsdv98svbr9wghj']);
     }
 
     public function testGameConfig()
@@ -79,5 +80,87 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         //    'finished' => true,
         //    'time_remaining' => null
         // ], $response);
+    }
+
+    public function testDryRunMultiron()
+    {
+        // registration and enrollment boilerplate...
+        $this->_client->execute('addPlayer', ['p1', 'p1', 'player1', null]);
+        $this->_client->execute('addPlayer', ['p2', 'p2', 'player2', null]);
+        $this->_client->execute('addPlayer', ['p3', 'p3', 'player3', null]);
+        $this->_client->execute('addPlayer', ['p4', 'p4', 'player4', null]);
+
+        $pin1 = $this->_client->execute('enrollPlayer', [1, 1]);
+        $pin2 = $this->_client->execute('enrollPlayer', [2, 1]);
+        $pin3 = $this->_client->execute('enrollPlayer', [3, 1]);
+        $pin4 = $this->_client->execute('enrollPlayer', [4, 1]);
+
+        $this->_client->execute('registerPlayer', [$pin1]);
+        $this->_client->execute('registerPlayer', [$pin2]);
+        $this->_client->execute('registerPlayer', [$pin3]);
+        $this->_client->execute('registerPlayer', [$pin4]);
+
+        $hashcode = $this->_client->execute('startGame', [1, [1, 2, 3, 4]]);
+
+        $data = [
+            "round_index" => 1,
+            "honba" => 0,
+            "outcome" => "multiron",
+            "loser_id" => 1,
+            "multi_ron" => 2,
+            "wins" => [
+                [
+                    "riichi" => "",
+                    "winner_id" => 2,
+                    "han" => 2,
+                    "fu" => 30,
+                    "dora" => 0,
+                    "uradora" => 0,
+                    "kandora" => 0,
+                    "kanuradora" => 0,
+                    "yaku" => "23,8"
+                ], [
+                    "riichi" => "",
+                    "winner_id" => 3,
+                    "han" => 3,
+                    "fu" => 30,
+                    "dora" => 0,
+                    "uradora" => 0,
+                    "kandora" => 0,
+                    "kanuradora" => 0,
+                    "yaku" => "15"
+                ]
+            ]
+        ];
+
+        $expectedOutput = [
+            'dealer' => 2,
+            'round' => 2,
+            'riichi' => 0,
+            'honba' => 0,
+            'scores' => [
+                1 => 24100,
+                2 => 32000,
+                3 => 33900,
+                4 => 30000
+            ],
+            'payments' => [
+                'direct' => [
+                    '2<-1' => 2000,
+                    '3<-1' => 3900
+                ],
+                'riichi' => [
+                    '2<-' => 0,
+                    '3<-' => 0
+                ],
+                'honba' => [
+                    '2<-1' => 0,
+                    '3<-1' => 0
+                ]
+            ]
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->assertEquals($expectedOutput, $dryRunData);
     }
 }
