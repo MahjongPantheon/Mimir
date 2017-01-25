@@ -42,6 +42,9 @@ class RulesetEma extends Ruleset
         'tonpuusen'             => false,
         'autoRegisterUsers'     => false,
         'gameExpirationTime'    => false,
+        'minPenalty'            => 100,
+        'maxPenalty'            => 20000,
+        'penaltyStep'           => 100,
         'withLeadingDealerGameOver' => false
     ];
 

@@ -347,7 +347,9 @@ class SessionResultsPrimitive extends Primitive
         $this->_ratingDelta = $this->_calcRatingDelta($rules, $results->getScores());
 
         if (!empty($results->getPenalties()[$this->_playerId])) { // final chombing
-            $this->_ratingDelta += $results->getPenalties()[$this->_playerId];
+            $this->_ratingDelta += (
+                $results->getPenalties()[$this->_playerId] / (float)$rules->ratingDivider()
+            );
         }
 
         return $this;
