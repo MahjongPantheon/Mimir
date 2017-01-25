@@ -174,9 +174,10 @@ class PlayersController extends Controller
 
         $result = array_map(function (SessionPrimitive $session) {
             return [
-                'hashcode'  => $session->getRepresentationalHash(),
-                'status'    => $session->getStatus(),
-                'players'   => array_map(function (PlayerPrimitive $p, $score) use (&$session) {
+                'hashcode'    => $session->getRepresentationalHash(),
+                'status'      => $session->getStatus(),
+                'table_index' => $session->getTableIndex(),
+                'players'     => array_map(function (PlayerPrimitive $p, $score) use (&$session) {
                     return [
                         'id'            => $p->getId(),
                         'alias'         => $p->getAlias(),
@@ -223,15 +224,28 @@ class PlayersController extends Controller
             return null;
         }
 
-        $result = array_map(function (PlayerPrimitive $p, $score) use (&$session) {
+        $tmpResults = SessionResultsPrimitive::findByPlayersAndSession(
+            $this->_db,
+            $session->getId(),
+            $session->getPlayersIds()
+        );
+
+        /** @var SessionResultsPrimitive[] $sessionResults */
+        $sessionResults = [];
+        foreach ($tmpResults as $sr) {
+            $sessionResults[$sr->getPlayerId()] = $sr;
+        }
+
+        $result = array_map(function (PlayerPrimitive $p) use (&$session, &$sessionResults) {
             return [
                 'id'            => $p->getId(),
                 'alias'         => $p->getAlias(),
                 'ident'         => $p->getIdent(),
                 'display_name'  => $p->getDisplayName(),
-                'score'         => $score
+                'score'         => $sessionResults[$p->getId()]->getScore(),
+                'rating_delta'  => $sessionResults[$p->getId()]->getRatingDelta(),
             ];
-        }, $session->getPlayers(), $session->getCurrentState()->getScores());
+        }, $session->getPlayers());
 
         $this->_log->addInfo('Successfully got last session results for player id #' . $playerId . ' at event id #' . $eventId);
         return $result;

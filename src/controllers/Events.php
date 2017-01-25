@@ -178,12 +178,28 @@ class EventsController extends Controller
 
         $rules = $event[0]->getRuleset();
         $data = [
-            'allowedYaku'       => $rules->allowedYaku(),
-            'startPoints'       => $rules->startPoints(),
-            'withKazoe'         => $rules->withKazoe(),
-            'withKiriageMangan' => $rules->withKiriageMangan(),
-            'withAbortives'     => $rules->withAbortives(),
-            'withNagashiMangan' => $rules->withNagashiMangan()
+            'allowedYaku'         => $rules->allowedYaku(),
+            'startPoints'         => $rules->startPoints(),
+            'withKazoe'           => $rules->withKazoe(),
+            'withKiriageMangan'   => $rules->withKiriageMangan(),
+            'withAbortives'       => $rules->withAbortives(),
+            'withNagashiMangan'   => $rules->withNagashiMangan(),
+            'withAtamahane'       => $rules->withAtamahane(),
+            'rulesetTitle'        => $rules->title(),
+            'tenboDivider'        => $rules->tenboDivider(),
+            'ratingDivider'       => $rules->ratingDivider(),
+            'tonpuusen'           => $rules->tonpuusen(),
+            'startRating'         => $rules->startRating(),
+            'riichiGoesToWinner'  => $rules->riichiGoesToWinner(),
+            'extraChomboPayments' => $rules->extraChomboPayments(),
+            'chomboPenalty'       => $rules->chomboPenalty(),
+            'withKuitan'          => $rules->withKuitan(),
+            'withButtobi'         => $rules->withButtobi(),
+            'withMultiYakumans'   => $rules->withMultiYakumans(),
+            'autoRegisterUsers'   => $rules->autoRegisterUsers(),
+            'gamExpirationTime'   => $rules->gameExpirationTime(),
+            'eventTitle'          => $event[0]->getTitle(),
+            'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
         ];
 
         $this->_log->addInfo('Successfully received config for event id# ' . $eventId);

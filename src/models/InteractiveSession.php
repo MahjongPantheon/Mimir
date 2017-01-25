@@ -42,11 +42,12 @@ class InteractiveSessionModel extends Model
      * @throws DatabaseException
      * @param int $eventId
      * @param int[] $playerIds
+     * @param int $tableIndex - Table number in tournament
      * @param string $replayHash
      * @param string $origLink
      * @return string
      */
-    public function startGame($eventId, $playerIds, $replayHash = null, $origLink = null)
+    public function startGame($eventId, $playerIds, $tableIndex = null, $replayHash = null, $origLink = null)
     {
         $this->_checkAuth($playerIds, $eventId);
         $event = EventPrimitive::findById($this->_db, [$eventId]);
@@ -80,6 +81,7 @@ class InteractiveSessionModel extends Model
             ->setStatus('inprogress')
             ->setReplayHash($replayHash)
             ->setOrigLink($origLink)
+            ->setTableIndex($tableIndex)
             ->save();
         if (!$success) {
             throw new DatabaseException('Couldn\'t save session data to DB!');

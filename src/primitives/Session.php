@@ -39,6 +39,7 @@ class SessionPrimitive extends Primitive
         'event_id'              => '_eventId',
         'representational_hash' => '_representationalHash',
         'replay_hash'           => '_replayHash',
+        'table_index'           => '_tableIndex',
         'orig_link'             => '_origLink',
         'play_date'             => '_playDate',
         '::session_user'        => '_playersIds', // external many-to-many relation
@@ -53,6 +54,7 @@ class SessionPrimitive extends Primitive
             '_eventId'      => $this->_integerTransform(),
             '_representationalHash' => $this->_stringTransform(true),
             '_replayHash'   => $this->_stringTransform(true),
+            '_tableIndex'   => $this->_integerTransform(true),
             '_origLink'     => $this->_stringTransform(true),
             '_playDate'     => $this->_stringTransform(true),
             '_status'       => $this->_stringTransform(true),
@@ -102,6 +104,12 @@ class SessionPrimitive extends Primitive
      * @var string
      */
     protected $_replayHash;
+
+    /**
+     * Number of table in tournament
+     * @var int
+     */
+    protected $_tableIndex = null;
 
     /**
      * original tenhou game link, for access to replay
@@ -382,6 +390,24 @@ class SessionPrimitive extends Primitive
     public function getOrigLink()
     {
         return $this->_origLink;
+    }
+
+    /**
+     * @param int $tableIndex
+     * @return $this
+     */
+    public function setTableIndex($tableIndex)
+    {
+        $this->_tableIndex = $tableIndex;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTableIndex()
+    {
+        return $this->_tableIndex;
     }
 
     /**
