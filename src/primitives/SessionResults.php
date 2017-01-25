@@ -117,7 +117,7 @@ class SessionResultsPrimitive extends Primitive
     }
 
     /**
-     * Find sessions by event id (foreign key search)
+     * Find session results by event id (foreign key search)
      *
      * @param IDb $db
      * @param string[] $eventIds
@@ -130,7 +130,7 @@ class SessionResultsPrimitive extends Primitive
     }
 
     /**
-     * Find sessions by session id (foreign key search)
+     * Find session results by session id (foreign key search)
      *
      * @param IDb $db
      * @param string[] $sessionIds
@@ -143,7 +143,7 @@ class SessionResultsPrimitive extends Primitive
     }
 
     /**
-     * Find sessions by player id (foreign key search)
+     * Find session results by player id (foreign key search)
      *
      * @param IDb $db
      * @param string[] $playerIds
@@ -153,6 +153,23 @@ class SessionResultsPrimitive extends Primitive
     public static function findByPlayerId(IDb $db, $playerIds)
     {
         return self::_findBy($db, 'player_id', $playerIds);
+    }
+
+    /**
+     * Find session results by players and session id
+     *
+     * @param IDb $db
+     * @param $sessionId
+     * @param $playerIds
+     * @return SessionResultsPrimitive[]
+     * @throws \Exception
+     */
+    public static function findByPlayersAndSession(IDb $db, $sessionId, $playerIds)
+    {
+        return self::_findBySeveral($db, [
+            'player_id' => (array)$playerIds,
+            'session_id' => (array)$sessionId
+        ]);
     }
 
     protected function _create()
