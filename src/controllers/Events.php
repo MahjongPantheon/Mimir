@@ -198,6 +198,9 @@ class EventsController extends Controller
             'withMultiYakumans'   => $rules->withMultiYakumans(),
             'autoRegisterUsers'   => $rules->autoRegisterUsers(),
             'gamExpirationTime'   => $rules->gameExpirationTime(),
+            'minPenalty'          => $rules->minPenalty(),
+            'maxPenalty'          => $rules->maxPenalty(),
+            'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
         ];
