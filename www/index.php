@@ -17,6 +17,19 @@
  */
 namespace Riichi;
 
+/*
+TODO
+
+- выдавать дельту рейтинга/очков в данных последней игры
+    - looks like done
+- выдавать eventTitle, withAtamahane в конфиге игры
+    - looks like done
+- выдавать номер стола в рассадке
+
+
+*/
+
+
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/Api.php';
 
