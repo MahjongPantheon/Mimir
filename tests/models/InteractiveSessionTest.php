@@ -153,7 +153,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
-                    return $p->getId();
+                return $p->getId();
             }, $this->_players)
         );
 
@@ -182,7 +182,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
-                    return $p->getId();
+                return $p->getId();
             }, $this->_players)
         );
 
@@ -203,7 +203,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
-                    return $p->getId();
+                return $p->getId();
             }, $this->_players)
         );
 
@@ -306,7 +306,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $hash = $session->startGame(
             $this->_event->getId(),
             array_map(function (PlayerPrimitive $p) {
-                    return $p->getId();
+                return $p->getId();
             }, $this->_players)
         );
 

@@ -26,6 +26,9 @@ require_once __DIR__ . '/../../src/Db.php';
 
 class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Db
+     */
     protected $_db;
     /**
      * @var EventPrimitive

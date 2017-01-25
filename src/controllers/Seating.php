@@ -80,9 +80,10 @@ class SeatingController extends Controller
 
         list ($playersMap, $tables) = $this->_getData($eventId);
         $seating = array_chunk(array_keys(Seating::generateTables($playersMap, $tables, $groupsCount, $seed)), 4);
+        $tableIndex = 1;
         foreach ($seating as $table) {
             (new InteractiveSessionModel($this->_db, $this->_config))
-                ->startGame($eventId, $table);
+                ->startGame($eventId, $table, $tableIndex++);
         }
 
         $this->_log->addInfo('Started all games by seed #' . $seed . ' for event #' . $eventId);

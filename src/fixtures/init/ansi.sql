@@ -135,6 +135,7 @@ CREATE TABLE "session"
   "event_id" integer not null,
   "representational_hash" varchar(255), -- hash to find this game from client mobile app
   "replay_hash" varchar(255), -- tenhou game hash, for deduplication
+  "table_index" integer, -- table number in tournament
   "orig_link" text, -- original tenhou game link, for access to replay
   "play_date" timestamp,
   "status" varchar(255), -- planned / inprogress / finished

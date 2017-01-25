@@ -174,9 +174,10 @@ class PlayersController extends Controller
 
         $result = array_map(function (SessionPrimitive $session) {
             return [
-                'hashcode'  => $session->getRepresentationalHash(),
-                'status'    => $session->getStatus(),
-                'players'   => array_map(function (PlayerPrimitive $p, $score) use (&$session) {
+                'hashcode'    => $session->getRepresentationalHash(),
+                'status'      => $session->getStatus(),
+                'table_index' => $session->getTableIndex(),
+                'players'     => array_map(function (PlayerPrimitive $p, $score) use (&$session) {
                     return [
                         'id'            => $p->getId(),
                         'alias'         => $p->getAlias(),
