@@ -30,7 +30,7 @@ class RulesetJpmlB extends Ruleset
         'startPoints'           => 30000,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => false,
-        'chomboPenalty'         => 20,
+        'chomboPenalty'         => 200,
         'withAtamahane'         => true,
         'withAbortives'         => true,
         'withKuitan'            => true,
@@ -42,6 +42,9 @@ class RulesetJpmlB extends Ruleset
         'tonpuusen'             => false,
         'autoRegisterUsers'     => false,
         'gameExpirationTime'    => false,
+        'minPenalty'            => 10,
+        'maxPenalty'            => 200,
+        'penaltyStep'           => 10,
         'withLeadingDealerGameOver' => true
     ];
 

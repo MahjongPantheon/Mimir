@@ -162,4 +162,19 @@ abstract class Ruleset
     {
         return static::$_ruleset['gameExpirationTime'];
     }
+
+    public function minPenalty()
+    {
+        return static::$_ruleset['minPenalty'];
+    }
+
+    public function maxPenalty()
+    {
+        return static::$_ruleset['maxPenalty'];
+    }
+
+    public function penaltyStep()
+    {
+        return static::$_ruleset['penaltyStep'];
+    }
 }

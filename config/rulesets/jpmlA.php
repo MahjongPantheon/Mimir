@@ -42,6 +42,9 @@ class RulesetJpmlA extends Ruleset
         'tonpuusen'             => false,
         'autoRegisterUsers'     => false,
         'gameExpirationTime'    => false,
+        'minPenalty'            => 10,
+        'maxPenalty'            => 200,
+        'penaltyStep'           => 10,
         'withLeadingDealerGameOver' => true
     ];
 
