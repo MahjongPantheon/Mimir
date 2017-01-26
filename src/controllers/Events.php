@@ -193,6 +193,45 @@ class EventsController extends Controller
     }
 
     /**
+     * Get all players enrolled for event
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getAllEnrolledPlayers($eventId)
+    {
+        $this->_log->addInfo('Getting all enrolled players for event id# ' . $eventId);
+
+        $enrolled = PlayerEnrollmentPrimitive::findByEvent($this->_db, $eventId);
+        $players = PlayerPrimitive::findById(
+            $this->_db,
+            array_map(function (PlayerEnrollmentPrimitive $e) {
+                return $e->getPlayerId();
+            }, $enrolled)
+        );
+
+        /** @var PlayerEnrollmentPrimitive[] $enrolledByKey */
+        $enrolledByKey = [];
+        foreach ($enrolled as $e) {
+            $enrolledByKey[$e->getPlayerId()] = $e;
+        }
+
+        $data = array_map(function (PlayerPrimitive $p) use (&$enrolledByKey) {
+            return [
+                'id'            => $p->getId(),
+                'display_name'  => $p->getDisplayName(),
+                'alias'         => $p->getAlias(),
+                'tenhou_id'     => $p->getTenhouId(),
+                'pin'           => $enrolledByKey[$p->getId()]->getPin()
+            ];
+        }, $players);
+
+        $this->_log->addInfo('Successfully received all enrolled players for event id# ' . $eventId);
+        return $data;
+    }
+
+    /**
      * Get event rules configuration
      *
      * @param integer $eventId

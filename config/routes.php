@@ -59,6 +59,7 @@ return [
     'registerPlayerCP'   => ['EventsController', 'registerPlayerAdmin'],
     'unregisterPlayerCP' => ['EventsController', 'unregisterPlayerAdmin'],
     'enrollPlayer'       => ['EventsController', 'enrollPlayer'],
+    'getAllEnrolled'     => ['EventsController', 'getAllEnrolledPlayers'],
     'startGame'          => ['GamesController', 'start'],
     'endGame'            => ['GamesController', 'end'],
     'addTextLog'         => ['GamesController', 'addTextLog'],
