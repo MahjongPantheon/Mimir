@@ -71,7 +71,7 @@ class PlayerEnrollmentPrimitive extends Primitive
     {
         $userReg = $this->_db->table(self::$_table)->create();
         if (empty($this->_pin)) {
-            $this->_pin = round(crc32('PlayerReg' . microtime()) / 4);
+            $this->_pin = mt_rand(100000, 999999);
         }
 
         try {
@@ -149,7 +149,7 @@ class PlayerEnrollmentPrimitive extends Primitive
      */
     public static function findByEvent(IDb $db, $eventId)
     {
-        return self::_findBy($db, 'user_id', [$eventId]);
+        return self::_findBy($db, 'event_id', [$eventId]);
     }
 
     /**

@@ -487,8 +487,14 @@ class EventModel extends Model
         if (empty($event)) {
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
-        $regItem = (new PlayerRegistrationPrimitive($this->_db))->setReg($playerId, $eventId);
-        return $regItem->save();
+        $regItem = (new PlayerRegistrationPrimitive($this->_db))->setReg($player[0], $event[0]);
+        $success = $regItem->save();
+
+        $eItem = PlayerEnrollmentPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId);
+        if ($success) {
+            $eItem->drop();
+        }
+        return $success;
     }
 
     /**
