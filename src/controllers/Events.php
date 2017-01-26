@@ -138,9 +138,41 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Registering pin code #' . $pin);
         $authToken = (new EventModel($this->_db, $this->_config))
-            ->registerPlayer($pin);
+            ->registerPlayerPin($pin);
         $this->_log->addInfo('Successfully registered pin code #' . $pin);
         return $authToken;
+    }
+
+    /**
+     * Register for participation in event (from admin control panel)
+     *
+     * @param integer $playerId
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return bool success?
+     */
+    public function registerPlayerAdmin($playerId, $eventId)
+    {
+        $this->_log->addInfo('Registering player id# ' . $playerId . ' for event id# ' . $eventId);
+        $success = (new EventModel($this->_db, $this->_config))
+            ->registerPlayer($playerId, $eventId);
+        $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
+        return $success;
+    }
+
+    /**
+     * Unregister from participation in event (from admin control panel)
+     *
+     * @param integer $playerId
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return void
+     */
+    public function unregisterPlayerAdmin($playerId, $eventId)
+    {
+        $this->_log->addInfo('Unregistering player id# ' . $playerId . ' for event id# ' . $eventId);
+        (new EventModel($this->_db, $this->_config))->unregisterPlayer($playerId, $eventId);
+        $this->_log->addInfo('Successfully unregistered player id# ' . $playerId . ' for event id# ' . $eventId);
     }
 
     /**
