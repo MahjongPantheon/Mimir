@@ -130,7 +130,7 @@ class PlayerEnrollmentPrimitive extends Primitive
      * @param IDb $db
      * @param $playerId
      * @param $eventId
-     * @return PlayerEnrollmentPrimitive | []
+     * @return PlayerEnrollmentPrimitive
      * @throws \Exception
      */
     public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
@@ -139,6 +139,17 @@ class PlayerEnrollmentPrimitive extends Primitive
             'user_id' => [$playerId],
             'event_id' => [$eventId]
         ], ['onlyLast' => true]);
+    }
+
+    /**
+     * @param IDb $db
+     * @param $eventId
+     * @return PlayerEnrollmentPrimitive[]
+     * @throws \Exception
+     */
+    public static function findByEvent(IDb $db, $eventId)
+    {
+        return self::_findBy($db, 'user_id', [$eventId]);
     }
 
     /**

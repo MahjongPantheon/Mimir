@@ -527,8 +527,11 @@ class EventModel extends Model
             $event = EventPrimitive::findById($this->_db, [$eItem->getEventId()]);
 
             if ($event[0]->getType() === 'offline_interactive_tournament') {
+                $reggedItems = PlayerRegistrationPrimitive::findByPlayerAndEvent($this->_db, $eItem->getPlayerId(), $event[0]->getId());
                 // check that games are not started yet
-                if ($event[0]->getLastTimer()) {
+                if ($event[0]->getLastTimer() && empty($reggedItems)) {
+                    // do not allow new users to enter already tournament
+                    // but allow to reenroll/reenter pin for already participating people
                     throw new BadActionException('Pin is expired: game sessions are already started.');
                 }
             }
