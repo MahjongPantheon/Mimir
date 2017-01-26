@@ -469,13 +469,55 @@ class EventModel extends Model
     }
 
     /**
+     * Register player to event
+     *
+     * @param $playerId
+     * @param $eventId
+     * @throws BadActionException
+     * @throws InvalidParametersException
+     * @return bool success?
+     */
+    public function registerPlayer($playerId, $eventId)
+    {
+        $player = PlayerPrimitive::findById($this->_db, [$playerId]);
+        if (empty($player)) {
+            throw new InvalidParametersException('Player id#' . $playerId . ' not found in DB');
+        }
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+        $regItem = (new PlayerRegistrationPrimitive($this->_db))->setReg($playerId, $eventId);
+        return $regItem->save();
+    }
+
+    /**
+     * Unregister player from event
+     *
+     * @param $playerId
+     * @param $eventId
+     * @throws BadActionException
+     * @throws InvalidParametersException
+     * @return void
+     */
+    public function unregisterPlayer($playerId, $eventId)
+    {
+        $regItem = PlayerRegistrationPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId);
+        if (empty($regItem)) {
+            return;
+        }
+
+        $regItem->drop();
+    }
+
+    /**
      * Self-register player to event by pin
      *
      * @param $pin
      * @throws BadActionException
      * @return string auth token
      */
-    public function registerPlayer($pin)
+    public function registerPlayerPin($pin)
     {
         $success = false;
         $token = null;

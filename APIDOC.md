@@ -225,6 +225,26 @@ Returns: _string_ Auth token
 Exceptions:
 * _InvalidParametersException_ 
 
+### registerPlayerCP
+Parameters:
+* **$playerId** (_integer_) 
+* **$eventId** (_integer_) 
+
+Returns: _bool_ success?
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### unregisterPlayerCP
+Parameters:
+* **$playerId** (_integer_) 
+* **$eventId** (_integer_) 
+
+Returns: _void_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### enrollPlayer
 Parameters:
 * **$playerId** (_integer_) 
