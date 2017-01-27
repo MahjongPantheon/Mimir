@@ -68,6 +68,7 @@ return [
     'addPlayer'          => ['PlayersController', 'add'],
     'updatePlayer'       => ['PlayersController', 'update'],
     'getPlayer'          => ['PlayersController', 'get'],
+    'getEverybody'       => ['PlayersController', 'getAll'], // TODO: get rid
 
     'generateSeating'   => ['SeatingController', 'generate'],
     'startGamesWithSeating' => ['SeatingController', 'startGamesWithSeating'],

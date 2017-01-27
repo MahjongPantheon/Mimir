@@ -352,6 +352,11 @@ Returns: _array_
 Exceptions:
 * _EntityNotFoundException_ 
 
+### getEverybody
+Parameters:
+
+Returns: _array_ 
+
 ### generateSeating
 Parameters:
 * **$eventId** (_int_) 
