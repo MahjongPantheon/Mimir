@@ -351,6 +351,22 @@ abstract class Primitive
     }
 
     /**
+     * @param IDb $db
+     * @return Primitive[]
+     */
+    public static function findAll(IDb $db)
+    {
+        $result = $db->table(static::$_table)->findArray();
+        if (empty($result)) {
+            return [];
+        }
+
+        return array_map(function ($data) use ($db) {
+            return self::_recreateInstance($db, $data);
+        }, $result);
+    }
+
+    /**
      * Find items by indexed search by several fields
      *
      * @param IDb $db

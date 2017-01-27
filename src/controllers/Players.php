@@ -126,6 +126,29 @@ class PlayersController extends Controller
     }
 
     /**
+     * Get all system players
+     * TODO: replace it with some search/autocomplete! Amounts of data might be very large!
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        $this->_log->addInfo('Fetching info of ALL players');
+        /** @var PlayerPrimitive[] $players */
+        $players = PlayerPrimitive::findAll($this->_db);
+        $this->_log->addInfo('Successfully fetched info of all players');
+        return array_map(function (PlayerPrimitive $p) {
+            return [
+                'id'            => $p->getId(),
+                'alias'         => $p->getAlias(),
+                'display_name'  => $p->getDisplayName(),
+                'ident'         => $p->getIdent(),
+                'tenhou_id'     => $p->getTenhouId()
+            ];
+        }, $players);
+    }
+
+    /**
      * Get user info by id
      * @throws InvalidParametersException
      * @throws EntityNotFoundException
