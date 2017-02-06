@@ -268,11 +268,12 @@ class EventsController extends Controller
             'withButtobi'         => $rules->withButtobi(),
             'withMultiYakumans'   => $rules->withMultiYakumans(),
             'autoRegisterUsers'   => $rules->autoRegisterUsers(),
-            'gamExpirationTime'   => $rules->gameExpirationTime(),
+            'gameExpirationTime'  => $rules->gameExpirationTime(),
             'minPenalty'          => $rules->minPenalty(),
             'maxPenalty'          => $rules->maxPenalty(),
             'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
+            'autoSeating'         => $event[0]->getType() === 'offline_interactive_tournament', // TODO refine condition
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
         ];
 
