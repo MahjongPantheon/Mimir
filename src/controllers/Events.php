@@ -273,6 +273,7 @@ class EventsController extends Controller
             'maxPenalty'          => $rules->maxPenalty(),
             'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
+            'eventStatHost'       => $event[0]->getStatHost(),
             'autoSeating'         => $event[0]->getType() === 'offline_interactive_tournament', // TODO refine condition
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
         ];

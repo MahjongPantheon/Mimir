@@ -43,6 +43,7 @@ class EventPrimitive extends Primitive
         'owner_formation'   => '_ownerFormationId',
         'owner_user'        => '_ownerUserId',
         'type'              => '_type',
+        'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
     ];
@@ -58,6 +59,7 @@ class EventPrimitive extends Primitive
             '_lastTimer'          => $this->_integerTransform(true),
             '_id'                 => $this->_integerTransform(true),
             '_lobbyId'            => $this->_stringTransform(true),
+            '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
                     return $rules->title();
@@ -94,6 +96,11 @@ class EventPrimitive extends Primitive
      * @var string
      */
     protected $_endTime;
+    /**
+     * Host of statistics frontend
+     * @var string
+     */
+    protected $_statHost;
     /**
      * Last triggered timer timestamp
      * @var int
@@ -429,6 +436,24 @@ class EventPrimitive extends Primitive
     public function getType()
     {
         return $this->_type;
+    }
+
+    /**
+     * @param string $host
+     * @return EventPrimitive
+     */
+    public function setStatHost($host)
+    {
+        $this->_statHost = $host;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatHost()
+    {
+        return $this->_statHost;
     }
 
     /**
