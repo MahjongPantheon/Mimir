@@ -63,8 +63,7 @@ class RoundsHelper
         self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $players);
         self::_checkOneOf($roundData, 'winner_id', explode(',', $players));
         self::_checkOneOf($roundData, 'loser_id', explode(',', $players));
-        // -1 to -5 stand for one to five yakumans
-        self::_checkOneOf($roundData, 'han', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2, -3, -4, -5]);
+        self::_checkHan($roundData, 'han');
         // 0 for 5+ han
         self::_checkOneOf($roundData, 'fu', [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 0]);
 
@@ -88,8 +87,7 @@ class RoundsHelper
             self::_csvCheckZeroOrMoreOf($ron, 'riichi', $players);
             self::_checkOneOf($ron, 'winner_id', explode(',', $players));
 
-            // -1 to -5 stand for one to five yakumans
-            self::_checkOneOf($ron, 'han', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2, -3, -4, -5]);
+            self::_checkHan($ron, 'han');
             // 0 for 5+ han
             self::_checkOneOf($ron, 'fu', [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 0]);
 
@@ -109,8 +107,7 @@ class RoundsHelper
     {
         self::_csvCheckZeroOrMoreOf($roundData, 'riichi', $players);
         self::_checkOneOf($roundData, 'winner_id', explode(',', $players));
-        // -1 to -5 stand for one to five yakumans
-        self::_checkOneOf($roundData, 'han', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -2, -3, -4, -5]);
+        self::_checkHan($roundData, 'han');
         // 0 for 5+ han
         self::_checkOneOf($roundData, 'fu', [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110, 0]);
 
@@ -149,6 +146,14 @@ class RoundsHelper
                     'Player id #' . $playerId . ' is not registered for this event'
                 );
             }
+        }
+    }
+
+    protected static function _checkHan($data, $key)
+    {
+        if (!is_int($data[$key]) || $data[$key] == 0 || $data[$key] < -5 || $data[$key] > 32) {
+            // don't allow more that 32 han or 5x yakuman
+            throw new MalformedPayloadException('Field #' . $key . ' should be valid han count, but is "' . $data[$key] . '"');
         }
     }
 

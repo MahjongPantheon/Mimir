@@ -338,7 +338,7 @@ class TextlogParser
             $han = -1; // TODO: multi yakumans for textual logs?
         }
 
-        return $han;
+        return intval($han);
     }
 
     /**
