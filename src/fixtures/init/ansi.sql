@@ -72,6 +72,7 @@ CREATE TABLE "event"
   "end_time" timestamp,
   "game_duration" integer, -- for timer, duration in seconds
   "last_timer" integer, -- for timer, unix timestamp of last started timer
+  "red_zone" integer, -- timer red zone amount in seconds, or null to disable red zone
   "owner_formation" integer, -- at least one owner id should be set!
   "owner_user" integer,
   "stat_host" varchar(255) not null, -- host of statistics frontend

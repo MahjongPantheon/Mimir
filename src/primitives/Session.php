@@ -542,9 +542,13 @@ class SessionPrimitive extends Primitive
         $this->getCurrentState()->update($round);
         $success = $this->save();
 
-        $isInRedZone = $this->getEvent()->getType() === 'offline_interactive_tournament' && ( // 10 minutes = 600 seconds
-            $this->getEvent()->getLastTimer() + ($this->getEvent()->getGameDuration() * 60 - 600) < time()
+        $isInRedZone = $this->getEvent()->getRedZone() && (
+            $this->getEvent()->getLastTimer() + (
+                $this->getEvent()->getGameDuration() * 60
+                - $this->getEvent()->getRedZone()
+            ) < time()
         );
+
         if ($isInRedZone) {
             $this->getCurrentState()->forceFinish();
         }

@@ -46,6 +46,7 @@ class EventPrimitive extends Primitive
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
+        'red_zone'          => '_redZone',
     ];
 
     protected function _getFieldsTransforms()
@@ -58,6 +59,7 @@ class EventPrimitive extends Primitive
             '_gameDuration'       => $this->_integerTransform(true),
             '_lastTimer'          => $this->_integerTransform(true),
             '_id'                 => $this->_integerTransform(true),
+            '_redZone'            => $this->_integerTransform(true),
             '_lobbyId'            => $this->_stringTransform(true),
             '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [
@@ -106,6 +108,11 @@ class EventPrimitive extends Primitive
      * @var int
      */
     protected $_lastTimer;
+    /**
+     * Timer red zone amount in seconds, or null to disable
+     * @var int|null
+     */
+    protected $_redZone;
     /**
      * Game duration for current event, in seconds
      * @var int
@@ -232,6 +239,24 @@ class EventPrimitive extends Primitive
     public function getEndTime()
     {
         return $this->_endTime;
+    }
+
+    /**
+     * @param string $redZone
+     * @return EventPrimitive
+     */
+    public function setRedZone($redZone)
+    {
+        $this->_redZone = $redZone;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRedZone()
+    {
+        return $this->_redZone;
     }
 
     /**
