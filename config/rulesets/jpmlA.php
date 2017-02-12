@@ -29,7 +29,7 @@ class RulesetJpmlA extends Ruleset
         'oka'                   => 0,
         'startPoints'           => 30000,
         'riichiGoesToWinner'    => false,
-        'extraChomboPayments'   => true,
+        'extraChomboPayments'   => false,
         'chomboPenalty'         => 200,
         'withAtamahane'         => true,
         'withAbortives'         => true,
