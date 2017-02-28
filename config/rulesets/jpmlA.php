@@ -35,7 +35,7 @@ class RulesetJpmlA extends Ruleset
         'withAbortives'         => true,
         'withKuitan'            => true,
         'withKazoe'             => false,
-        'withButtobi'           => true,
+        'withButtobi'           => false,
         'withMultiYakumans'     => false,
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
