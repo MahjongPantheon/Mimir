@@ -70,14 +70,16 @@ class RulesetJpmlA extends Ruleset
         }, 0);
 
         switch($minusedPlayers) {
-            case 4:
-            case 2:
-            case 0:
-                return [1 => 80, 40, -40, -80];
             case 3:
-                return [1 => 120, -10, -30, -80];
+                $uma = [1 => 120, -10, -30, -80];
+                break;
             case 1:
-                return [1 => 80, 30, 10, -120];
+                $uma = [1 => 80, 30, 10, -120];
+                break;
+            default:
+                $uma = [1 => 80, 40, -40, -80];
         }
+
+        return $this->_equalizeUma($scores, $uma);
     }
 }

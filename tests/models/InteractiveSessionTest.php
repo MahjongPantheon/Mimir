@@ -349,10 +349,10 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $results = SessionResultsPrimitive::findByEventId($this->_db, [$this->_event->getId()]);
         $this->assertEquals(4, count($results));
         // See jpmlA ruleset to find out why these numbers are ok
-        $this->assertEquals(8, $results[0]->getRatingDelta());
-        $this->assertEquals(4, $results[1]->getRatingDelta());
-        $this->assertEquals(-4, $results[2]->getRatingDelta());
-        $this->assertEquals(-8, $results[3]->getRatingDelta());
+        $this->assertEquals(0, $results[0]->getRatingDelta());
+        $this->assertEquals(0, $results[1]->getRatingDelta());
+        $this->assertEquals(0, $results[2]->getRatingDelta());
+        $this->assertEquals(0, $results[3]->getRatingDelta());
 
         // Check that user history items exist in db
         /** @var PlayerHistoryPrimitive[] $items */
@@ -364,10 +364,10 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             );
         }, $this->_players);
 
-        $this->assertEquals(1508, $items[0]->getRating());
-        $this->assertEquals(1504, $items[1]->getRating());
-        $this->assertEquals(1496, $items[2]->getRating());
-        $this->assertEquals(1492, $items[3]->getRating());
+        $this->assertEquals(1500, $items[0]->getRating());
+        $this->assertEquals(1500, $items[1]->getRating());
+        $this->assertEquals(1500, $items[2]->getRating());
+        $this->assertEquals(1500, $items[3]->getRating());
     }
 
     public function testRoundRollback()
