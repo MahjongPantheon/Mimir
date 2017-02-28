@@ -34,7 +34,7 @@ class RulesetJpmlA extends Ruleset
         'withAtamahane'         => true,
         'withAbortives'         => true,
         'withKuitan'            => true,
-        'withKazoe'             => true,
+        'withKazoe'             => false,
         'withButtobi'           => true,
         'withMultiYakumans'     => false,
         'withNagashiMangan'     => false,
@@ -65,19 +65,21 @@ class RulesetJpmlA extends Ruleset
     public function uma($scores = [])
     {
         rsort($scores);
-        $minusedPlayers = array_reduce($scores, function($idx, $score) {
-            return $score < $this->startPoints() ? 1 : 0;
+        $minusedPlayers = array_reduce($scores, function($acc, $score) {
+            return $acc + ($score < $this->startPoints() ? 1 : 0);
         }, 0);
 
         switch($minusedPlayers) {
-            case 4:
-            case 2:
-            case 0:
-                return [1 => 80, 40, -40, -80];
             case 3:
-                return [1 => 120, -10, -30, -80];
+                $uma = [1 => 120, -10, -30, -80];
+                break;
             case 1:
-                return [1 => 80, 30, 10, -120];
+                $uma = [1 => 80, 30, 10, -120];
+                break;
+            default:
+                $uma = [1 => 80, 40, -40, -80];
         }
+
+        return $this->_equalizeUma($scores, $uma);
     }
 }

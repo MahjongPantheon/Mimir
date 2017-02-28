@@ -41,6 +41,47 @@ abstract class Ruleset
         return static::$_instances[$title];
     }
 
+    /**
+     * Make uma equal if scores are equal
+     *
+     * @param $score
+     * @param $uma
+     * @return array
+     */
+    protected function _equalizeUma($score, $uma)
+    {
+        rsort($score);
+        if ($score[0] === $score[1] && $score[1] === $score[2] && $score[2] === $score[3]) {
+            return [1 => 0, 0, 0, 0]; // exceptional case: all equal score
+        }
+
+        if ($score[0] === $score[1] && $score[1] === $score[2]) {
+            // 1 == 2 == 3 places
+            $eqUma = ($uma[1] + $uma[2] + $uma[3]) / 3;
+            return [1 => $eqUma, $eqUma, $eqUma, $uma[4]];
+        }
+
+        if ($score[1] === $score[2] && $score[2] === $score[3]) {
+            // 2 == 3 == 4 places
+            $eqUma = ($uma[2] + $uma[3] + $uma[4]) / 3;
+            return [1 => $uma[1], $eqUma, $eqUma, $eqUma];
+        }
+
+        if ($score[0] === $score[1]) {
+            $uma[1] = $uma[2] = ($uma[1] + $uma[2]) / 2;
+        }
+
+        if ($score[1] === $score[2]) {
+            $uma[2] = $uma[3] = ($uma[2] + $uma[3]) / 2;
+        }
+
+        if ($score[2] === $score[3]) {
+            $uma[3] = $uma[4] = ($uma[3] + $uma[4]) / 2;
+        }
+
+        return $uma;
+    }
+
     protected static $_title;
     protected static $_ruleset;
 
