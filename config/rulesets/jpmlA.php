@@ -65,8 +65,8 @@ class RulesetJpmlA extends Ruleset
     public function uma($scores = [])
     {
         rsort($scores);
-        $minusedPlayers = array_reduce($scores, function($idx, $score) {
-            return $score < $this->startPoints() ? 1 : 0;
+        $minusedPlayers = array_reduce($scores, function($acc, $score) {
+            return $acc + ($score < $this->startPoints() ? 1 : 0);
         }, 0);
 
         switch($minusedPlayers) {
