@@ -369,6 +369,15 @@ Exceptions:
 * _AuthFailedException_ 
 * _InvalidParametersException_ 
 
+### getCurrentSeating
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### startGamesWithSeating
 Parameters:
 * **$eventId** (_int_) 
@@ -381,12 +390,17 @@ Exceptions:
 * _InvalidParametersException_ 
 * _AuthFailedException_ 
 
-### getCurrentSeating
+### startGamesWithManualSeating
 Parameters:
-* **$eventId** (_integer_) 
+* **$eventId** (_int_) 
+* **$tablesDescription** (_string_) 
+* **$randomize** (_boolean_) - randomize each table by winds
 
-Returns: _array_ 
+Returns: _bool_ 
 
 Exceptions:
+* _AuthFailedException_ 
+* _DatabaseException_ 
 * _InvalidParametersException_ 
+* _InvalidUserException_ 
 

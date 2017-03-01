@@ -71,6 +71,7 @@ return [
     'getEverybody'       => ['PlayersController', 'getAll'], // TODO: get rid
 
     'generateSeating'   => ['SeatingController', 'generate'],
+    'getCurrentSeating' => ['EventsController', 'getCurrentSeating'],
     'startGamesWithSeating' => ['SeatingController', 'startGamesWithSeating'],
-    'getCurrentSeating' => ['EventsController', 'getCurrentSeating']
+    'startGamesWithManualSeating' => ['SeatingController', 'startGamesWithManualSeating'],
 ];
