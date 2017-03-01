@@ -45,7 +45,7 @@ class RulesetJpmlA extends Ruleset
         'minPenalty'            => 10,
         'maxPenalty'            => 200,
         'penaltyStep'           => 10,
-        'withLeadingDealerGameOver' => true
+        'withLeadingDealerGameOver' => false
     ];
 
     public function allowedYaku()
