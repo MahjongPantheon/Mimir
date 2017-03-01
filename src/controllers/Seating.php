@@ -91,6 +91,42 @@ class SeatingController extends Controller
     }
 
     /**
+     * Start games with predefined seating
+     *
+     * @param int $eventId
+     * @param string $tablesDescription
+     * @param boolean $randomize  - randomize each table by winds
+     * @throws AuthFailedException
+     * @throws DatabaseException
+     * @throws InvalidParametersException
+     * @throws InvalidUserException
+     * @return bool
+     */
+    public function startGamesWithManualSeating($eventId, $tablesDescription, $randomize = false)
+    {
+        if (!(new EventModel($this->_db, $this->_config))->checkAdminToken()) {
+            throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
+        }
+
+        $this->_log->addInfo('Starting new games by manual seating for event #' . $eventId);
+        $sessions = SessionPrimitive::findByEventAndStatus($this->_db, $eventId, 'inprogress');
+        if (!empty($sessions)) {
+            throw new InvalidParametersException('Failed to start new game: not all games finished in event id#' . $eventId);
+        }
+
+        $seating = $this->_makeManualSeating($eventId, $tablesDescription, $randomize);
+
+        $tableIndex = 1;
+        foreach ($seating as $table) {
+            (new InteractiveSessionModel($this->_db, $this->_config))
+                ->startGame($eventId, $table, $tableIndex++);
+        }
+
+        $this->_log->addInfo('Started all games by manual seating for event #' . $eventId);
+        return true;
+    }
+
+    /**
      * @param $eventId
      * @return array
      * @throws InvalidParametersException
@@ -123,5 +159,69 @@ class SeatingController extends Controller
         }, $seatingInfo), 4);
 
         return [$playersMap, $tables];
+    }
+
+    /**
+     * Make manual seating
+     *
+     * Input:
+     * 1-3-5-6
+     * 2-4-7-9
+     *
+     * Where numbers mean current place of player in rating table.
+     *
+     * Output:
+     * seating by player id:
+     * [
+     *    [12, 43, 23, 43],
+     *    [24, 41, 93, 10]
+     * ]
+     *
+     * @param $eventId
+     * @param $tablesDescription
+     * @param $randomize
+     * @throws InvalidParametersException
+     * @return array
+     */
+    protected function _makeManualSeating($eventId, $tablesDescription, $randomize)
+    {
+        $tables = array_map(function ($t) use ($randomize) {
+            $places = array_map('trim', explode('-', $t));
+            if ($randomize) {
+                srand(time());
+                shuffle($places);
+            }
+            return $places;
+        }, explode("\n", $tablesDescription));
+
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $currentRatingTable = (new EventModel($this->_db, $this->_config))
+            ->getRatingTable($event[0], 'rating', 'desc');
+
+        $participatingPlayers = [];
+        foreach ($tables as &$table) {
+            foreach ($table as $k => $player) {
+                if (!is_numeric($player) || empty($player) || empty($currentRatingTable[intval($player) + 1])) {
+                    throw new InvalidParametersException('Wrong rating place found: ' . $player);
+                }
+
+                $playerId = $currentRatingTable[intval($player) + 1]['id'];
+                if (!empty($participatingPlayers[$playerId])) {
+                    throw new InvalidParametersException(
+                        'Player id #' . $playerId . ' (place #' . $player . ') is already placed at another table!'
+                    );
+                }
+
+                $table[$k] = $playerId;
+                $participatingPlayers[$playerId] = true;
+            }
+        }
+
+        return $tables;
     }
 }

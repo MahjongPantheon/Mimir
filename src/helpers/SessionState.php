@@ -61,6 +61,13 @@ class SessionState
      * @var boolean
      */
     protected $_prematurelyFinished = false;
+    /**
+     * True if round has just changed, useful to determine if
+     * current 4e or 4s is first one, no matter what honba count is.
+     * (Possible situation: draw in 3s or 3e, so first 4e or 4s has honba).
+     * @var boolean
+     */
+    protected $_roundJustChanged = true;
 
     public function __construct(Ruleset $rules, $playersIds)
     {
@@ -126,6 +133,23 @@ class SessionState
     }
 
     /**
+     * @return bool
+     */
+    protected function _dealerIsLeaderOnOorasu()
+    {
+        if ($this->_roundJustChanged) {
+            return false; // should play last round at least once!
+        }
+
+        if ($this->getRound() !== ($this->_rules->tonpuusen() ? 4 : 8)) {
+            return false; // not oorasu
+        }
+
+        $scores = array_values($this->getScores());
+        return (end($scores) === max($scores));
+    }
+
+    /**
      * End game prematurely
      */
     public function forceFinish()
@@ -139,9 +163,11 @@ class SessionState
      */
     public function isFinished()
     {
-        return $this->getRound() > 8
+        return $this->getRound() > ($this->_rules->tonpuusen() ? 4 : 8)
             || $this->_prematurelyFinished
-            || ($this->_rules->withButtobi() && $this->_buttobi());
+            || ($this->_rules->withButtobi() && $this->_buttobi())
+            || ($this->_rules->withLeadingDealerGameOver() && $this->_dealerIsLeaderOnOorasu())
+            ;
     }
 
     /**
@@ -248,6 +274,7 @@ class SessionState
      */
     public function update(RoundPrimitive $round)
     {
+        $lastRoundIndex = $this->getRound();
         switch ($round->getOutcome()) {
             case 'ron':
                 $payments = $this->_updateAfterRon($round);
@@ -271,6 +298,7 @@ class SessionState
                 ;
         }
 
+        $this->_roundJustChanged = ($lastRoundIndex != $this->getRound());
         return $payments; // for dry run
     }
 

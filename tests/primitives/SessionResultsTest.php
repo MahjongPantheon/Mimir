@@ -65,6 +65,8 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_ruleset->setRule('riichiGoesToWinner', false);
         $this->_ruleset->setRule('tenboDivider', 1000.);
         $this->_ruleset->setRule('ratingDivider', 1.);
+        $this->_ruleset->setRule('tonpuusen', false);
+        $this->_ruleset->setRule('withLeadingDealerGameOver', true);
         $this->_ruleset->setRule('startPoints', 30000);
         $this->_ruleset->setRule('uma', [1 => 15, 5, -5, -15]);
         $this->_ruleset->setRule('oka', 0);
