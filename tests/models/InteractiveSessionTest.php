@@ -364,10 +364,10 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             );
         }, $this->_players);
 
-        $this->assertEquals(1500, $items[0]->getRating());
-        $this->assertEquals(1500, $items[1]->getRating());
-        $this->assertEquals(1500, $items[2]->getRating());
-        $this->assertEquals(1500, $items[3]->getRating());
+        $this->assertEquals(0, $items[0]->getRating());
+        $this->assertEquals(0, $items[1]->getRating());
+        $this->assertEquals(0, $items[2]->getRating());
+        $this->assertEquals(0, $items[3]->getRating());
     }
 
     public function testRoundRollback()
