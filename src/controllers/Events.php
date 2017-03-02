@@ -274,7 +274,9 @@ class EventsController extends Controller
             'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
             'eventStatHost'       => $event[0]->getStatHost(),
-            'redZone'             => $event[0]->getRedZone(),
+            'redZone'             => $event[0]->getRedZone(), // in seconds!
+            'gameDuration'        => $event[0]->getGameDuration(), // in minutes!
+            'isOnline'            => $event[0]->getType() === 'online',
             'autoSeating'         => $event[0]->getType() === 'offline_interactive_tournament', // TODO refine condition
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
         ];

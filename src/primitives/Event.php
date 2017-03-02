@@ -252,6 +252,7 @@ class EventPrimitive extends Primitive
     }
 
     /**
+     * Timer red zone in seconds
      * @return string
      */
     public function getRedZone()
@@ -270,6 +271,7 @@ class EventPrimitive extends Primitive
     }
 
     /**
+     * Game duration in minutes
      * @return int
      */
     public function getGameDuration()

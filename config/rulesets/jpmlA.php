@@ -25,7 +25,7 @@ class RulesetJpmlA extends Ruleset
     protected static $_ruleset = [
         'tenboDivider'          => 100,
         'ratingDivider'         => 10,
-        'startRating'           => 1500,
+        'startRating'           => 0,
         'oka'                   => 0,
         'startPoints'           => 30000,
         'riichiGoesToWinner'    => false,
