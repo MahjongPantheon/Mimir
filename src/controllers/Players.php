@@ -307,4 +307,147 @@ class PlayersController extends Controller
         $this->_log->addInfo('Successfully got id for player #' . $playerIdent);
         return $player[0]->getId();
     }
+
+    /**
+     * Get last recorded round with user in event
+     *
+     * @param int $playerId
+     * @param int $eventId
+     * @throws EntityNotFoundException
+     * @return array|null
+     */
+    public function getLastRound($playerId, $eventId)
+    {
+        $this->_log->addInfo('Getting last round for player id #' . $playerId . ' at event id #' . $eventId);
+        $session = SessionPrimitive::findLastByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
+        if (empty($session)) {
+            return null;
+        }
+
+        $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
+        /** @var MultiRoundPrimitive $lastRound */
+        $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
+            /** @var $acc RoundPrimitive */
+            if (!$acc || $r->getId() > $acc->getId()) {
+                return $r;
+            }
+            return $acc;
+        });
+
+        $result = $this->_formatLastRound($session, $lastRound);
+        $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);
+        return $result;
+    }
+
+    /**
+     * Get last recorded round with user in event
+     *
+     * @throws InvalidParametersException
+     * @throws EntityNotFoundException
+     * @return array|null
+     */
+    public function getLastRoundFromToken()
+    {
+        $this->_log->addInfo('Getting last round (by token)');
+        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        if (empty($data)) {
+            throw new InvalidParametersException('Invalid user token', 401);
+        }
+    }
+
+    /**
+     * Calculate payments for given round
+     *
+     * @param SessionPrimitive $session
+     * @param RoundPrimitive $round
+     * @throws EntityNotFoundException
+     * @throws InvalidParametersException
+     * @return array
+     */
+    protected function _formatLastRound(SessionPrimitive $session, RoundPrimitive $round)
+    {
+        if ($round instanceof MultiRoundPrimitive) {
+            $riichiWinners = PointsCalc::assignRiichiBets(
+                $round->rounds(),
+                $round->getLoserId(),
+                $round->getLastSessionState()->getRiichiBets(),
+                $round->getLastSessionState()->getHonba(),
+                $round->getSession()
+            );
+
+            PointsCalc::resetPaymentsInfo();
+            $payments = PointsCalc::lastPaymentsInfo();
+            foreach ($round->rounds() as $roundItem) {
+                PointsCalc::ron(
+                    $session->getEvent()->getRuleset(),
+                    $round->getLastSessionState()->getCurrentDealer() == $roundItem->getWinnerId(),
+                    $round->getLastSessionState()->getScores(),
+                    $roundItem->getWinnerId(),
+                    $roundItem->getLoserId(),
+                    $roundItem->getHan(),
+                    $roundItem->getFu(),
+                    $riichiWinners[$roundItem->getWinnerId()]['from_players'],
+                    $riichiWinners[$roundItem->getWinnerId()]['honba'],
+                    $riichiWinners[$roundItem->getWinnerId()]['from_table']
+                );
+                $payments = array_merge_recursive($payments, PointsCalc::lastPaymentsInfo());
+            }
+
+            return $payments;
+        }
+
+        PointsCalc::resetPaymentsInfo();
+        switch ($round->getOutcome()) {
+            case 'ron':
+                PointsCalc::ron(
+                    $session->getEvent()->getRuleset(),
+                    $round->getLastSessionState()->getCurrentDealer() === $round->getWinnerId(),
+                    $round->getLastSessionState()->getScores(),
+                    $round->getWinnerId(),
+                    $round->getLoserId(),
+                    $round->getHan(),
+                    $round->getFu(),
+                    $round->getRiichiIds(),
+                    $round->getLastSessionState()->getHonba(),
+                    $round->getLastSessionState()->getRiichiBets()
+                );
+                break;
+            case 'tsumo':
+                PointsCalc::tsumo(
+                    $session->getEvent()->getRuleset(),
+                    $round->getLastSessionState()->getCurrentDealer(),
+                    $round->getLastSessionState()->getScores(),
+                    $round->getWinnerId(),
+                    $round->getHan(),
+                    $round->getFu(),
+                    $round->getRiichiIds(),
+                    $round->getLastSessionState()->getHonba(),
+                    $round->getLastSessionState()->getRiichiBets()
+                );
+                break;
+            case 'draw':
+                PointsCalc::draw(
+                    $round->getLastSessionState()->getScores(),
+                    $round->getTempaiIds(),
+                    $round->getRiichiIds()
+                );
+                break;
+            case 'abort':
+                PointsCalc::abort(
+                    $round->getLastSessionState()->getScores(),
+                    $round->getRiichiIds()
+                );
+                break;
+            case 'chombo':
+                PointsCalc::chombo(
+                    $session->getEvent()->getRuleset(),
+                    $round->getLastSessionState()->getCurrentDealer(),
+                    $round->getLoserId(),
+                    $round->getLastSessionState()->getScores()
+                );
+                break;
+        }
+
+        return PointsCalc::lastPaymentsInfo();
+    }
 }

@@ -42,12 +42,14 @@ return [
     'addRound'           => ['GamesController', 'addRound'],
     'addOnlineReplay'    => ['GamesController', 'addOnlineReplay'],
     'getLastResults'     => ['PlayersController', 'getLastResults'],
+    'getLastRound'       => ['PlayersController', 'getLastRound'],
 
     'getGameConfigT'     => ['EventsController', 'getGameConfigFromToken'],
     'getTimerStateT'     => ['EventsController', 'getTimerStateFromToken'],
     'getAllPlayersT'     => ['EventsController', 'getAllRegisteredPlayersFromToken'],
     'getCurrentGamesT'   => ['PlayersController', 'getCurrentSessionsFromToken'],
     'getLastResultsT'    => ['PlayersController', 'getLastResultsFromToken'],
+    'getLastRoundT'      => ['PlayersController', 'getLastRoundFromToken'],
     'getPlayerT'         => ['PlayersController', 'getFromToken'],
     'startGameT'         => ['GamesController', 'startFromToken'], // for self-starts
 

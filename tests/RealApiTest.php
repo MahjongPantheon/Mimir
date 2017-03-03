@@ -163,4 +163,17 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
         $this->assertEquals($expectedOutput, $dryRunData);
     }
+
+    public function testGetLastRoundInfo()
+    {
+        /*
+         * TODO:
+         * 1. create all stuff
+         * 2. make dry run of round
+         * 3. add round (ron)
+         * 4. Query lastRound
+         * 5. Check that dry run results match last round results
+         * 6. Same for tsumo, draw, abort, chombo, multiron
+         */
+    }
 }
