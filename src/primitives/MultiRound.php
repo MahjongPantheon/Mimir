@@ -138,6 +138,20 @@ class MultiRoundPrimitive extends RoundPrimitive
         return $this;
     }
 
+    /**
+     * @return SessionState
+     * @throws EntityNotFoundException
+     * @throws InvalidParametersException
+     */
+    public function getLastSessionState()
+    {
+        return SessionState::fromJson(
+            $this->_rounds[0]->getEvent()->getRuleset(),
+            $this->_rounds[0]->getSession()->getPlayersIds(),
+            $this->_lastSessionState
+        );
+    }
+
     public function setDora($dora)
     {
         throw new InvalidParametersException('MultiRound should not be treated as round');

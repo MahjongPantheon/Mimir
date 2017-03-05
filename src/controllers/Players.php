@@ -327,16 +327,35 @@ class PlayersController extends Controller
         $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
         /** @var MultiRoundPrimitive $lastRound */
         $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
-            /** @var $acc RoundPrimitive */
-            if (!$acc || $r->getId() > $acc->getId()) {
+            if ($acc instanceof MultiRoundPrimitive) {
+                foreach ($acc->rounds() as $round) {
+                    if ($round->getId() > $r->getId()) {
+                        return $acc;
+                    }
+                }
                 return $r;
+            } else {
+                /** @var $acc RoundPrimitive */
+                if (!$acc || $r->getId() > $acc->getId()) {
+                    return $r;
+                }
+                return $acc;
             }
-            return $acc;
         });
 
-        $result = $this->_formatLastRound($session, $lastRound);
+        $paymentsInfo = $this->_formatLastRound($session, $lastRound);
+
         $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);
-        return $result;
+        return [
+            'outcome'    => $lastRound->getOutcome(),
+            'penaltyFor' => $lastRound->getOutcome() === 'chombo' ? $lastRound->getLoserId() : null,
+            'dealer'     => $session->getCurrentState()->getCurrentDealer(),
+            'round'      => $session->getCurrentState()->getRound(),
+            'riichi'     => $session->getCurrentState()->getRiichiBets(),
+            'honba'      => $session->getCurrentState()->getHonba(),
+            'scores'     => $session->getCurrentState()->getScores(),
+            'payments'   => $paymentsInfo
+        ];
     }
 
     /**
@@ -366,12 +385,14 @@ class PlayersController extends Controller
      */
     protected function _formatLastRound(SessionPrimitive $session, RoundPrimitive $round)
     {
+        $sessionState = $round->getLastSessionState();
+
         if ($round instanceof MultiRoundPrimitive) {
             $riichiWinners = PointsCalc::assignRiichiBets(
                 $round->rounds(),
                 $round->getLoserId(),
-                $round->getLastSessionState()->getRiichiBets(),
-                $round->getLastSessionState()->getHonba(),
+                $sessionState->getRiichiBets(),
+                $sessionState->getHonba(),
                 $round->getSession()
             );
 
@@ -380,8 +401,8 @@ class PlayersController extends Controller
             foreach ($round->rounds() as $roundItem) {
                 PointsCalc::ron(
                     $session->getEvent()->getRuleset(),
-                    $round->getLastSessionState()->getCurrentDealer() == $roundItem->getWinnerId(),
-                    $round->getLastSessionState()->getScores(),
+                    $sessionState->getCurrentDealer() == $roundItem->getWinnerId(),
+                    $sessionState->getScores(),
                     $roundItem->getWinnerId(),
                     $roundItem->getLoserId(),
                     $roundItem->getHan(),
@@ -401,49 +422,49 @@ class PlayersController extends Controller
             case 'ron':
                 PointsCalc::ron(
                     $session->getEvent()->getRuleset(),
-                    $round->getLastSessionState()->getCurrentDealer() === $round->getWinnerId(),
-                    $round->getLastSessionState()->getScores(),
+                    $sessionState->getCurrentDealer() == $round->getWinnerId(),
+                    $sessionState->getScores(),
                     $round->getWinnerId(),
                     $round->getLoserId(),
                     $round->getHan(),
                     $round->getFu(),
                     $round->getRiichiIds(),
-                    $round->getLastSessionState()->getHonba(),
-                    $round->getLastSessionState()->getRiichiBets()
+                    $sessionState->getHonba(),
+                    $sessionState->getRiichiBets()
                 );
                 break;
             case 'tsumo':
                 PointsCalc::tsumo(
                     $session->getEvent()->getRuleset(),
-                    $round->getLastSessionState()->getCurrentDealer(),
-                    $round->getLastSessionState()->getScores(),
+                    $sessionState->getCurrentDealer(),
+                    $sessionState->getScores(),
                     $round->getWinnerId(),
                     $round->getHan(),
                     $round->getFu(),
                     $round->getRiichiIds(),
-                    $round->getLastSessionState()->getHonba(),
-                    $round->getLastSessionState()->getRiichiBets()
+                    $sessionState->getHonba(),
+                    $sessionState->getRiichiBets()
                 );
                 break;
             case 'draw':
                 PointsCalc::draw(
-                    $round->getLastSessionState()->getScores(),
+                    $sessionState->getScores(),
                     $round->getTempaiIds(),
                     $round->getRiichiIds()
                 );
                 break;
             case 'abort':
                 PointsCalc::abort(
-                    $round->getLastSessionState()->getScores(),
+                    $sessionState->getScores(),
                     $round->getRiichiIds()
                 );
                 break;
             case 'chombo':
                 PointsCalc::chombo(
                     $session->getEvent()->getRuleset(),
-                    $round->getLastSessionState()->getCurrentDealer(),
+                    $sessionState->getCurrentDealer(),
                     $round->getLoserId(),
-                    $round->getLastSessionState()->getScores()
+                    $sessionState->getScores()
                 );
                 break;
         }

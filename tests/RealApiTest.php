@@ -38,7 +38,7 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         // Init db! Or bunch of PDOExceptions will appeal
         $db = Db::__getCleanTestingInstance();
         $evt = (new EventPrimitive($db))
-            ->setRuleset(Ruleset::instance('ema'))
+            ->setRuleset(Ruleset::instance('tenhounet'))
             ->setType('offline')
             ->setTitle('test')
             ->setDescription('test')
@@ -46,14 +46,15 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $evt->save();
 
         $this->_client = new Client('http://localhost:1349');
+        $this->_client->getHttpClient()->withDebug();
         $this->_client->getHttpClient()->withHeaders(['X-Auth-Token: 198vdsh904hfbnkjv98whb2iusvd98b29bsdv98svbr9wghj']);
     }
 
     public function testGameConfig()
     {
         $response = $this->_client->execute('getGameConfig', [1]);
-        $this->assertEquals(false, $response['withAbortives']);
-        $this->assertEquals(30000, $response['startPoints']);
+        $this->assertEquals(true, $response['withAbortives']);
+        $this->assertEquals(25000, $response['startPoints']);
     }
 
     public function testTimer()
@@ -139,10 +140,10 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
             'riichi' => 0,
             'honba' => 0,
             'scores' => [
-                1 => 24100,
-                2 => 32000,
-                3 => 33900,
-                4 => 30000
+                1 => 19100,
+                2 => 27000,
+                3 => 28900,
+                4 => 25000
             ],
             'payments' => [
                 'direct' => [
@@ -157,7 +158,9 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
                     '2<-1' => 0,
                     '3<-1' => 0
                 ]
-            ]
+            ],
+            'penaltyFor' => null,
+            'outcome' => 'multiron'
         ];
 
         $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
@@ -166,14 +169,140 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
 
     public function testGetLastRoundInfo()
     {
-        /*
-         * TODO:
-         * 1. create all stuff
-         * 2. make dry run of round
-         * 3. add round (ron)
-         * 4. Query lastRound
-         * 5. Check that dry run results match last round results
-         * 6. Same for tsumo, draw, abort, chombo, multiron
-         */
+        // registration and enrollment boilerplate...
+        $this->_client->execute('addPlayer', ['p1', 'p1', 'player1', null]);
+        $this->_client->execute('addPlayer', ['p2', 'p2', 'player2', null]);
+        $this->_client->execute('addPlayer', ['p3', 'p3', 'player3', null]);
+        $this->_client->execute('addPlayer', ['p4', 'p4', 'player4', null]);
+
+        $pin1 = $this->_client->execute('enrollPlayer', [1, 1]);
+        $pin2 = $this->_client->execute('enrollPlayer', [2, 1]);
+        $pin3 = $this->_client->execute('enrollPlayer', [3, 1]);
+        $pin4 = $this->_client->execute('enrollPlayer', [4, 1]);
+
+        $this->_client->execute('registerPlayer', [$pin1]);
+        $this->_client->execute('registerPlayer', [$pin2]);
+        $this->_client->execute('registerPlayer', [$pin3]);
+        $this->_client->execute('registerPlayer', [$pin4]);
+
+        $hashcode = $this->_client->execute('startGame', [1, [1, 2, 3, 4]]);
+
+        // Multiron...
+        $data = [
+            "round_index" => 1,
+            "honba" => 0,
+            "outcome" => "multiron",
+            "loser_id" => 1,
+            "multi_ron" => 2,
+            "wins" => [
+                [
+                    "riichi" => "",
+                    "winner_id" => 2,
+                    "han" => 2,
+                    "fu" => 30,
+                    "dora" => 0,
+                    "uradora" => 0,
+                    "kandora" => 0,
+                    "kanuradora" => 0,
+                    "yaku" => "23,8"
+                ], [
+                    "riichi" => "",
+                    "winner_id" => 3,
+                    "han" => 3,
+                    "fu" => 30,
+                    "dora" => 0,
+                    "uradora" => 0,
+                    "kandora" => 0,
+                    "kanuradora" => 0,
+                    "yaku" => "15"
+                ]
+            ]
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->_client->execute('addRound', [$hashcode, $data]); // add for real
+        $lastRoundData = $this->_client->execute('getLastRound', [1, 1]);
+        $this->assertEquals($dryRunData, $lastRoundData);
+
+        // Ron
+        $data = [
+            'round_index' => 2,
+            'honba' => 0,
+            'outcome'   => 'ron',
+            'riichi'    => '',
+            'winner_id' => 2,
+            'loser_id'  => 3,
+            'han'       => 2,
+            'fu'        => 30,
+            'multi_ron' => null,
+            'dora'      => 0,
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 1,
+            'yaku'      => '2'
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->_client->execute('addRound', [$hashcode, $data]); // add for real
+        $lastRoundData = $this->_client->execute('getLastRound', [1, 1]);
+        $this->assertEquals($dryRunData, $lastRoundData);
+
+        $data = [
+            'round_index' => 2,
+            'honba' => 1,
+            'outcome'   => 'tsumo',
+            'riichi'    => '',
+            'winner_id' => 2,
+            'han'       => 2,
+            'fu'        => 30,
+            'multi_ron' => null,
+            'dora'      => 0,
+            'uradora'   => 0,
+            'kandora'   => 0,
+            'kanuradora' => 1,
+            'yaku'      => '3'
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->_client->execute('addRound', [$hashcode, $data]); // add for real
+        $lastRoundData = $this->_client->execute('getLastRound', [1, 1]);
+        $this->assertEquals($dryRunData, $lastRoundData);
+
+        $data = [
+            'round_index' => 2,
+            'honba' => 2,
+            'outcome'   => 'draw',
+            'riichi'    => '',
+            'tempai'    => ''
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->_client->execute('addRound', [$hashcode, $data]); // add for real
+        $lastRoundData = $this->_client->execute('getLastRound', [1, 1]);
+        $this->assertEquals($dryRunData, $lastRoundData);
+
+        $data = [
+            'round_index' => 3,
+            'honba' => 3,
+            'outcome'   => 'abort',
+            'riichi'    => ''
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->_client->execute('addRound', [$hashcode, $data]); // add for real
+        $lastRoundData = $this->_client->execute('getLastRound', [1, 1]);
+        $this->assertEquals($dryRunData, $lastRoundData);
+
+        $data = [
+            'round_index' => 3,
+            'honba' => 4,
+            'outcome'   => 'chombo',
+            'loser_id'  => 2,
+        ];
+
+        $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
+        $this->_client->execute('addRound', [$hashcode, $data]); // add for real
+        $lastRoundData = $this->_client->execute('getLastRound', [1, 1]);
+        $this->assertEquals($dryRunData, $lastRoundData);
     }
 }
