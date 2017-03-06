@@ -123,7 +123,7 @@ class InteractiveSessionModel extends Model
         $currentHonba = $session->getCurrentState()->getHonba();
         $currentRound = $session->getCurrentState()->getRound();
         if ($roundData['round_index'] != $currentRound || $roundData['honba'] != $currentHonba) {
-            throw new InvalidParametersException('This round is already recorded');
+            throw new InvalidParametersException('This round is already recorded (or other round index/honba mismatch)');
         }
 
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
@@ -132,12 +132,14 @@ class InteractiveSessionModel extends Model
             /** @var $state SessionState */
             list($state, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
             return [
-                'dealer'    => $state->getCurrentDealer(),
-                'round'     => $state->getRound(),
-                'riichi'    => $state->getRiichiBets(),
-                'honba'     => $state->getHonba(),
-                'scores'    => $state->getScores(),
-                'payments'  => $paymentsInfo
+                'outcome'    => $round->getOutcome(),
+                'penaltyFor' => $round->getOutcome() === 'chombo' ? $round->getLoserId() : null,
+                'dealer'     => $state->getCurrentDealer(),
+                'round'      => $state->getRound(),
+                'riichi'     => $state->getRiichiBets(),
+                'honba'      => $state->getHonba(),
+                'scores'     => $state->getScores(),
+                'payments'   => $paymentsInfo
             ];
         }
 

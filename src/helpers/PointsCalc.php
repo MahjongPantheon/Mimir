@@ -315,4 +315,62 @@ class PointsCalc
             ];
         }
     }
+
+
+    /**
+     * @param $rounds RoundPrimitive[]
+     * @param $loserId int
+     * @param $session SessionPrimitive
+     * @return array
+     * @throws InvalidParametersException
+     */
+    public static function assignRiichiBets($rounds, $loserId, $riichiBets, $honba, SessionPrimitive $session)
+    {
+        $bets = [];
+        $winners = [];
+
+        foreach ($rounds as $round) {
+            $winners[$round->getWinnerId()] = [];
+            $bets = array_merge($bets, $round->getRiichiIds());
+            foreach ($bets as $k => $player) {
+                if (isset($winners[$player])) {
+                    $winners[$player] []= $round->getWinnerId(); // winner always gets back his bet
+                    unset($bets[$k]);
+                }
+            }
+        }
+
+        // Find player who gets non-winning riichi bets
+        // First we double the array to form a ring to simplify traversal
+        // Then we find winner closest to current loser - he'll get all riichi (like with atamahane rule).
+        $playersRing = array_merge($session->getPlayersIds(), $session->getPlayersIds());
+        $closestWinner = null;
+        for ($i = 0; $i < count($playersRing); $i++) {
+            if ($loserId == $playersRing[$i]) {
+                for ($j = $i + 1; $j < count($playersRing); $j++) {
+                    if (isset($winners[$playersRing[$j]])) {
+                        $closestWinner = $playersRing[$j];
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if (!$closestWinner) {
+            throw new InvalidParametersException('No closest winner was found when calculation riichi bets assignment', 119);
+        }
+
+        $winners[$closestWinner] = array_merge($winners[$closestWinner], $bets);
+
+        // assign riichi counts, add riichi on table for first (closest) winner
+        foreach ($winners as $id => $bets) {
+            $winners[$id] = [
+                'from_table'    => ($id == $closestWinner ? $riichiBets : 0),
+                'from_players'  => $winners[$id],
+                'honba'         => $honba,
+            ];
+        }
+
+        return $winners;
+    }
 }

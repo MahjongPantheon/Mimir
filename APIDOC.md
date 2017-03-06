@@ -123,6 +123,16 @@ Returns: _array|null_
 Exceptions:
 * _EntityNotFoundException_ 
 
+### getLastRound
+Parameters:
+* **$playerId** (_int_) 
+* **$eventId** (_int_) 
+
+Returns: _array|null_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
+
 ### getGameConfigT
 Parameters:
 
@@ -157,6 +167,15 @@ Exceptions:
 * _InvalidParametersException_ 
 
 ### getLastResultsT
+Parameters:
+
+Returns: _array|null_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+* _EntityNotFoundException_ 
+
+### getLastRoundT
 Parameters:
 
 Returns: _array|null_ 
