@@ -259,7 +259,9 @@ class MultiRoundPrimitive extends RoundPrimitive
 
     public function getRiichiIds()
     {
-        throw new InvalidParametersException('MultiRound should not be treated as round');
+        return array_unique(array_reduce($this->_rounds, function ($acc, RoundPrimitive $round) {
+            return array_merge($acc, $round->getRiichiIds());
+        }, []));
     }
 
     public function setRiichiUsers($riichiUsers)
