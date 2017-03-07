@@ -134,6 +134,7 @@ class InteractiveSessionModel extends Model
             return [
                 'outcome'    => $round->getOutcome(),
                 'penaltyFor' => $round->getOutcome() === 'chombo' ? $round->getLoserId() : null,
+                'riichiIds'  => $round->getRiichiIds(),
                 'dealer'     => $state->getCurrentDealer(),
                 'round'      => $state->getRound(),
                 'riichi'     => $state->getRiichiBets(),

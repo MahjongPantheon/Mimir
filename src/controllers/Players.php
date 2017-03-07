@@ -349,6 +349,7 @@ class PlayersController extends Controller
         return [
             'outcome'    => $lastRound->getOutcome(),
             'penaltyFor' => $lastRound->getOutcome() === 'chombo' ? $lastRound->getLoserId() : null,
+            'riichiIds'  => $lastRound->getRiichiIds(),
             'dealer'     => $session->getCurrentState()->getCurrentDealer(),
             'round'      => $session->getCurrentState()->getRound(),
             'riichi'     => $session->getCurrentState()->getRiichiBets(),

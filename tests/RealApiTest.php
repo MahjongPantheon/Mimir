@@ -137,6 +137,7 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $expectedOutput = [
             'dealer' => 2,
             'round' => 2,
+            'riichiIds' => [],
             'riichi' => 0,
             'honba' => 0,
             'scores' => [
