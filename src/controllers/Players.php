@@ -373,6 +373,7 @@ class PlayersController extends Controller
         if (empty($data)) {
             throw new InvalidParametersException('Invalid user token', 401);
         }
+        return $this->getLastRound($data->getPlayerId(), $data->getEventId());
     }
 
     /**
