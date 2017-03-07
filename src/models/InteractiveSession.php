@@ -122,6 +122,9 @@ class InteractiveSessionModel extends Model
         // check that same game is not passed
         $currentHonba = $session->getCurrentState()->getHonba();
         $currentRound = $session->getCurrentState()->getRound();
+        $currentDealer = $session->getCurrentState()->getCurrentDealer();
+        $currentRiichi = $session->getCurrentState()->getRiichiBets();
+        $currentScores = $session->getCurrentState()->getScores();
         if ($roundData['round_index'] != $currentRound || $roundData['honba'] != $currentHonba) {
             throw new InvalidParametersException('This round is already recorded (or other round index/honba mismatch)');
         }
@@ -131,16 +134,36 @@ class InteractiveSessionModel extends Model
         if ($dry) {
             /** @var $state SessionState */
             list($state, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
+
+            $multiGet = function (RoundPrimitive $p, $method) {
+                if ($p instanceof MultiRoundPrimitive) {
+                    return array_map(function (RoundPrimitive $inner) use ($method) {
+                        return $inner->{$method}();
+                    }, $p->rounds());
+                }
+
+                return $p->{$method}();
+            };
+
+            // Warning! Should match PlayersController::getLastRound return format!
             return [
                 'outcome'    => $round->getOutcome(),
                 'penaltyFor' => $round->getOutcome() === 'chombo' ? $round->getLoserId() : null,
                 'riichiIds'  => $round->getRiichiIds(),
-                'dealer'     => $state->getCurrentDealer(),
-                'round'      => $state->getRound(),
-                'riichi'     => $state->getRiichiBets(),
-                'honba'      => $state->getHonba(),
-                'scores'     => $state->getScores(),
-                'payments'   => $paymentsInfo
+                'dealer'     => $currentDealer,
+                'round'      => $currentRound,
+                'riichi'     => $currentRiichi,
+                'honba'      => $currentHonba,
+                'scores'     => $currentScores, // scores before payments!
+                'payments'   => $paymentsInfo,
+                'winner'     => $multiGet($round, 'getWinnerId'),
+                'yaku'       => $multiGet($round, 'getYaku'),
+                'han'        => $multiGet($round, 'getHan'),
+                'fu'         => $multiGet($round, 'getFu'),
+                'dora'       => $multiGet($round, 'getDora'),
+                'kandora'    => $multiGet($round, 'getKandora'),
+                'uradora'    => $multiGet($round, 'getUradora'),
+                'kanuradora' => $multiGet($round, 'getKanuradora')
             ];
         }
 

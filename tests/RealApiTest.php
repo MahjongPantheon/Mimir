@@ -135,15 +135,15 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         ];
 
         $expectedOutput = [
-            'dealer' => 2,
-            'round' => 2,
+            'dealer' => 1,
+            'round' => 1,
             'riichiIds' => [],
             'riichi' => 0,
             'honba' => 0,
             'scores' => [
-                1 => 24100,
-                2 => 32000,
-                3 => 33900,
+                1 => 30000,
+                2 => 30000,
+                3 => 30000,
                 4 => 30000
             ],
             'payments' => [
@@ -161,7 +161,16 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
                 ]
             ],
             'penaltyFor' => null,
-            'outcome' => 'multiron'
+            'outcome' => 'multiron',
+
+            'winner'     => [2, 3],
+            'yaku'       => ['23,8', '15'],
+            'han'        => [2, 3],
+            'fu'         => [30, 30],
+            'dora'       => [0, 0],
+            'kandora'    => [0, 0],
+            'uradora'    => [0, 0],
+            'kanuradora' => [0, 0]
         ];
 
         $dryRunData = $this->_client->execute('addRound', [$hashcode, $data, true]);
