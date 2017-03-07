@@ -345,18 +345,40 @@ class PlayersController extends Controller
 
         $paymentsInfo = $this->_formatLastRound($session, $lastRound);
 
-        $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);
-        return [
+        $multiGet = function (RoundPrimitive $p, $method) {
+            if ($p instanceof MultiRoundPrimitive) {
+                return array_map(function (RoundPrimitive $inner) use ($method) {
+                    return $inner->{$method}();
+                }, $p->rounds());
+            }
+
+            return $p->{$method}();
+        };
+
+        // Warning: should match InteractiveSessionModel::addRound return format!
+        $result = [
             'outcome'    => $lastRound->getOutcome(),
             'penaltyFor' => $lastRound->getOutcome() === 'chombo' ? $lastRound->getLoserId() : null,
             'riichiIds'  => $lastRound->getRiichiIds(),
-            'dealer'     => $session->getCurrentState()->getCurrentDealer(),
-            'round'      => $session->getCurrentState()->getRound(),
-            'riichi'     => $session->getCurrentState()->getRiichiBets(),
-            'honba'      => $session->getCurrentState()->getHonba(),
-            'scores'     => $session->getCurrentState()->getScores(),
-            'payments'   => $paymentsInfo
+            'dealer'     => $lastRound->getLastSessionState()->getCurrentDealer(),
+            'round'      => $lastRound->getRoundIndex(),
+            'riichi'     => $lastRound->getLastSessionState()->getRiichiBets(),
+            'honba'      => $lastRound->getLastSessionState()->getHonba(),
+            'scores'     => $lastRound->getLastSessionState()->getScores(), // scores before payments!
+            'payments'   => $paymentsInfo,
+            'winner'     => $multiGet($lastRound, 'getWinnerId'),
+            'yaku'       => $multiGet($lastRound, 'getYaku'),
+            'han'        => $multiGet($lastRound, 'getHan'),
+            'fu'         => $multiGet($lastRound, 'getFu'),
+            'dora'       => $multiGet($lastRound, 'getDora'),
+            'kandora'    => $multiGet($lastRound, 'getKandora'),
+            'uradora'    => $multiGet($lastRound, 'getUradora'),
+            'kanuradora' => $multiGet($lastRound, 'getKanuradora')
         ];
+
+        $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);
+
+        return $result;
     }
 
     /**

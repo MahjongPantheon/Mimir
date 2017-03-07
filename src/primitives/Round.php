@@ -157,19 +157,19 @@ class RoundPrimitive extends Primitive
     /**
      * @var int
      */
-    protected $_dora;
+    protected $_dora = 0;
     /**
      * @var int
      */
-    protected $_uradora;
+    protected $_uradora = 0;
     /**
      * @var int
      */
-    protected $_kandora;
+    protected $_kandora = 0;
     /**
      * @var int
      */
-    protected $_kanuradora;
+    protected $_kanuradora = 0;
     /**
      * @var int[]
      */

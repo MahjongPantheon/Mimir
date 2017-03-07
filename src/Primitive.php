@@ -153,6 +153,9 @@ abstract class Primitive
         return [
             'serialize' => function ($obj) use ($nullable) {
                 return (!$obj && $nullable) ? null : (int)$obj;
+            },
+            'deserialize' => function ($str) use ($nullable) {
+                return (!$str && $nullable) ? null : (int)$str;
             }
         ];
     }
