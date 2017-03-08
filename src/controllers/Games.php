@@ -146,7 +146,8 @@ class GamesController extends Controller
      *          riichi => [ ..playerId.. ],
      *          honba => int,
      *          scores => [ ..int.. ],
-     *          finished => boolean
+     *          finished => boolean,
+     *          penalties => [ playerId => penaltySize, ... ]
      *      ]
      * ]
      *
@@ -180,7 +181,8 @@ class GamesController extends Controller
                 'riichi'    => $session[0]->getCurrentState()->getRiichiBets(),
                 'honba'     => $session[0]->getCurrentState()->getHonba(),
                 'scores'    => $session[0]->getCurrentState()->getScores(),
-                'finished'  => $session[0]->getCurrentState()->isFinished()
+                'finished'  => $session[0]->getCurrentState()->isFinished(),
+                'penalties' => $session[0]->getCurrentState()->getPenalties()
             ]
         ];
 
