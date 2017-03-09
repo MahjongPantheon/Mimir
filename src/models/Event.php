@@ -106,6 +106,7 @@ class EventModel extends Model
                 'status' => $game->getStatus(),
                 'hash' => $game->getRepresentationalHash(),
                 'penalties' => $game->getCurrentState()->getPenaltiesLog(),
+                'table_index' => $game->getTableIndex(),
                 'last_round' => $lastRound ? [
                     'outcome' => $lastRound->getOutcome(),
                     'winner'  => $lastRound->getWinnerId(),
