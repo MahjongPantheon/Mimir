@@ -343,6 +343,10 @@ class PlayersController extends Controller
             }
         });
 
+        if (empty($lastRound)) {
+            return null;
+        }
+
         $paymentsInfo = $this->_formatLastRound($session, $lastRound);
 
         $multiGet = function (RoundPrimitive $p, $method) {
