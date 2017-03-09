@@ -206,11 +206,11 @@ class SeatingController extends Controller
         $participatingPlayers = [];
         foreach ($tables as &$table) {
             foreach ($table as $k => $player) {
-                if (!is_numeric($player) || empty($player) || empty($currentRatingTable[intval($player) + 1])) {
+                if (!is_numeric($player) || empty($player) || empty($currentRatingTable[intval($player) - 1])) {
                     throw new InvalidParametersException('Wrong rating place found: ' . $player);
                 }
 
-                $playerId = $currentRatingTable[intval($player) + 1]['id'];
+                $playerId = $currentRatingTable[intval($player) - 1]['id'];
                 if (!empty($participatingPlayers[$playerId])) {
                     throw new InvalidParametersException(
                         'Player id #' . $playerId . ' (place #' . $player . ') is already placed at another table!'
