@@ -96,7 +96,7 @@ class Seating
         for ($i = 0; $i < $maxIterations; $i++) {
             srand($randFactor + $i * 17); // 2)
             foreach ($groups as $k => $v) {
-                $groups[$k] = self::_shuffle($groups[$k]); // 3)
+                $groups[$k] = self::shuffle($groups[$k]); // 3)
             }
 
             $flattenedGroups = array_reduce($groups, function ($acc, $el) {
@@ -273,7 +273,7 @@ class Seating
      * @param $array
      * @return array
      */
-    protected static function _shuffle(array $array)
+    public static function shuffle(array $array)
     {
         $keys = array_keys($array);
 

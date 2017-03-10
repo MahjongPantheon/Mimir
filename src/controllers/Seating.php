@@ -187,13 +187,12 @@ class SeatingController extends Controller
     {
         $tables = array_map(function ($t) use ($randomize) {
             $places = array_map('trim', explode('-', $t));
-            if ($randomize) {
-                srand(time());
-                shuffle($places);
+            if (!$randomize) {
+                return $places;
             }
-            return $places;
+            srand(microtime());
+            return Seating::shuffle($places);
         }, explode("\n", $tablesDescription));
-
 
         $event = EventPrimitive::findById($this->_db, [$eventId]);
         if (empty($event)) {
