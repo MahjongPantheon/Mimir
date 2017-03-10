@@ -148,6 +148,7 @@ CREATE TABLE "session"
 ;
 CREATE INDEX "session_replay" ON "session"("replay_hash");
 CREATE INDEX "session_status" ON "session"("status");
+CREATE INDEX "session_table_index" ON "session"("table_index");
 CREATE INDEX "session_rephash" ON "session"("representational_hash");
 
 -- Many-to-many relation

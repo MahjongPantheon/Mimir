@@ -55,6 +55,7 @@ class EventModel extends Model
             ->select('session_user.user_id')
             ->select('session_user.session_id')
             ->select('user.display_name')
+            ->select('session.table_index')
             ->where('session.event_id', $eventId)
             ->orderByDesc('session.id')
             ->orderByAsc('order')
