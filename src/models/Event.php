@@ -344,6 +344,19 @@ class EventModel extends Model
             $playersHistoryItems = array_reverse($playersHistoryItems);
         }
 
+        if ($event->getType() === 'offline_interactive_tournament') {
+            $this->_stableSort(
+                $playersHistoryItems,
+                function (PlayerHistoryPrimitive $el1, PlayerHistoryPrimitive $el2) {
+                    if ($el1->getGamesPlayed() == $el2->getGamesPlayed()) {
+                        return 0;
+                    }
+
+                    return $el1->getGamesPlayed() < $el2->getGamesPlayed() ? 1 : -1; // swap for desc sort
+                }
+            );
+        }
+
         // TODO: среднеквадратичное отклонение
 
         return array_map(function (PlayerHistoryPrimitive $el) use (&$playerItems, $event) {
@@ -429,6 +442,47 @@ class EventModel extends Model
                 break;
             default:
                 throw new InvalidParametersException("Parameter orderBy should be either 'name', 'rating' or 'avg_place'");
+        }
+    }
+
+    protected function _stableSort(&$array, $comparer = 'strcmp')
+    {
+        // Arrays of size < 2 require no action.
+        if (count($array) < 2) {
+            return;
+        }
+
+        // Split the array in half
+        $halfway = count($array) / 2;
+        $array1 = array_slice($array, 0, $halfway);
+        $array2 = array_slice($array, $halfway);
+
+        // Recurse to sort the two halves
+        $this->_stableSort($array1, $comparer);
+        $this->_stableSort($array2, $comparer);
+        // If all of $array1 is <= all of $array2, just append them.
+        if (call_user_func($comparer, end($array1), $array2[0]) < 1) {
+            $array = array_merge($array1, $array2);
+            return;
+        }
+
+        // Merge the two sorted arrays into a single sorted array
+        $array = array();
+        $ptr1 = $ptr2 = 0;
+        while ($ptr1 < count($array1) && $ptr2 < count($array2)) {
+            if (call_user_func($comparer, $array1[$ptr1], $array2[$ptr2]) < 1) {
+                $array[] = $array1[$ptr1++];
+            } else {
+                $array[] = $array2[$ptr2++];
+            }
+        }
+
+        // Merge the remainder
+        while ($ptr1 < count($array1)) {
+            $array[] = $array1[$ptr1++];
+        }
+        while ($ptr2 < count($array2)) {
+            $array[] = $array2[$ptr2++];
         }
     }
 
