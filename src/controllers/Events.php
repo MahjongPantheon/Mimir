@@ -1,5 +1,5 @@
 <?php
-/*  Riichi mahjong API game server
+/*  Mimir: mahjong games storage
  *  Copyright (C) 2016  o.klimenko aka ctizen
  *
  *  This program is free software: you can redistribute it and/or modify
