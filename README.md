@@ -1,12 +1,14 @@
-Riichi mahjong game server: API
-===============================
+## Mimir: game storage
 
-A backend part for riichi mahjong games and tournaments assistance system.
+![Mimir](www/mimirhires.png?raw=true "Mimir")
 
-[![Build Status](https://travis-ci.org/Furiten/riichi-api.svg?branch=master)](https://travis-ci.org/Furiten/riichi-api)
+**Mimir** is a backend for [Tyr]() and [Rheda](), which provides storage of game information for japanese (riichi) mahjong sessions. 
 
-What is it for?
----------------
+[![Build Status](https://travis-ci.org/MahjongPantheon/Mimir.svg?branch=master)](https://travis-ci.org/MahjongPantheon/Mimir)
+
+**Mimir** is a part of [Pantheon](https://github.com/MahjongPantheon) system.
+
+### Features
 
 We needed a simple but stateful API for gaming assistance in aspects like:
 - Storing game log for an offline game.
@@ -16,21 +18,18 @@ We needed a simple but stateful API for gaming assistance in aspects like:
 - Automating creating and performing of online and offline tournaments.
 - And many more...
 
-What's inside?
---------------
+### What's inside?
 
-- API uses JSON-RPC to communicate with clients.
+- Mimir uses JSON-RPC to communicate with clients.
 - Supported RDBMS are sqlite, mysql (v5.5+) and pgsql (v9.5+), others may work too because of PDO under hood, but only after some little coding (you'll see :) ). Anyway, other RDBMS are not tested at all, use them at your own risk.
 - PHP v5.5+ is required to run the API on your own server.
 - [Api doc here](APIDOC.md)
 
-Installation gotchas
---------------------
+### Installation gotchas
 
 - PHP v5.6.x comes with `always_populate_raw_post_data = 0` in default php.ini, and this breaks JSON reply validity, if errors output is not disabled (you should disable it on production anyway! But it will flood your log files with crap :( ). When using this PHP version, you should set `always_populate_raw_post_data = -1` in your ini file.
 
-Developer information
----------------------
+### Developer information
 
 We accept any help with developing, testing and improving our system, so please feel free to create issues or send pull requests for missing functionality.
 
@@ -48,7 +47,7 @@ You also will need standard `make` utility to use following shortcuts.
 To generate or recreate sqlite db, run `make init_sqlite`.
 To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.
 
-Distribution info
------------------
+### Legend
 
-This software is distributed under GNU GPL v3 license. Latest version of the software can be downloaded at [its primary repo](https://github.com/Furiten/riichi-api). It's also the one and only place to submit your issues and pull requests :)
+**Mimir** is a figure in Norse mythology renowned for his knowledge and wisdom. See wikipedia for details :)
+
