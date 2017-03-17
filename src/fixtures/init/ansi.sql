@@ -16,6 +16,7 @@ CREATE TABLE "user"
   "ident" varchar(255) not null, -- oauth ident info, for example
   "alias" varchar(255), -- user alias for text-mode game log
   "display_name" varchar(255) not null,
+  "city" varchar(255),
   "tenhou_id" varchar(255)
 )
 -- CHARACTER SET utf8 COLLATE utf8_general_ci
