@@ -61,11 +61,8 @@ class OnlineParser
         $success = true;
         $scores = [];
         foreach ($this->_roundData as $round) {
-            $success = $success && $session->updateCurrentState(
-                RoundPrimitive::createFromData($this->_db, $session, $round)
-            );
-            // TODO: potential error! RoundPrimitive->save() should be called before updating current state!
-
+            $savedRound = RoundPrimitive::createFromData($this->_db, $session, $round);
+            $success = $success && $session->updateCurrentState($savedRound);
             $scores []= $session->getCurrentState()->getScores();
         }
 
@@ -149,9 +146,27 @@ class OnlineParser
                 throw new ParseException('No unnamed players are allowed in replays');
             }
 
-            $players = PlayerPrimitive::findByAlias($this->_db, array_keys($this->_players));
+            $players = PlayerPrimitive::findByTenhouId($this->_db, array_keys($this->_players));
+
+            # let's auto register missed players
+            # maybe flag to do it should be in the event settings
             if (count($players) !== count($this->_players)) {
-                throw new ParseException('Some of players are not found in DB (' . implode(',', array_keys($this->_players)) . ')');
+                $registeredPlayers = array_map(function (PlayerPrimitive $p) {
+                    return $p->getTenhouId();
+                }, $players);
+
+                $missedPlayers = array_diff(array_keys($this->_players), $registeredPlayers);
+                foreach ($missedPlayers as $i => $tenhouId) {
+                    $ident = sha1($tenhouId);
+                    $player = (new PlayerPrimitive($this->_db))
+                        ->setAlias($tenhouId)
+                        ->setDisplayName($tenhouId)
+                        ->setIdent($ident)
+                        ->setTenhouId($tenhouId);
+                    $player->save();
+
+                    $players[] = $player;
+                }
             }
 
             if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
