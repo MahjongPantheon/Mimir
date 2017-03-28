@@ -17,8 +17,22 @@
  */
 namespace Riichi;
 
-require_once __DIR__ . '/ExceptionBase.php';
-
-class EntityNotFoundException extends BaseException
+class BaseException extends \Exception
 {
+    static protected $_conf = null;
+
+    public function __construct($message = "", $code = 0, \Exception $previous = null)
+    {
+        if (empty(self::$_conf)) {
+            $configPath = getenv('OVERRIDE_CONFIG_PATH');
+            self::$_conf = require(empty($configPath) ? __DIR__ . '/../../config/index.php' : $configPath);
+        }
+
+        $token = empty($_SERVER['HTTP_X_DEBUG_TOKEN']) ? '' : $_SERVER['HTTP_X_DEBUG_TOKEN'];
+        if ($token === self::$_conf['admin']['debug_token']) {
+            $message .= "\n\n" . $this->getTraceAsString();
+        }
+
+        parent::__construct($message, $code, $previous);
+    }
 }

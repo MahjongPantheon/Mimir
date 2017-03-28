@@ -30,7 +30,8 @@ if (file_exists(__DIR__ . '/local/index.php')) {
 
 return array_merge([
     'admin'     => [
-        'god_token' => 'CHANGE_ME' // TODO: change this in local config!
+        'god_token' => 'CHANGE_ME', // TODO: change this in your local config!
+        'debug_token' => 'CHANGE_ME' // TODO: change this in your local config!
     ],
     'db'        => require __DIR__ . '/db.php',
     'routes'    => require __DIR__ . '/routes.php'

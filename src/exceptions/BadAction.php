@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class BadActionException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class BadActionException extends BaseException
 {
 }

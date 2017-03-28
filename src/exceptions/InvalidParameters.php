@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class InvalidParametersException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class InvalidParametersException extends BaseException
 {
 }
