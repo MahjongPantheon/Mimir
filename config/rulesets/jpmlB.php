@@ -28,6 +28,7 @@ class RulesetJpmlB extends Ruleset
         'startRating'           => 1500,
         'oka'                   => 0,
         'startPoints'           => 30000,
+        'subtractStartPoints'   => true,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => false,
         'chomboPenalty'         => 200,

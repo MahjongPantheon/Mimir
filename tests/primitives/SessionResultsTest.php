@@ -68,6 +68,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_ruleset->setRule('tonpuusen', false);
         $this->_ruleset->setRule('withLeadingDealerGameOver', true);
         $this->_ruleset->setRule('startPoints', 30000);
+        $this->_ruleset->setRule('subtractStartPoints', true);
         $this->_ruleset->setRule('uma', [1 => 15, 5, -5, -15]);
         $this->_ruleset->setRule('oka', 0);
 
@@ -220,7 +221,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result1->getScore(), $result2->getScore());
         $this->assertEquals($result1->getRatingDelta(), $result2->getRatingDelta());
         $this->assertEquals(31500, $result1->getScore());
-        $this->assertEquals(11500, $result2->getRatingDelta());
+        $this->assertEquals(41500, $result2->getRatingDelta()); // no base subtraction in ema, 11500+30000
     }
 
     public function testChombo()
