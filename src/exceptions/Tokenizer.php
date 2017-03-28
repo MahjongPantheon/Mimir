@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class TokenizerException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class TokenizerException extends BaseException
 {
 }

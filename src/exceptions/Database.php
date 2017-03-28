@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class DatabaseException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class DatabaseException extends BaseException
 {
 }

@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class DownloadException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class DownloadException extends BaseException
 {
 }

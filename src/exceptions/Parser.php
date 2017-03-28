@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class ParseException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class ParseException extends BaseException
 {
 }

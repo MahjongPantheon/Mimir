@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class InvalidUserException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class InvalidUserException extends BaseException
 {
 }

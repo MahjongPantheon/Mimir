@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class MalformedPayloadException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class MalformedPayloadException extends BaseException
 {
 }
