@@ -134,6 +134,11 @@ abstract class Ruleset
         return static::$_ruleset['startPoints'];
     }
 
+    public function subtractStartPoints()
+    {
+        return static::$_ruleset['subtractStartPoints'];
+    }
+
     public function riichiGoesToWinner()
     {
         return static::$_ruleset['riichiGoesToWinner'];

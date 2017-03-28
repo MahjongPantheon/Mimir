@@ -417,7 +417,9 @@ class SessionResultsPrimitive extends Primitive
     protected function _calcRatingDelta(Ruleset $rules, $allScores)
     {
         return (
-            ($this->_score - $rules->startPoints()) / (float)$rules->tenboDivider()
+            (
+                $this->_score - ($rules->subtractStartPoints() ? $rules->startPoints() : 0)
+            ) / (float)$rules->tenboDivider()
             + $rules->oka($this->_place)
             + $rules->uma($allScores)[$this->_place]
         ) / (float)$rules->ratingDivider();
