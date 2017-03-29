@@ -28,5 +28,7 @@ return [
         'god_token' => '198vdsh904hfbnkjv98whb2iusvd98b29bsdv98svbr9wghj',
         'debug_token' => '2-839489203hf2893'
     ],
-    'routes'    => require __DIR__ . '/../../config/routes.php'
+    'routes'    => require __DIR__ . '/../../config/routes.php',
+    'verbose'   => true,
+    'verboseLog' => __DIR__ . '/../data/verbose.log'
 ];
