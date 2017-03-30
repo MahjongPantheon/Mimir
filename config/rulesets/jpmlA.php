@@ -46,6 +46,9 @@ class RulesetJpmlA extends Ruleset
         'minPenalty'            => 10,
         'maxPenalty'            => 200,
         'penaltyStep'           => 10,
+        'timerPolicy'           => 'redZone',
+        'yellowZone'            => 0,
+        'redZone'               => 300, // 5min
         'withLeadingDealerGameOver' => false
     ];
 

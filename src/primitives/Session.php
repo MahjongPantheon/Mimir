@@ -305,10 +305,11 @@ class SessionPrimitive extends Primitive
 
         $orm = $orm->orderByDesc('s.id'); // primary key
         $item = $orm->findOne();
+
         if (!empty($item)) {
             $item = $item->asArray();
         } else {
-            return [];
+            return null;
         }
         return self::_recreateInstance($db, $item);
     }
@@ -565,18 +566,51 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        $this->getCurrentState()->update($round);
-        $success = $this->save();
+        $lastTimer = $this->getEvent()->getLastTimer(); // may be null if timer is not set!
 
-        $isInRedZone = $this->getEvent()->getRedZone() && (
-            $this->getEvent()->getLastTimer() + (
-                $this->getEvent()->getGameDuration() * 60
-                - $this->getEvent()->getRedZone()
-            ) < time()
-        );
+        switch ($this->getEvent()->getRuleset()->timerPolicy()) {
+            case 'yellowZone':
+                $isInYellowZone = $lastTimer && (
+                    $lastTimer + (
+                        $this->getEvent()->getGameDuration() * 60
+                        - $this->getEvent()->getRuleset()->yellowZone()
+                    ) < time()
+                );
 
-        if ($isInRedZone) {
-            $this->getCurrentState()->forceFinish();
+                if ($isInYellowZone) {
+                    if (!$this->getCurrentState()->yellowZoneAlreadyPlayed()) {
+                        $this->getCurrentState()->update($round);
+                        $this->getCurrentState()->setYellowZonePlayed(); // call before '->save' to save in one shot
+                        $success = $this->save();
+                    } else {
+                        // this is red zone, in fact
+                        $this->getCurrentState()->update($round);
+                        $success = $this->save();
+                        $this->getCurrentState()->forceFinish();
+                    }
+                } else {
+                    $this->getCurrentState()->update($round);
+                    $success = $this->save();
+                }
+                break;
+            case 'redZone':
+                $this->getCurrentState()->update($round);
+                $success = $this->save();
+
+                $isInRedZone = $lastTimer && (
+                    $lastTimer + (
+                        $this->getEvent()->getGameDuration() * 60
+                        - $this->getEvent()->getRuleset()->redZone()
+                    ) < time()
+                );
+
+                if ($isInRedZone) {
+                    $this->getCurrentState()->forceFinish();
+                }
+                break;
+            default: // no zones, just update
+                $this->getCurrentState()->update($round);
+                $success = $this->save();
         }
 
         if ($this->getCurrentState()->isFinished()) {
@@ -642,7 +676,6 @@ class SessionPrimitive extends Primitive
      * Rollback round in current session
      * @param RoundPrimitive|MultiRoundPrimitive $round
      * @throws InvalidParametersException
-     * @return array
      */
     public function rollback(RoundPrimitive $round)
     {

@@ -66,6 +66,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_ruleset->setRule('tenboDivider', 1000.);
         $this->_ruleset->setRule('ratingDivider', 1.);
         $this->_ruleset->setRule('tonpuusen', false);
+        $this->_ruleset->setRule('timerPolicy', 'none');
         $this->_ruleset->setRule('withLeadingDealerGameOver', true);
         $this->_ruleset->setRule('startPoints', 30000);
         $this->_ruleset->setRule('subtractStartPoints', true);
