@@ -140,7 +140,8 @@ CREATE TABLE "session"
   "replay_hash" varchar(255), -- tenhou game hash, for deduplication
   "table_index" integer, -- table number in tournament
   "orig_link" text, -- original tenhou game link, for access to replay
-  "play_date" timestamp,
+  "start_date" timestamp,
+  "end_date" timestamp,
   "status" varchar(255), -- planned / inprogress / finished
   "intermediate_results" text, -- json-encoded results for in-progress sessions
   foreign key ("event_id") references "event" ("id")
