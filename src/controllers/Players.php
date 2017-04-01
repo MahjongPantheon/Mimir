@@ -384,7 +384,8 @@ class PlayersController extends Controller
             'dora'       => $multiGet($lastRound, 'getDora'),
             'kandora'    => $multiGet($lastRound, 'getKandora'),
             'uradora'    => $multiGet($lastRound, 'getUradora'),
-            'kanuradora' => $multiGet($lastRound, 'getKanuradora')
+            'kanuradora' => $multiGet($lastRound, 'getKanuradora'),
+            'openHand'   => $multiGet($lastRound, 'getOpenHand')
         ];
 
         $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);

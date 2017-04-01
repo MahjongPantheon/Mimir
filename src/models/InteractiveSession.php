@@ -163,7 +163,8 @@ class InteractiveSessionModel extends Model
                 'dora'       => $multiGet($round, 'getDora'),
                 'kandora'    => $multiGet($round, 'getKandora'),
                 'uradora'    => $multiGet($round, 'getUradora'),
-                'kanuradora' => $multiGet($round, 'getKanuradora')
+                'kanuradora' => $multiGet($round, 'getKanuradora'),
+                'openHand'   => $multiGet($round, 'getOpenHand')
             ];
         }
 

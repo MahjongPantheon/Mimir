@@ -259,7 +259,8 @@ class EventModel extends Model
                     'dora'          => (int) $round->getDora(),
                     'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
                     'kandora'       => (int) $round->getKandora(),
-                    'kanuradora'    => (int) $round->getKanuradora()
+                    'kanuradora'    => (int) $round->getKanuradora(),
+                    'open_hand'     => $round->getOpenHand()
                 ];
             case 'multiron':
                 /** @var MultiRoundPrimitive $mRound */
@@ -281,7 +282,8 @@ class EventModel extends Model
                             'dora'          => (int) $round->getDora(),
                             'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
                             'kandora'       => (int) $round->getKandora(),
-                            'kanuradora'    => (int) $round->getKanuradora()
+                            'kanuradora'    => (int) $round->getKanuradora(),
+                            'open_hand'     => $round->getOpenHand()
                         ];
                     }, $rounds)
                 ];
@@ -297,7 +299,8 @@ class EventModel extends Model
                     'dora'          => (int) $round->getDora(),
                     'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
                     'kandora'       => (int) $round->getKandora(),
-                    'kanuradora'    => (int) $round->getKanuradora()
+                    'kanuradora'    => (int) $round->getKanuradora(),
+                    'open_hand'     => $round->getOpenHand()
                 ];
             case 'draw':
                 return [
