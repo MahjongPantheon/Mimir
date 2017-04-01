@@ -46,6 +46,9 @@ class RulesetEma extends Ruleset
         'minPenalty'            => 100,
         'maxPenalty'            => 20000,
         'penaltyStep'           => 100,
+        'timerPolicy'           => 'yellowZone',
+        'yellowZone'            => 900, // 15min
+        'redZone'               => 0,
         'withLeadingDealerGameOver' => false
     ];
 

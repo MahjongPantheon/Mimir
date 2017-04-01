@@ -49,6 +49,9 @@ class RulesetTenhounet extends Ruleset
         'autoRegisterUsers'     => true,
         'gameExpirationTime'    => 27, // hours, to cover JST difference
         'withLeadingDealerGameOver' => true,
+        'timerPolicy'           => 'none',
+        'yellowZone'            => 0,
+        'redZone'               => 0,
         'uma' => [
             1 => 15,
             2 => 5,

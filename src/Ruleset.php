@@ -223,4 +223,19 @@ abstract class Ruleset
     {
         return static::$_ruleset['penaltyStep'];
     }
+
+    public function redZone()
+    {
+        return static::$_ruleset['redZone'];
+    }
+
+    public function yellowZone()
+    {
+        return static::$_ruleset['yellowZone'];
+    }
+
+    public function timerPolicy()
+    {
+        return static::$_ruleset['timerPolicy'];
+    }
 }
