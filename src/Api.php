@@ -19,6 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/Db.php';
+require_once __DIR__ . '/ErrorHandler.php';
 
 use Monolog\Logger;
 use Monolog\Handler\ErrorLogHandler;
@@ -34,6 +35,11 @@ class Api
         $this->_db = new Db($this->_config);
         $this->_syslog = new Logger('RiichiApi');
         $this->_syslog->pushHandler(new ErrorLogHandler());
+
+        // + some custom handler for testing errors
+        if ($this->_config->getValue('verbose')) {
+            (new ErrorHandler($this->_config, $this->_syslog))->register();
+        }
     }
 
     public function getTimezone()

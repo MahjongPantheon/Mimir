@@ -46,7 +46,6 @@ class EventPrimitive extends Primitive
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
-        'red_zone'          => '_redZone',
     ];
 
     protected function _getFieldsTransforms()
@@ -59,7 +58,6 @@ class EventPrimitive extends Primitive
             '_gameDuration'       => $this->_integerTransform(true),
             '_lastTimer'          => $this->_integerTransform(true),
             '_id'                 => $this->_integerTransform(true),
-            '_redZone'            => $this->_integerTransform(true),
             '_lobbyId'            => $this->_stringTransform(true),
             '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [

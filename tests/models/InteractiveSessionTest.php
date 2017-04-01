@@ -115,6 +115,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($sessionPrimitive));
         $this->assertEquals($this->_event->getId(), $sessionPrimitive[0]->getEventId());
         $this->assertEquals('finished', $sessionPrimitive[0]->getStatus());
+        $this->assertNotEquals('', $sessionPrimitive[0]->getEndDate());
     }
 
     public function testAddRoundRon()
@@ -414,7 +415,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         /** @var SessionPrimitive $session */
         list($session) = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash]);
         $this->assertEquals(
-            '{"_scores":{"1":29400,"2":32800,"3":29900,"4":27900},"_penalties":[],"_extraPenaltyLog":[],"_round":2,"_honba":0,"_riichiBets":0,"_prematurelyFinished":false,"_roundJustChanged":true}',
+            '{"_scores":{"1":29400,"2":32800,"3":29900,"4":27900},"_penalties":[],"_extraPenaltyLog":[],"_round":2,"_honba":0,"_riichiBets":0,"_prematurelyFinished":false,"_roundJustChanged":true,"_yellowZoneAlreadyPlayed":false}',
             $session->getCurrentState()->toJson()
         );
 

@@ -17,6 +17,8 @@
  */
 namespace Riichi;
 
-class AuthFailedException extends \Exception
+require_once __DIR__ . '/ExceptionBase.php';
+
+class AuthFailedException extends BaseException
 {
 }

@@ -51,6 +51,7 @@ class RoundPrimitive extends Primitive
         'tempai'        => '_tempaiIds',
         'winner_id'     => '_winnerId',
         'loser_id'      => '_loserId',
+        'open_hand'     => '_openHand',
         'last_session_state' => '_lastSessionState'
     ];
 
@@ -75,6 +76,7 @@ class RoundPrimitive extends Primitive
             '_kanuradora' => $this->_integerTransform(true),
             '_multiRon'   => $this->_integerTransform(true),
             '_id'         => $this->_integerTransform(true),
+            '_openHand'   => $this->_integerTransform(),
             '_lastSessionState' => [
                 'serialize' => function () {
                     return $this->getSession()->getCurrentState()->toJson();
@@ -188,6 +190,10 @@ class RoundPrimitive extends Primitive
      * @var string
      */
     protected $_lastSessionState;
+    /**
+     * @var boolean
+     */
+    protected $_openHand;
 
     /**
      * Find rounds by local ids (primary key) - should not be used in business code
@@ -727,6 +733,14 @@ class RoundPrimitive extends Primitive
     public function getYaku()
     {
         return $this->_yaku;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getOpenHand()
+    {
+        return boolval($this->_openHand);
     }
 
     /**

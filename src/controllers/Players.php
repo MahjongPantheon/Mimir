@@ -327,20 +327,27 @@ class PlayersController extends Controller
         $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
         /** @var MultiRoundPrimitive $lastRound */
         $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
+            /** @var $acc RoundPrimitive */
+
             if ($acc instanceof MultiRoundPrimitive) {
-                foreach ($acc->rounds() as $round) {
-                    if ($round->getId() > $r->getId()) {
-                        return $acc;
-                    }
-                }
-                return $r;
+                $accId = array_reduce($acc->rounds(), function ($mAcc, RoundPrimitive $r) {
+                    return ($r->getId() > $mAcc) ? $r->getId() : $mAcc;
+                }, 0);
+            } else if ($acc) {
+                $accId = $acc->getId();
             } else {
-                /** @var $acc RoundPrimitive */
-                if (!$acc || $r->getId() > $acc->getId()) {
-                    return $r;
-                }
-                return $acc;
+                $accId = 0;
             }
+
+            if ($r instanceof MultiRoundPrimitive) {
+                $rId = array_reduce($r->rounds(), function ($mAcc, RoundPrimitive $r) {
+                    return ($r->getId() > $mAcc) ? $r->getId() : $mAcc;
+                }, 0);
+            } else {
+                $rId = $r->getId();
+            }
+
+            return $rId > $accId ? $r : $acc;
         });
 
         if (empty($lastRound)) {
@@ -377,7 +384,8 @@ class PlayersController extends Controller
             'dora'       => $multiGet($lastRound, 'getDora'),
             'kandora'    => $multiGet($lastRound, 'getKandora'),
             'uradora'    => $multiGet($lastRound, 'getUradora'),
-            'kanuradora' => $multiGet($lastRound, 'getKanuradora')
+            'kanuradora' => $multiGet($lastRound, 'getKanuradora'),
+            'openHand'   => $multiGet($lastRound, 'getOpenHand')
         ];
 
         $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);

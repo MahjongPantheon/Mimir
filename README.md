@@ -8,6 +8,8 @@
 
 **Mimir** is a part of [Pantheon](https://github.com/MahjongPantheon) system.
 
+Please use our [Bug tracker](https://pantheon.myjetbrains.com/youtrack/issues/MIMIR) for error reports and feature requests.
+
 ### Features
 
 We needed a simple but stateful API for gaming assistance in aspects like:

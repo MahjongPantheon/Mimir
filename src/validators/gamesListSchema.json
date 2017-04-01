@@ -158,6 +158,9 @@
         },
         "kanuradora": {
           "type": "integer"
+        },
+        "open_hand": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -173,7 +176,8 @@
         "dora",
         "uradora",
         "kandora",
-        "kanuradora"
+        "kanuradora",
+        "open_hand"
       ]
     },
     "multiron": {
@@ -222,6 +226,9 @@
               },
               "kanuradora": {
                 "type": "integer"
+              },
+              "open_hand": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false,
@@ -234,7 +241,8 @@
               "dora",
               "uradora",
               "kandora",
-              "kanuradora"
+              "kanuradora",
+              "open_hand"
             ]
           }
         }
@@ -283,6 +291,9 @@
         },
         "kanuradora": {
           "type": "integer"
+        },
+        "open_hand": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -297,7 +308,8 @@
         "dora",
         "uradora",
         "kandora",
-        "kanuradora"
+        "kanuradora",
+        "open_hand"
       ]
     },
     "draw": {

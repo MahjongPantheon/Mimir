@@ -41,7 +41,8 @@ class SessionPrimitive extends Primitive
         'replay_hash'           => '_replayHash',
         'table_index'           => '_tableIndex',
         'orig_link'             => '_origLink',
-        'play_date'             => '_playDate',
+        'start_date'            => '_startDate',
+        'end_date'              => '_endDate',
         '::session_user'        => '_playersIds', // external many-to-many relation
         'status'                => '_status',
         'intermediate_results'  => '_current',
@@ -56,7 +57,8 @@ class SessionPrimitive extends Primitive
             '_replayHash'   => $this->_stringTransform(true),
             '_tableIndex'   => $this->_integerTransform(true),
             '_origLink'     => $this->_stringTransform(true),
-            '_playDate'     => $this->_stringTransform(true),
+            '_startDate'    => $this->_stringTransform(true),
+            '_endDate'      => $this->_stringTransform(true),
             '_status'       => $this->_stringTransform(true),
             '_id'           => $this->_integerTransform(true),
             '_current'      => [
@@ -121,7 +123,13 @@ class SessionPrimitive extends Primitive
      * Timestamp
      * @var string
      */
-    protected $_playDate;
+    protected $_startDate;
+
+    /**
+     * Timestamp
+     * @var string
+     */
+    protected $_endDate;
 
     /**
      * ordered list of player ids, east to north.
@@ -150,7 +158,7 @@ class SessionPrimitive extends Primitive
     public function __construct(IDb $db)
     {
         parent::__construct($db);
-        $this->_playDate = date('Y-m-d H:i:s'); // may be actualized on restore
+        $this->_startDate = date('Y-m-d H:i:s'); // may be actualized on restore
     }
 
     /**
@@ -209,8 +217,8 @@ class SessionPrimitive extends Primitive
             $db,
             ['status' => (array)$state, 'event_id' => [$eventId]],
             [
-                'limit' => $limit, 'offset' => $offset,
-                'order' => 'desc',  'orderBy' => 'play_date'
+                'limit' => $limit, 'offset'  => $offset,
+                'order' => 'desc', 'orderBy' => 'end_date'
             ]
         );
     }
@@ -297,10 +305,11 @@ class SessionPrimitive extends Primitive
 
         $orm = $orm->orderByDesc('s.id'); // primary key
         $item = $orm->findOne();
+
         if (!empty($item)) {
             $item = $item->asArray();
         } else {
-            return [];
+            return null;
         }
         return self::_recreateInstance($db, $item);
     }
@@ -311,7 +320,7 @@ class SessionPrimitive extends Primitive
      */
     public function save()
     {
-        $this->_representationalHash = sha1(implode(',', $this->_playersIds) . $this->_playDate);
+        $this->_representationalHash = sha1(implode(',', $this->_playersIds) . $this->_startDate);
         return parent::save();
     }
 
@@ -413,9 +422,27 @@ class SessionPrimitive extends Primitive
     /**
      * @return string
      */
-    public function getPlayDate()
+    public function getStartDate()
     {
-        return $this->_playDate;
+        return $this->_startDate;
+    }
+
+    /**
+     * @param string $date
+     * @return $this
+     */
+    public function setEndDate($date)
+    {
+        $this->_endDate = $date;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEndDate()
+    {
+        return $this->_endDate;
     }
 
     /**
@@ -539,20 +566,53 @@ class SessionPrimitive extends Primitive
      */
     public function updateCurrentState(RoundPrimitive $round)
     {
-        $this->getCurrentState()->update($round);
-        $success = $this->save();
+        $lastTimer = $this->getEvent()->getLastTimer(); // may be null if timer is not set!
 
-        $isInRedZone = $this->getEvent()->getRedZone() && (
-            $this->getEvent()->getLastTimer() + (
-                $this->getEvent()->getGameDuration() * 60
-                - $this->getEvent()->getRedZone()
-            ) < time()
-        );
+        switch ($this->getEvent()->getRuleset()->timerPolicy()) {
+            case 'yellowZone':
+                $isInYellowZone = $lastTimer && (
+                    $lastTimer + (
+                        $this->getEvent()->getGameDuration() * 60
+                        - $this->getEvent()->getRuleset()->yellowZone()
+                    ) < time()
+                );
 
-        if ($isInRedZone) {
-            $this->getCurrentState()->forceFinish();
+                if ($isInYellowZone) {
+                    if (!$this->getCurrentState()->yellowZoneAlreadyPlayed()) {
+                        $this->getCurrentState()->update($round);
+                        $this->getCurrentState()->setYellowZonePlayed(); // call before '->save' to save in one shot
+                        $success = $this->save();
+                    } else {
+                        // this is red zone, in fact
+                        $this->getCurrentState()->update($round);
+                        $success = $this->save();
+                        $this->getCurrentState()->forceFinish();
+                    }
+                } else {
+                    $this->getCurrentState()->update($round);
+                    $success = $this->save();
+                }
+                break;
+            case 'redZone':
+                $this->getCurrentState()->update($round);
+                $success = $this->save();
+
+                $isInRedZone = $lastTimer && (
+                    $lastTimer + (
+                        $this->getEvent()->getGameDuration() * 60
+                        - $this->getEvent()->getRuleset()->redZone()
+                    ) < time()
+                );
+
+                if ($isInRedZone) {
+                    $this->getCurrentState()->forceFinish();
+                }
+                break;
+            default: // no zones, just update
+                $this->getCurrentState()->update($round);
+                $success = $this->save();
         }
-        
+
         if ($this->getCurrentState()->isFinished()) {
             $success = $success && $this->finish();
         }
@@ -579,7 +639,13 @@ class SessionPrimitive extends Primitive
         if ($this->getStatus() === 'finished') {
             return false;
         }
-        return $this->setStatus('finished')->save() && $this->_finalizeGame();
+
+        $success = $this
+            ->setStatus('finished')
+            ->setEndDate(date('Y-m-d H:i:s'))
+            ->save();
+
+        return $success && $this->_finalizeGame();
     }
 
     /**
@@ -610,7 +676,6 @@ class SessionPrimitive extends Primitive
      * Rollback round in current session
      * @param RoundPrimitive|MultiRoundPrimitive $round
      * @throws InvalidParametersException
-     * @return array
      */
     public function rollback(RoundPrimitive $round)
     {

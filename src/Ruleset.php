@@ -134,6 +134,11 @@ abstract class Ruleset
         return static::$_ruleset['startPoints'];
     }
 
+    public function subtractStartPoints()
+    {
+        return static::$_ruleset['subtractStartPoints'];
+    }
+
     public function riichiGoesToWinner()
     {
         return static::$_ruleset['riichiGoesToWinner'];
@@ -217,5 +222,20 @@ abstract class Ruleset
     public function penaltyStep()
     {
         return static::$_ruleset['penaltyStep'];
+    }
+
+    public function redZone()
+    {
+        return static::$_ruleset['redZone'];
+    }
+
+    public function yellowZone()
+    {
+        return static::$_ruleset['yellowZone'];
+    }
+
+    public function timerPolicy()
+    {
+        return static::$_ruleset['timerPolicy'];
     }
 }

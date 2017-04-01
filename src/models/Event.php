@@ -72,13 +72,13 @@ class EventModel extends Model
                 $ratings[$item->getPlayerId()] = $item->getRating();
             }
         }
-        
+
         return array_map(function ($seat) use (&$ratings) {
             $seat['rating'] = $ratings[$seat['user_id']];
             return $seat;
         }, $seatings);
     }
-    
+
     /**
      * Find out currently playing tables state (for tournaments only)
      * @param integer $eventId
@@ -125,11 +125,11 @@ class EventModel extends Model
                 }, $game->getPlayers())
             ];
         }
-        
+
         return $output;
     }
 
-    
+
     // ------ Last games related -------
 
     /**
@@ -165,7 +165,7 @@ class EventModel extends Model
 
         foreach ($games as $session) {
             $result['games'][$session->getId()] = [
-                'date' => $session->getPlayDate(),
+                'date' => $session->getEndDate(),
                 'replay_link' => $session->getOrigLink(),
                 'players' => array_map('intval', $session->getPlayersIds()),
                 'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
@@ -259,7 +259,8 @@ class EventModel extends Model
                     'dora'          => (int) $round->getDora(),
                     'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
                     'kandora'       => (int) $round->getKandora(),
-                    'kanuradora'    => (int) $round->getKanuradora()
+                    'kanuradora'    => (int) $round->getKanuradora(),
+                    'open_hand'     => $round->getOpenHand()
                 ];
             case 'multiron':
                 /** @var MultiRoundPrimitive $mRound */
@@ -281,7 +282,8 @@ class EventModel extends Model
                             'dora'          => (int) $round->getDora(),
                             'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
                             'kandora'       => (int) $round->getKandora(),
-                            'kanuradora'    => (int) $round->getKanuradora()
+                            'kanuradora'    => (int) $round->getKanuradora(),
+                            'open_hand'     => $round->getOpenHand()
                         ];
                     }, $rounds)
                 ];
@@ -297,7 +299,8 @@ class EventModel extends Model
                     'dora'          => (int) $round->getDora(),
                     'uradora'       => (int) $round->getUradora(), // TODO: not sure if we really need these guys
                     'kandora'       => (int) $round->getKandora(),
-                    'kanuradora'    => (int) $round->getKanuradora()
+                    'kanuradora'    => (int) $round->getKanuradora(),
+                    'open_hand'     => $round->getOpenHand()
                 ];
             case 'draw':
                 return [

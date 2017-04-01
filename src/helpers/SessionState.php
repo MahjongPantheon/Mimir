@@ -68,6 +68,13 @@ class SessionState
      * @var boolean
      */
     protected $_roundJustChanged = true;
+    /**
+     * True if timer policy refers to "yellow zone" rule AND first game in
+     * yellow zone was already recorded. In fact, this is a "red zone" flag,
+     * which means that hanchan will be finished when next round is recorded.
+     * @var boolean
+     */
+    protected $_yellowZoneAlreadyPlayed = false;
 
     public function __construct(Ruleset $rules, $playersIds)
     {
@@ -503,5 +510,23 @@ class SessionState
     public function getPenaltiesLog()
     {
         return $this->_extraPenaltyLog;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function yellowZoneAlreadyPlayed()
+    {
+        return $this->_yellowZoneAlreadyPlayed;
+    }
+
+    /**
+     * @param bool $state
+     * @return $this
+     */
+    public function setYellowZonePlayed($state = true)
+    {
+        $this->_yellowZoneAlreadyPlayed = $state;
+        return $this;
     }
 }

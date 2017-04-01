@@ -33,6 +33,7 @@ class RulesetTenhounet extends Ruleset
         'startRating'           => 1500,
         'oka'                   => 20,
         'startPoints'           => 25000,
+        'subtractStartPoints'   => true,
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => false,
         'chomboPenalty'         => 0,
@@ -48,6 +49,9 @@ class RulesetTenhounet extends Ruleset
         'autoRegisterUsers'     => true,
         'gameExpirationTime'    => 27, // hours, to cover JST difference
         'withLeadingDealerGameOver' => true,
+        'timerPolicy'           => 'none',
+        'yellowZone'            => 0,
+        'redZone'               => 0,
         'uma' => [
             1 => 15,
             2 => 5,

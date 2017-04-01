@@ -185,11 +185,17 @@ class PlayerStatModel extends Model
                         $acc['feed'] ++;
                     } else if ($r->getWinnerId() == $playerId) {
                         $acc['ron'] ++;
+                        if ($r->getOpenHand()) {
+                            $acc['openhand'] ++;
+                        }
                     }
                     break;
                 case 'tsumo':
                     if ($r->getWinnerId() == $playerId) {
                         $acc['tsumo'] ++;
+                        if ($r->getOpenHand()) {
+                            $acc['openhand'] ++;
+                        }
                     } else {
                         $acc['tsumofeed'] ++;
                     }
@@ -204,6 +210,9 @@ class PlayerStatModel extends Model
                     foreach ($r->rounds() as $round) {
                         if ($round->getWinnerId() == $playerId) {
                             $acc['ron'] ++;
+                            if ($r->getOpenHand()) {
+                                $acc['openhand'] ++;
+                            }
                             break;
                         } else if ($r->getLoserId() == $playerId) {
                             $acc['feed'] ++;
@@ -219,7 +228,8 @@ class PlayerStatModel extends Model
             'tsumo'     => 0,
             'chombo'    => 0,
             'feed'      => 0,
-            'tsumofeed' => 0
+            'tsumofeed' => 0,
+            'openhand'  => 0
         ]);
     }
 
