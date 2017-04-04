@@ -83,7 +83,7 @@ class SeatingController extends Controller
         $tableIndex = 1;
         foreach ($seating as $table) {
             (new InteractiveSessionModel($this->_db, $this->_config))
-                ->startGame($eventId, $table, $tableIndex++);
+                ->startGame($eventId, $table, $tableIndex++); // TODO: here might be an exception inside loop!
         }
 
         $this->_log->addInfo('Started all games by seed #' . $seed . ' for event #' . $eventId);
