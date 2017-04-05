@@ -617,7 +617,7 @@ class EventModel extends Model
 
     /**
      * Checks if token is ok.
-     * Reads token value from _SERVER['HTTP_X_AUTH_TOKEN']
+     * Reads token value from X-Auth-Token request header
      *
      * Also should return true to admin-level token to allow everything
      *
@@ -643,8 +643,7 @@ class EventModel extends Model
      */
     public function dataFromToken()
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        return PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $token);
+        return PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $this->_meta->getAuthToken());
     }
 
     /**
@@ -653,7 +652,6 @@ class EventModel extends Model
      */
     public function checkAdminToken()
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        return $token === $this->_config->getValue('admin.god_token');
+        return $this->_meta->getAuthToken() === $this->_config->getValue('admin.god_token');
     }
 }

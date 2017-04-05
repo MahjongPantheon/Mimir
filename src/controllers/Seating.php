@@ -34,7 +34,7 @@ class SeatingController extends Controller
      */
     public function generate($eventId, $groupsCount, $seed)
     {
-        if (!(new EventModel($this->_db, $this->_config))->checkAdminToken()) {
+        if (!(new EventModel($this->_db, $this->_config, $this->_meta))->checkAdminToken()) {
             throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
         }
 
@@ -68,7 +68,7 @@ class SeatingController extends Controller
      */
     public function startGamesWithSeating($eventId, $groupsCount, $seed)
     {
-        if (!(new EventModel($this->_db, $this->_config))->checkAdminToken()) {
+        if (!(new EventModel($this->_db, $this->_config, $this->_meta))->checkAdminToken()) {
             throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
         }
 
@@ -82,7 +82,7 @@ class SeatingController extends Controller
         $seating = array_chunk(array_keys(Seating::generateTables($playersMap, $tables, $groupsCount, $seed)), 4);
         $tableIndex = 1;
         foreach ($seating as $table) {
-            (new InteractiveSessionModel($this->_db, $this->_config))
+            (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))
                 ->startGame($eventId, $table, $tableIndex++); // TODO: here might be an exception inside loop!
         }
 
@@ -104,7 +104,7 @@ class SeatingController extends Controller
      */
     public function startGamesWithManualSeating($eventId, $tablesDescription, $randomize = false)
     {
-        if (!(new EventModel($this->_db, $this->_config))->checkAdminToken()) {
+        if (!(new EventModel($this->_db, $this->_config, $this->_meta))->checkAdminToken()) {
             throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
         }
 
@@ -118,7 +118,7 @@ class SeatingController extends Controller
 
         $tableIndex = 1;
         foreach ($seating as $table) {
-            (new InteractiveSessionModel($this->_db, $this->_config))
+            (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))
                 ->startGame($eventId, $table, $tableIndex++);
         }
 
@@ -199,7 +199,7 @@ class SeatingController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $currentRatingTable = (new EventModel($this->_db, $this->_config))
+        $currentRatingTable = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->getRatingTable($event[0], 'rating', 'desc');
 
         $participatingPlayers = [];

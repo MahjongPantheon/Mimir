@@ -30,5 +30,9 @@ return [
     ],
     'routes'    => require __DIR__ . '/../../config/routes.php',
     'verbose'   => true,
-    'verboseLog' => __DIR__ . '/../data/verbose.log'
+    'verboseLog' => __DIR__ . '/../data/verbose.log',
+    'api' => [
+        'version_major' => 1,
+        'version_minor' => 0
+    ]
 ];

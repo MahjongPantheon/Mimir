@@ -29,6 +29,7 @@ if (file_exists(__DIR__ . '/local/index.php')) {
 }
 
 return array_merge([
+    // ---------- may be overridden in local settings -----------
     'admin'     => [
         'god_token' => 'CHANGE_ME', // TODO: change this in your local config!
         'debug_token' => 'CHANGE_ME' // TODO: change this in your local config!
@@ -36,5 +37,11 @@ return array_merge([
     'db'        => require __DIR__ . '/db.php',
     'routes'    => require __DIR__ . '/routes.php',
     'verbose'   => false,
-    'verboseLog' => null
+    'verboseLog' => null,
+
+    // ---------- not intended for local override! ------------
+    'api' => [
+        'version_major' => 1, // do not change this! Update your setup if version mismatches.
+        'version_minor' => 0
+    ]
 ], $locals);
