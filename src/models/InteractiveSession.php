@@ -224,7 +224,7 @@ class InteractiveSessionModel extends Model
     protected function _checkAuth($playersIds, $eventId)
     {
         // Check that real session player is trying to enter data
-        $evMdl = new EventModel($this->_db, $this->_config);
+        $evMdl = new EventModel($this->_db, $this->_config, $this->_meta);
         if (!$evMdl->checkToken($playersIds[0], $eventId) &&
             !$evMdl->checkToken($playersIds[1], $eventId) &&
             !$evMdl->checkToken($playersIds[2], $eventId) &&
@@ -240,8 +240,7 @@ class InteractiveSessionModel extends Model
      */
     public function checkAdminToken()
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        return $token === $this->_config->getValue('admin.god_token');
+        return $this->_meta->getAuthToken() === $this->_config->getValue('admin.god_token');
     }
 
     /**
