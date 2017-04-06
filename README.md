@@ -49,6 +49,19 @@ You also will need standard `make` utility to use following shortcuts.
 To generate or recreate sqlite db, run `make init_sqlite`.
 To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.
 
+### Versioning
+
+Mimir uses Semver-like versioning system: *Major*.*Minor*.*Bugfix*
+- Major version change occurs when breaking changes are made to the API. 
+- Minor version changes when non-breaking fixes and features are implemented.  
+- Bugfix version changes when one or several bug fixes are applied, and they do not change any essential system behavior.
+
+Mimir's API protocol version matches Mimir's major and minor version: *Major*.*Minor*
+- Clients should pass desired protocol version as X-Api-Version header.
+- Mimir response also contains same header with current API protocol version.
+- Different major versions of API are not expected to be compatible at all. Client should upgrade or downgrade to match API version.
+- Different minor versions are expected to be forward and partially backward compatible. Client may lack some functionality and may not use some of response fields. But it's guaranteed that no existing functionality of any client within single major version could be broken.
+
 ### Legend
 
 **Mimir** is a figure in Norse mythology renowned for his knowledge and wisdom. See wikipedia for details :)

@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../helpers/MultiRound.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../primitives/Event.php';
 require_once __DIR__ . '/../primitives/Round.php';
@@ -272,12 +273,7 @@ class InteractiveSessionModel extends Model
             throw new InvalidParametersException('No recorded rounds found for session id#' . $session[0]->getId());
         }
 
-        $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
-            /** @var RoundPrimitive $acc */
-            // find max id
-            return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
-        }, null);
-
+        $lastRound = MultiRoundHelper::findLastRound($rounds);
         $session[0]->rollback($lastRound); // this also does session save & drop round
         return true;
     }
