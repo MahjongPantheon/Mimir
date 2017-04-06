@@ -139,6 +139,16 @@ class MultiRoundPrimitive extends RoundPrimitive
     }
 
     /**
+     * Drop all rounds in multi-round
+     */
+    public function drop()
+    {
+        foreach ($this->_rounds as $round) {
+            $round->drop();
+        }
+    }
+
+    /**
      * @return SessionState
      * @throws EntityNotFoundException
      * @throws InvalidParametersException
