@@ -218,7 +218,7 @@ class SessionPrimitive extends Primitive
             ['status' => (array)$state, 'event_id' => [$eventId]],
             [
                 'limit' => $limit, 'offset'  => $offset,
-                'order' => 'desc', 'orderBy' => 'end_date'
+                'order' => 'desc', 'orderBy' => 'id'
             ]
         );
     }

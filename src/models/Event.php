@@ -102,7 +102,7 @@ class EventModel extends Model
                 'hash' => $game->getRepresentationalHash(),
                 'penalties' => $game->getCurrentState()->getPenaltiesLog(),
                 'table_index' => $game->getTableIndex(),
-                'last_round' => $this->_formatLastRound($lastRound),
+                'last_round' => $lastRound ? $this->_formatLastRound($lastRound) : [],
                 'players' => array_map(function (PlayerPrimitive $p) {
                     return [
                         'id' => $p->getId(),
@@ -117,10 +117,6 @@ class EventModel extends Model
 
     protected function _formatLastRound(RoundPrimitive $round)
     {
-        if (!$round) {
-            return [];
-        }
-
         if ($round instanceof MultiRoundPrimitive) {
             return [
                 'outcome' => $round->getOutcome(),
