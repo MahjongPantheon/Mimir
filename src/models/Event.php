@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../helpers/MultiRound.php';
 require_once __DIR__ . '/../primitives/Event.php';
 require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../primitives/SessionResults.php';
@@ -92,31 +93,16 @@ class EventModel extends Model
         $lastGames = SessionPrimitive::findByEventAndStatus($this->_db, $eventId, ['finished', 'inprogress'], 0, $tablesCount);
         $output = [];
         foreach ($lastGames as $game) {
-            /** @var RoundPrimitive $lastRound */
-            $lastRound = array_reduce( // TODO: do it on db side
-                RoundPrimitive::findBySessionIds($this->_db, [$game->getId()]),
-                function ($acc, RoundPrimitive $r) {
-                    /** @var RoundPrimitive $acc */
-                    // find max id
-                    return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
-                },
-                null
-            );
+            $rounds = RoundPrimitive::findBySessionIds($this->_db, [$game->getId()]);
+            /** @var MultiRoundPrimitive $lastRound */
+            $lastRound = MultiRoundHelper::findLastRound($rounds);
 
             $output []= [
                 'status' => $game->getStatus(),
                 'hash' => $game->getRepresentationalHash(),
                 'penalties' => $game->getCurrentState()->getPenaltiesLog(),
                 'table_index' => $game->getTableIndex(),
-                'last_round' => $lastRound ? [
-                    'outcome' => $lastRound->getOutcome(),
-                    'winner'  => $lastRound->getWinnerId(),
-                    'loser'   => $lastRound->getLoserId(),
-                    'tempai'  => $lastRound->getTempaiIds(),
-                    'riichi'  => $lastRound->getRiichiIds(),
-                    'han'     => $lastRound->getHan(),
-                    'fu'      => $lastRound->getFu()
-                ] : [],
+                'last_round' => $this->_formatLastRound($lastRound),
                 'players' => array_map(function (PlayerPrimitive $p) {
                     return [
                         'id' => $p->getId(),
@@ -129,6 +115,37 @@ class EventModel extends Model
         return $output;
     }
 
+    protected function _formatLastRound(RoundPrimitive $round)
+    {
+        if (!$round) {
+            return [];
+        }
+
+        if ($round instanceof MultiRoundPrimitive) {
+            return [
+                'outcome' => $round->getOutcome(),
+                'loser'   => $round->getLoserId(),
+                'riichi'  => $round->getRiichiIds(),
+                'wins'    => array_map(function (RoundPrimitive $round) {
+                    return [
+                        'winner' => $round->getWinnerId(),
+                        'han'    => $round->getHan(),
+                        'fu'     => $round->getFu()
+                    ];
+                }, $round->rounds())
+            ];
+        }
+
+        return [
+            'outcome' => $round->getOutcome(),
+            'winner'  => $round->getWinnerId(),
+            'loser'   => $round->getLoserId(),
+            'tempai'  => $round->getTempaiIds(),
+            'riichi'  => $round->getRiichiIds(),
+            'han'     => $round->getHan(),
+            'fu'      => $round->getFu()
+        ];
+    }
 
     // ------ Last games related -------
 

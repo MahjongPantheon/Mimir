@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../helpers/MultiRound.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../models/PlayerStat.php';
 require_once __DIR__ . '/../models/Event.php';
@@ -326,29 +327,7 @@ class PlayersController extends Controller
 
         $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
         /** @var MultiRoundPrimitive $lastRound */
-        $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
-            /** @var $acc RoundPrimitive */
-
-            if ($acc instanceof MultiRoundPrimitive) {
-                $accId = array_reduce($acc->rounds(), function ($mAcc, RoundPrimitive $r) {
-                    return ($r->getId() > $mAcc) ? $r->getId() : $mAcc;
-                }, 0);
-            } else if ($acc) {
-                $accId = $acc->getId();
-            } else {
-                $accId = 0;
-            }
-
-            if ($r instanceof MultiRoundPrimitive) {
-                $rId = array_reduce($r->rounds(), function ($mAcc, RoundPrimitive $r) {
-                    return ($r->getId() > $mAcc) ? $r->getId() : $mAcc;
-                }, 0);
-            } else {
-                $rId = $r->getId();
-            }
-
-            return $rId > $accId ? $r : $acc;
-        });
+        $lastRound = MultiRoundHelper::findLastRound($rounds);
 
         if (empty($lastRound)) {
             return null;
