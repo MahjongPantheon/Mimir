@@ -380,7 +380,15 @@ class EventModel extends Model
                 'id'            => (int)$el->getPlayerId(),
                 'display_name'  => $playerItems[$el->getPlayerId()]->getDisplayName(),
                 'rating'        => (float)$el->getRating(),
-                'winner_zone'   => ($el->getRating() >= $event->getRuleset()->startRating()),
+                'winner_zone'   => (
+                    $event->getRuleset()->subtractStartPoints()
+                        ? $el->getRating() >= $event->getRuleset()->startRating()
+                        : $el->getRating() >= (
+                            ($event->getRuleset()->startPoints() * $el->getGamesPlayed())
+                                /
+                            ($event->getRuleset()->tenboDivider() * $event->getRuleset()->ratingDivider())
+                        )
+                ),
                 'avg_place'     => round($el->getAvgPlace(), 4),
                 'games_played'  => (int)$el->getGamesPlayed()
             ];
