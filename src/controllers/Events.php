@@ -278,8 +278,12 @@ class EventsController extends Controller
             'redZone'             => $rules->redZone(), // in seconds!
             'yellowZone'          => $rules->yellowZone(), // in seconds!
             'gameDuration'        => $event[0]->getGameDuration(), // in minutes!
-            'isOnline'            => $event[0]->getType() === 'online',
-            'autoSeating'         => $event[0]->getType() === 'offline_interactive_tournament', // TODO refine condition
+            'isOnline'            => (bool)$event[0]->getIsOnline(),
+            'autoSeating'         => (bool)$event[0]->getAutoSeating(),
+            'isTextlog'           => (bool)$event[0]->getIsTextlog(),
+            'syncStart'           => (bool)$event[0]->getSyncStart(),
+            'sortByGames'         => (bool)$event[0]->getSortByGames(),
+            'allowPlayerAppend'   => (bool)$event[0]->getAllowPlayerAppend(),
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
         ];
 

@@ -77,7 +77,14 @@ CREATE TABLE "event"
   "owner_formation" integer, -- at least one owner id should be set!
   "owner_user" integer,
   "stat_host" varchar(255) not null, -- host of statistics frontend
-  "type" varchar(255) not null, -- online or offline, tournament or local rating, interactive or simple
+  "sync_start" integer not null, -- should tables start synchronously or not (if not, players may start games when they want)
+  "auto_seating" integer not null, -- enable automatic seating feature. Disabled if allow_player_append == true.
+  "sort_by_games" integer not null, -- if true, players' rating table is sorted by games count first.
+  "allow_player_append" integer not null, -- if true, new player may join event even if some games are already finished.
+              -- Also, if true, games may be started only manually, and even when players count is not divisible by 4.
+  "is_online" integer not null, -- if true, event is treated as online (paifu log parser is used). Disabled if is_textlog = true
+  "is_textlog" integer not null, -- if true, non-interactive text log parser is used. For offline games.
+  "type" varchar(255) not null, -- DEPRECATED: to be removed in 2.x! ; online or offline, tournament or local rating, interactive or simple
   "lobby_id" integer, -- tenhou lobby id for online events
   "ruleset" text not null, -- table rules, in JSON
   foreign key ("owner_formation") references "formation" ("id"),

@@ -37,12 +37,22 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
-            ->setType('online')
+            ->setIsOnline(1)
+            ->setAllowPlayerAppend(0)
+            ->setAutoSeating(1)
+            ->setIsTextlog(0)
+            ->setSortByGames(1)
+            ->setSyncStart(1)
             ->setRuleset(Ruleset::instance('jpmlA'));
 
         $this->assertEquals('event1', $newEvent->getTitle());
         $this->assertEquals('eventdesc1', $newEvent->getDescription());
-        $this->assertEquals('online', $newEvent->getType());
+        $this->assertEquals(1, $newEvent->getIsOnline());
+        $this->assertEquals(1, $newEvent->getAutoSeating());
+        $this->assertEquals(1, $newEvent->getSortByGames());
+        $this->assertEquals(1, $newEvent->getSyncStart());
+        $this->assertEquals(0, $newEvent->getAllowPlayerAppend());
+        $this->assertEquals(0, $newEvent->getIsTextlog());
 
         $success = $newEvent->save();
         $this->assertTrue($success, "Saved event");
