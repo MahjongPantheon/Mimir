@@ -47,12 +47,8 @@ req:
 	php bin/rpc.php "$(filter-out $@,$(MAKECMDGOALS))"
 
 init_sqlite_nointeractive:
-	echo '' > $(SQLITE_FILE)
-	cat src/fixtures/init/ansi.sql \
-		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
-		| grep -v 'primary key' \
-		| sed 's/^.*-- datewrap://' \
-		| sed 's/integer,[ ]*--[ ]*serial/integer PRIMARY KEY AUTOINCREMENT,/g' \
+	@echo '' > $(SQLITE_FILE)
+	@cat src/fixtures/init/sqlite.sql \
 		| sqlite3 $(SQLITE_FILE)
 
 init_sqlite:
@@ -61,16 +57,7 @@ init_sqlite:
 	make init_sqlite_nointeractive
 
 init_mysql:
-	@echo "SET FOREIGN_KEY_CHECKS=0;"
-	@cat src/fixtures/init/ansi.sql \
-		| tr "\"" "\`" \
-		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
-		| sed 's/--[ ]*CHARACTER SET/   CHARACTER SET/g' \
-		| sed 's/integer,[ ]*--[ ]*serial/integer AUTO_INCREMENT,/g' \
-		| sed 's/timestamp/datetime/g'
-	@echo "SET FOREIGN_KEY_CHECKS=1;"
+	@cat src/fixtures/init/mysql.sql
 
 init_pgsql:
-	@cat src/fixtures/init/ansi.sql \
-		| sed 's/--[ ]*IF EXISTS/   IF EXISTS/g' \
-		| sed 's/integer,[ ]*--[ ]*serial/serial,/g'
+	@cat src/fixtures/init/postgres.sql

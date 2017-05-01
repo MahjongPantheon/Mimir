@@ -34,9 +34,9 @@ UPDATE event SET
   WHERE type = 'online';
 
 ALTER TABLE event
-  CHANGE "sync_start" "sync_start" integer not null,
-  CHANGE "auto_seating" "auto_seating" integer not null,
-  CHANGE "sort_by_games" "sort_by_games" integer not null,
-  CHANGE "allow_player_append" "allow_player_append" integer not null,
-  CHANGE "is_online" "is_online" integer not null,
-  CHANGE "is_textlog" "is_textlog" integer not null;
+  ALTER COLUMN "sync_start" TYPE integer not null,
+  ALTER COLUMN "auto_seating" TYPE integer not null,
+  ALTER COLUMN "sort_by_games" TYPE integer not null,
+  ALTER COLUMN "allow_player_append" TYPE integer not null,
+  ALTER COLUMN "is_online" TYPE integer not null,
+  ALTER COLUMN "is_textlog" TYPE integer not null;
