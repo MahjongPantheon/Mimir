@@ -1,38 +1,23 @@
--- README:
--- Commented out "IF EXISTS" clauses are expected to be uncommented for every supporting DB
--- Commented out "serial" clauses indicate fields that should be serial/auto_increment.
--- Commented out "datewrap" clauses indicate lines to replace with date(...) for supporting DBs
--- Commented out "CHARACTER SET" clauses force utf8-encoding for tables char fields in supporting DBs
--- Corresponding modifications to resulting DB-specific dumps are expected.
-
 -- Players, orgs, etc
-DROP TABLE
--- IF EXISTS
-   "user";
+DROP TABLE IF EXISTS "user";
 CREATE TABLE "user"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "ident" varchar(255) not null, -- oauth ident info, for example
   "alias" varchar(255), -- user alias for text-mode game log
   "display_name" varchar(255) not null,
   "city" varchar(255),
   "tenhou_id" varchar(255)
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 CREATE INDEX "user_alias" ON "user" ("alias");
 CREATE UNIQUE INDEX "user_ident" ON "user" ("ident");
 CREATE INDEX "user_tenhou" ON "user" ("tenhou_id");
 
 -- Local clubs, leagues, etc
-DROP TABLE
--- IF EXISTS
-   "formation";
+DROP TABLE IF EXISTS "formation";
 CREATE TABLE "formation"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "title" varchar(255) not null,
   "city" varchar(255) not null,
   "description" text not null,
@@ -40,14 +25,10 @@ CREATE TABLE "formation"
   "contact_info" text not null,
   "primary_owner" integer not null,
   foreign key ("primary_owner") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 
 -- Many-to-many relation, primarily for administrative needs. By default user is a player in formation.
-DROP TABLE
--- IF EXISTS
-   "formation_user";
+DROP TABLE IF EXISTS "formation_user";
 CREATE TABLE "formation_user"
 (
   "formation_id" integer not null,
@@ -55,18 +36,13 @@ CREATE TABLE "formation_user"
   "role" varchar(255) not null, -- who is this user in this group?
   foreign key ("formation_id") references "formation" ("id"),
   foreign key ("user_id") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 
 -- Local ratings, tournaments, including online ones
-DROP TABLE
--- IF EXISTS
-   "event";
+DROP TABLE IF EXISTS "event";
 CREATE TABLE "event"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "title" varchar(255) not null,
   "description" text not null,
   "start_time" timestamp,
@@ -77,64 +53,54 @@ CREATE TABLE "event"
   "owner_formation" integer, -- at least one owner id should be set!
   "owner_user" integer,
   "stat_host" varchar(255) not null, -- host of statistics frontend
-  "type" varchar(255) not null, -- online or offline, tournament or local rating, interactive or simple
+  "sync_start" integer not null, -- should tables start synchronously or not (if not, players may start games when they want)
+  "auto_seating" integer not null, -- enable automatic seating feature. Disabled if allow_player_append == true.
+  "sort_by_games" integer not null, -- if true, players' rating table is sorted by games count first.
+  "allow_player_append" integer not null, -- if true, new player may join event even if some games are already finished.
+              -- Also, if true, games may be started only manually, and even when players count is not divisible by 4.
+  "is_online" integer not null, -- if true, event is treated as online (paifu log parser is used). Disabled if is_textlog = true
+  "is_textlog" integer not null, -- if true, non-interactive text log parser is used. For offline games.
+  "type" varchar(255) not null, -- DEPRECATED: to be removed in 2.x! ; online or offline, tournament or local rating, interactive or simple
   "lobby_id" integer, -- tenhou lobby id for online events
   "ruleset" text not null, -- table rules, in JSON
   foreign key ("owner_formation") references "formation" ("id"),
   foreign key ("owner_user") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 CREATE INDEX "event_lobby" ON "event"("lobby_id");
 
 -- Users registered in event
-DROP TABLE
--- IF EXISTS
-   "event_registered_users";
+DROP TABLE IF EXISTS "event_registered_users";
 CREATE TABLE "event_registered_users"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "event_id" integer not null,
   "user_id" integer not null,
   "auth_token" varchar(48),
   foreign key ("event_id") references "event" ("id"),
   foreign key ("user_id") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
--- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
+);
 CREATE UNIQUE INDEX "event_registered_users_uniq" ON "event_registered_users"("event_id","user_id");
 CREATE INDEX "eru_auth_token" ON "event_registered_users"("auth_token");
 
 -- Users to be registered in event (tournament-type auth)
-DROP TABLE
--- IF EXISTS
-"event_enrolled_users";
+DROP TABLE IF EXISTS "event_enrolled_users";
 CREATE TABLE "event_enrolled_users"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "event_id" integer not null,
   "user_id" integer not null,
   "reg_pin" integer,
   foreign key ("event_id") references "event" ("id"),
   foreign key ("user_id") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
--- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
+);
 CREATE UNIQUE INDEX "event_enrolled_users_uniq" ON "event_enrolled_users"("event_id","user_id");
 CREATE INDEX "eeu_pin" ON "event_enrolled_users"("reg_pin");
 
 -- Game session: tonpuusen, hanchan, either online or offline
-DROP TABLE
--- IF EXISTS
-   "session";
+DROP TABLE IF EXISTS "session";
 CREATE TABLE "session"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "event_id" integer not null,
   "representational_hash" varchar(255), -- hash to find this game from client mobile app
   "replay_hash" varchar(255), -- tenhou game hash, for deduplication
@@ -145,18 +111,14 @@ CREATE TABLE "session"
   "status" varchar(255), -- planned / inprogress / finished
   "intermediate_results" text, -- json-encoded results for in-progress sessions
   foreign key ("event_id") references "event" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 CREATE INDEX "session_replay" ON "session"("replay_hash");
 CREATE INDEX "session_status" ON "session"("status");
 CREATE INDEX "session_table_index" ON "session"("table_index");
 CREATE INDEX "session_rephash" ON "session"("representational_hash");
 
 -- Many-to-many relation
-DROP TABLE
--- IF EXISTS
-   "session_user";
+DROP TABLE IF EXISTS "session_user";
 CREATE TABLE "session_user"
 (
   "session_id" integer not null,
@@ -164,20 +126,14 @@ CREATE TABLE "session_user"
   "order" integer not null, -- position in game
   foreign key ("session_id") references "session" ("id"),
   foreign key ("user_id") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
--- Unique index name should be TABLENAME_uniq to make sure postgres driver finds it.
+);
 CREATE UNIQUE INDEX "session_user_uniq" ON "session_user"("session_id","user_id");
 
 -- Session results, entry should exist only for finished sessions
-DROP TABLE
--- IF EXISTS
-   "session_results";
+DROP TABLE IF EXISTS "session_results";
 CREATE TABLE "session_results"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "event_id" integer not null,
   "session_id" integer not null,
   "player_id" integer not null,
@@ -187,18 +143,13 @@ CREATE TABLE "session_results"
   foreign key ("event_id") references "event" ("id"),
   foreign key ("session_id") references "session" ("id"),
   foreign key ("player_id") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 
 -- Session round results
-DROP TABLE
--- IF EXISTS
-   "round";
+DROP TABLE IF EXISTS "round";
 CREATE TABLE "round"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "session_id" integer not null,
   "event_id" integer not null,
   "outcome" varchar(255) not null, -- ron, tsumo, draw, abortive draw or chombo
@@ -221,19 +172,16 @@ CREATE TABLE "round"
   foreign key ("event_id") references "event" ("id"),
   foreign key ("winner_id") references "user" ("id"),
   foreign key ("loser_id") references "user" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);
 CREATE INDEX "round_outcome" ON "round"("outcome");
 
 -- User rating history in context of every event
 DROP TABLE
--- IF EXISTS
+   IF EXISTS
    "player_history";
 CREATE TABLE "player_history"
 (
-  "id" integer, -- serial
-  primary key ("id"),
+  "id" integer PRIMARY KEY AUTOINCREMENT,
   "user_id" integer not null,
   "session_id" integer not null,
   "event_id" integer not null,
@@ -243,6 +191,4 @@ CREATE TABLE "player_history"
   foreign key ("user_id") references "user" ("id"),
   foreign key ("session_id") references "session" ("id"),
   foreign key ("event_id") references "event" ("id")
-)
--- CHARACTER SET utf8 COLLATE utf8_general_ci
-;
+);

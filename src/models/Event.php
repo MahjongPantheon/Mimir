@@ -360,7 +360,7 @@ class EventModel extends Model
             $playersHistoryItems = array_reverse($playersHistoryItems);
         }
 
-        if ($event->getType() === 'offline_interactive_tournament') {
+        if ($event->getSortByGames()) {
             $this->_stableSort(
                 $playersHistoryItems,
                 function (PlayerHistoryPrimitive $el1, PlayerHistoryPrimitive $el2) {
@@ -612,7 +612,7 @@ class EventModel extends Model
         if ($eItem) {
             $event = EventPrimitive::findById($this->_db, [$eItem->getEventId()]);
 
-            if ($event[0]->getType() === 'offline_interactive_tournament') {
+            if (!$event[0]->getAllowPlayerAppend()) {
                 $reggedItems = PlayerRegistrationPrimitive::findByPlayerAndEvent($this->_db, $eItem->getPlayerId(), $event[0]->getId());
                 // check that games are not started yet
                 if ($event[0]->getLastTimer() && empty($reggedItems)) {
