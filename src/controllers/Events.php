@@ -286,6 +286,7 @@ class EventsController extends Controller
             'sortByGames'         => (bool)$event[0]->getSortByGames(),
             'allowPlayerAppend'   => (bool)$event[0]->getAllowPlayerAppend(),
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
+            'subtractStartPoints' => $rules->subtractStartPoints(),
         ];
 
         $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
