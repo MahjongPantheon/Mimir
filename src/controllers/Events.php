@@ -274,6 +274,7 @@ class EventsController extends Controller
             'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
             'eventStatHost'       => $event[0]->getStatHost(),
+            'useTimer'            => (bool)$event[0]->getUseTimer(),
             'timerPolicy'         => $rules->timerPolicy(),
             'redZone'             => $rules->redZone(), // in seconds!
             'yellowZone'          => $rules->yellowZone(), // in seconds!

@@ -48,6 +48,7 @@ class EventPrimitive extends Primitive
         'sync_start'        => '_syncStart',
         'auto_seating'      => '_autoSeating',
         'sort_by_games'     => '_sortByGames',
+        'use_timer'         => '_useTimer',
         'allow_player_append' => '_allowPlayerAppend',
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
@@ -72,6 +73,7 @@ class EventPrimitive extends Primitive
             '_autoSeating'        => $this->_integerTransform(),
             '_sortByGames'        => $this->_integerTransform(),
             '_allowPlayerAppend'  => $this->_integerTransform(),
+            '_useTimer'           => $this->_integerTransform(),
             '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
@@ -181,6 +183,11 @@ class EventPrimitive extends Primitive
      * @var int
      */
     protected $_isOnline;
+    /**
+     * if true, timer is shown in mobile app, also timer page is available in administration tools
+     * @var int
+     */
+    protected $_useTimer;
     /**
      * if true, non-interactive text log parser is used. For offline games.
      * @var int
@@ -625,6 +632,24 @@ class EventPrimitive extends Primitive
     public function setIsTextlog($isTextlog)
     {
         $this->_isTextlog = $isTextlog;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUseTimer()
+    {
+        return $this->_useTimer;
+    }
+
+    /**
+     * @param int $useTimer
+     * @return EventPrimitive
+     */
+    public function setUseTimer($useTimer)
+    {
+        $this->_useTimer = $useTimer;
         return $this;
     }
 
