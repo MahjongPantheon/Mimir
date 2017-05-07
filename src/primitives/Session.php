@@ -570,7 +570,7 @@ class SessionPrimitive extends Primitive
 
         switch ($this->getEvent()->getRuleset()->timerPolicy()) {
             case 'yellowZone':
-                $isInYellowZone = $lastTimer && (
+                $isInYellowZone = $this->getEvent()->getUseTimer() && $lastTimer && (
                     $lastTimer + (
                         $this->getEvent()->getGameDuration() * 60
                         - $this->getEvent()->getRuleset()->yellowZone()
@@ -597,7 +597,7 @@ class SessionPrimitive extends Primitive
                 $this->getCurrentState()->update($round);
                 $success = $this->save();
 
-                $isInRedZone = $lastTimer && (
+                $isInRedZone = $this->getEvent()->getUseTimer() && $lastTimer && (
                     $lastTimer + (
                         $this->getEvent()->getGameDuration() * 60
                         - $this->getEvent()->getRuleset()->redZone()

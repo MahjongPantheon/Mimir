@@ -59,6 +59,7 @@ CREATE TABLE "event"
   "sync_start" integer not null, -- should tables start synchronously or not (if not, players may start games when they want)
   "auto_seating" integer not null, -- enable automatic seating feature. Disabled if allow_player_append == true.
   "sort_by_games" integer not null, -- if true, players' rating table is sorted by games count first.
+  "use_timer" integer not null, -- if true, timer is shown in mobile app, also timer page is available in administration tools
   "allow_player_append" integer not null, -- if true, new player may join event even if some games are already finished.
               -- Also, if true, games may be started only manually, and even when players count is not divisible by 4.
   "is_online" integer not null, -- if true, event is treated as online (paifu log parser is used). Disabled if is_textlog = true

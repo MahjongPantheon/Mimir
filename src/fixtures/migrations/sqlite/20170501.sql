@@ -16,6 +16,7 @@ CREATE TABLE "event_new"
   "sort_by_games" integer not null, -- if true, players' rating table is sorted by games count first.
   "allow_player_append" integer not null, -- if true, new player may join event even if some games are already finished.
               -- Also, if true, games may be started only manually, and even when players count is not divisible by 4.
+  "use_timer" integer not null,
   "is_online" integer not null, -- if true, event is treated as online (paifu log parser is used). Disabled if is_textlog = true
   "is_textlog" integer not null, -- if true, non-interactive text log parser is used. For offline games.
   "type" varchar(255) not null, -- DEPRECATED: to be removed in 2.x! ; online or offline, tournament or local rating, interactive or simple
@@ -28,32 +29,32 @@ CREATE TABLE "event_new"
 INSERT INTO "event_new" (
   "id", "title", "description", "start_time", "end_time", "game_duration",
   "last_timer", "red_zone", "owner_formation", "owner_user", "stat_host",
-  "sync_start", "auto_seating", "sort_by_games", "allow_player_append",
+  "sync_start", "auto_seating", "sort_by_games", "allow_player_append", "use_timer",
   "is_online", "is_textlog", "type", "lobby_id", "ruleset"
 )
   SELECT "id", "title", "description", "start_time", "end_time", "game_duration",
   "last_timer", "red_zone", "owner_formation", "owner_user", "stat_host",
-  1, 1, 1, 0, 0, 0, "type", "lobby_id", "ruleset" FROM "event" WHERE "type" = 'offline_interactive_tournament';
+  1, 1, 1, 0, 1, 0, 0, "type", "lobby_id", "ruleset" FROM "event" WHERE "type" = 'offline_interactive_tournament';
 
 INSERT INTO "event_new" (
   "id", "title", "description", "start_time", "end_time", "game_duration",
   "last_timer", "red_zone", "owner_formation", "owner_user", "stat_host",
-  "sync_start", "auto_seating", "sort_by_games", "allow_player_append",
+  "sync_start", "auto_seating", "sort_by_games", "allow_player_append", "use_timer",
   "is_online", "is_textlog", "type", "lobby_id", "ruleset"
 )
   SELECT "id", "title", "description", "start_time", "end_time", "game_duration",
   "last_timer", "red_zone", "owner_formation", "owner_user", "stat_host",
-  0, 0, 0, 1, 0, 0, "type", "lobby_id", "ruleset" FROM "event" WHERE "type" = 'offline';
+  0, 0, 0, 1, 0, 0, 0, "type", "lobby_id", "ruleset" FROM "event" WHERE "type" = 'offline';
 
 INSERT INTO "event_new" (
   "id", "title", "description", "start_time", "end_time", "game_duration",
   "last_timer", "red_zone", "owner_formation", "owner_user", "stat_host",
-  "sync_start", "auto_seating", "sort_by_games", "allow_player_append",
+  "sync_start", "auto_seating", "sort_by_games", "allow_player_append", "use_timer",
   "is_online", "is_textlog", "type", "lobby_id", "ruleset"
 )
   SELECT "id", "title", "description", "start_time", "end_time", "game_duration",
   "last_timer", "red_zone", "owner_formation", "owner_user", "stat_host",
-  1, 1, 1, 0, 1, 0, "type", "lobby_id", "ruleset" FROM "event" WHERE "type" = 'online';
+  1, 1, 1, 0, 0, 1, 0, "type", "lobby_id", "ruleset" FROM "event" WHERE "type" = 'online';
 
 DROP TABLE IF EXISTS "event";
 ALTER TABLE "event_new" RENAME TO "event";

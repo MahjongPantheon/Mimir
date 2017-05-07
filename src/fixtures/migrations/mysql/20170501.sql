@@ -2,6 +2,7 @@ ALTER TABLE event
   ADD `sync_start` integer null,
   ADD `auto_seating` integer null,
   ADD `sort_by_games` integer null,
+  ADD `use_timer` integer null,
   ADD `allow_player_append` integer null,
   ADD `is_online` integer null,
   ADD `is_textlog` integer null;
@@ -12,6 +13,7 @@ UPDATE event SET
   `sort_by_games` = 1,
   `allow_player_append` = 0,
   `is_online` = 0,
+  `use_timer` = 1,
   `is_textlog` = 0
   WHERE type = 'offline_interactive_tournament';
 
@@ -21,6 +23,7 @@ UPDATE event SET
   `sort_by_games` = 0,
   `allow_player_append` = 1,
   `is_online` = 0,
+  `use_timer` = 0,
   `is_textlog` = 0
   WHERE type = 'offline';
 
@@ -30,6 +33,7 @@ UPDATE event SET
   `sort_by_games` = 1,
   `allow_player_append` = 0,
   `is_online` = 1,
+  `use_timer` = 0,
   `is_textlog` = 0
   WHERE type = 'online';
 
@@ -39,4 +43,5 @@ ALTER TABLE event
   CHANGE `sort_by_games` `sort_by_games` integer not null,
   CHANGE `allow_player_append` `allow_player_append` integer not null,
   CHANGE `is_online` `is_online` integer not null,
+  CHANGE `use_timer` `use_timer` integer not null,
   CHANGE `is_textlog` `is_textlog` integer not null;
