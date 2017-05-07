@@ -49,6 +49,8 @@ You also will need standard `make` utility to use following shortcuts.
 To generate or recreate sqlite db, run `make init_sqlite`.
 To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.
 
+Nginx is the recommended web server to run Mimir. See *nginx.example.com* file for typical installation nginx config.
+
 ### Versioning
 
 Mimir uses Semver-like versioning system: *Major*.*Minor*.*Bugfix*
