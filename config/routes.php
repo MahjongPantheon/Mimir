@@ -47,6 +47,7 @@ return [
     'getGameConfigT'     => ['EventsController', 'getGameConfigFromToken'],
     'getTimerStateT'     => ['EventsController', 'getTimerStateFromToken'],
     'getAllPlayersT'     => ['EventsController', 'getAllRegisteredPlayersFromToken'],
+    'getTablesStateT'    => ['EventsController', 'getTablesStateFromToken'],
     'getCurrentGamesT'   => ['PlayersController', 'getCurrentSessionsFromToken'],
     'getLastResultsT'    => ['PlayersController', 'getLastResultsFromToken'],
     'getLastRoundT'      => ['PlayersController', 'getLastRoundFromToken'],

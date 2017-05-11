@@ -103,6 +103,7 @@ class EventModel extends Model
                 'penalties' => $game->getCurrentState()->getPenaltiesLog(),
                 'table_index' => $game->getTableIndex(),
                 'last_round' => $lastRound ? $this->_formatLastRound($lastRound) : [],
+                'scores' => $game->getCurrentState()->getScores(),
                 'players' => array_map(function (PlayerPrimitive $p) {
                     return [
                         'id' => $p->getId(),
