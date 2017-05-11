@@ -112,6 +112,27 @@ class EventsController extends Controller
     }
 
     /**
+     * Get tables state in tournament from token
+     *
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getTablesStateFromToken()
+    {
+        $this->_log->addInfo('Getting tables state for event (by token)');
+        $eventModel = new EventModel($this->_db, $this->_config, $this->_meta);
+        $reg = $eventModel->dataFromToken();
+        if (empty($reg)) {
+            throw new InvalidParametersException('Invalid user token', 401);
+        }
+
+        $data = $eventModel->getTablesState($reg->getEventId());
+        $this->_log->addInfo('Successfully got tables state for event (by token)');
+        return $data;
+    }
+
+
+    /**
      * Get current seating in tournament
      *
      * @param integer $eventId
