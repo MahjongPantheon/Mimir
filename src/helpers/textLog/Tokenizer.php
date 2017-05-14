@@ -42,7 +42,7 @@ class Tokenizer
     const NOBODY = 'nobody';
     const RIICHI_DELIMITER = 'riichi';
     const OUTCOME = 'outcome';
-    const USER_ALIAS = 'userAlias';
+    const PLAYER_ALIAS = 'playerAlias';
     const FROM = 'from';
     const ALSO = 'also';
 
@@ -54,8 +54,8 @@ class Tokenizer
 
     public function __construct()
     {
-        $this->_lastAllowedToken = [ // first line should contain user scores map
-            self::USER_ALIAS => 1
+        $this->_lastAllowedToken = [ // first line should contain player scores map
+            self::PLAYER_ALIAS => 1
         ];
     }
 
@@ -193,7 +193,7 @@ class Tokenizer
                 'FROM' => '#^from$#',
 
                 // this should always be the last!
-                'USER_ALIAS' => '#^[a-z0-9_\.]+$#',
+                'PLAYER_ALIAS' => '#^[a-z0-9_\.]+$#',
             ];
         }
 
@@ -306,7 +306,7 @@ class Tokenizer
             $token,
             Tokenizer::SCORE,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
                 Tokenizer::OUTCOME => 1,
             ]
         );
@@ -438,7 +438,7 @@ class Tokenizer
             [
                 Tokenizer::ALL => 1,
                 Tokenizer::NOBODY => 1,
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
         return null;
@@ -489,7 +489,7 @@ class Tokenizer
             $token,
             Tokenizer::RIICHI_DELIMITER,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
 
@@ -502,7 +502,7 @@ class Tokenizer
             $token,
             Tokenizer::ALSO,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
 
@@ -515,7 +515,7 @@ class Tokenizer
             $token,
             Tokenizer::OUTCOME,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
 
@@ -528,7 +528,7 @@ class Tokenizer
             $token,
             Tokenizer::OUTCOME,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
 
@@ -554,7 +554,7 @@ class Tokenizer
             $token,
             Tokenizer::OUTCOME,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
 
@@ -567,21 +567,21 @@ class Tokenizer
             $token,
             Tokenizer::FROM,
             [
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
             ]
         );
 
         return null;
     }
 
-    protected function _callTokenUserAlias($token)
+    protected function _callTokenPlayerAlias($token)
     {
         $this->_currentStack [] = new Token(
             $token,
-            Tokenizer::USER_ALIAS,
+            Tokenizer::PLAYER_ALIAS,
             [
                 Tokenizer::SCORE_DELIMITER => 1,
-                Tokenizer::USER_ALIAS => 1,
+                Tokenizer::PLAYER_ALIAS => 1,
                 Tokenizer::FROM => 1,
                 Tokenizer::RIICHI_DELIMITER => 1,
                 Tokenizer::HAN_COUNT => 1,

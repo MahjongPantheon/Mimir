@@ -30,7 +30,7 @@ require_once __DIR__ . '/../Ruleset.php';
 class EventPrimitive extends Primitive
 {
     protected static $_table = 'event';
-    const REL_USER = 'event_registered_users';
+    const REL_USER = 'event_registered_players';
 
     protected static $_fieldsMapping = [
         'id'                => '_id',
@@ -41,7 +41,7 @@ class EventPrimitive extends Primitive
         'game_duration'     => '_gameDuration',
         'last_timer'        => '_lastTimer',
         'owner_formation'   => '_ownerFormationId',
-        'owner_user'        => '_ownerUserId',
+        'owner_player'      => '_ownerPlayerId',
         'type'              => '_type', // DEPRECATED: to be removed in 2.x
         'is_online'         => '_isOnline',
         'is_textlog'        => '_isTextlog',
@@ -59,7 +59,7 @@ class EventPrimitive extends Primitive
     {
         return [
             '_ownerFormationId'   => $this->_integerTransform(true),
-            '_ownerUserId'        => $this->_integerTransform(true),
+            '_ownerPlayerId'      => $this->_integerTransform(true),
             '_startTime'          => $this->_stringTransform(true),
             '_endTime'            => $this->_stringTransform(true),
             '_gameDuration'       => $this->_integerTransform(true),
@@ -145,12 +145,12 @@ class EventPrimitive extends Primitive
      * Owner player
      * @var PlayerPrimitive|null
      */
-    protected $_ownerUser = null;
+    protected $_ownerPlayer = null;
     /**
      * Owner player id
      * @var int
      */
-    protected $_ownerUserId;
+    protected $_ownerPlayerId;
     /**
      * Event type: online/offline, tournament/simple, etc
      * @deprecated to be removed in 2.x
@@ -425,13 +425,13 @@ class EventPrimitive extends Primitive
     }
 
     /**
-     * @param null|\Riichi\PlayerPrimitive $ownerUser
+     * @param null|\Riichi\PlayerPrimitive $ownerPlayer
      * @return EventPrimitive
      */
-    public function setOwnerUser(PlayerPrimitive $ownerUser)
+    public function setOwnerPlayer(PlayerPrimitive $ownerPlayer)
     {
-        $this->_ownerUser = $ownerUser;
-        $this->_ownerUserId = $ownerUser->getId();
+        $this->_ownerPlayer = $ownerPlayer;
+        $this->_ownerPlayerId = $ownerPlayer->getId();
         return $this;
     }
 
@@ -439,24 +439,24 @@ class EventPrimitive extends Primitive
      * @throws EntityNotFoundException
      * @return null|\Riichi\PlayerPrimitive
      */
-    public function getOwnerUser()
+    public function getOwnerPlayer()
     {
-        if (!$this->_ownerUser) {
-            $foundUsers = PlayerPrimitive::findById($this->_db, [$this->_ownerUserId]);
-            if (empty($foundUsers)) {
-                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_ownerUserId . ' not found in DB');
+        if (!$this->_ownerPlayer) {
+            $foundPlayers = PlayerPrimitive::findById($this->_db, [$this->_ownerPlayerId]);
+            if (empty($foundPlayers)) {
+                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_ownerPlayerId . ' not found in DB');
             }
-            $this->_ownerUser = $foundUsers[0];
+            $this->_ownerPlayer = $foundPlayers[0];
         }
-        return $this->_ownerUser;
+        return $this->_ownerPlayer;
     }
 
     /**
      * @return int
      */
-    public function getOwnerUserId()
+    public function getOwnerPlayerId()
     {
-        return $this->_ownerUserId;
+        return $this->_ownerPlayerId;
     }
 
     /**

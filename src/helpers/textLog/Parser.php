@@ -80,7 +80,7 @@ class TextlogParser
 
         /** @var Token[] $statement */
         foreach ($tokenizer->tokenize($gameLog) as $statement) {
-            if ($statement[0]->type() == Tokenizer::USER_ALIAS) {
+            if ($statement[0]->type() == Tokenizer::PLAYER_ALIAS) {
                 $this->_fillSession($session, $statement)->save(); // initial save required, rounds use session id
                 continue;
             }
@@ -132,7 +132,7 @@ class TextlogParser
     {
         $playersList = [];
 
-        // Line with users and scores
+        // Line with players and scores
         while (!empty($statement)) {
             /** @var $player Token */
             $player = array_shift($statement);
@@ -142,7 +142,7 @@ class TextlogParser
             $score = array_shift($statement);
 
             if (empty($player) || empty($delimiter) || empty($score)
-                || $player->type() != Tokenizer::USER_ALIAS
+                || $player->type() != Tokenizer::PLAYER_ALIAS
                 || $delimiter->type() != Tokenizer::SCORE_DELIMITER
                 || $score->type() != Tokenizer::SCORE
             ) {
@@ -226,7 +226,7 @@ class TextlogParser
             }
 
             if ($started) {
-                if ($v->type() == Tokenizer::USER_ALIAS) {
+                if ($v->type() == Tokenizer::PLAYER_ALIAS) {
                     if (empty($participants[$v->token()])) {
                         throw new ParseException("Failed to parse riichi statement. Player {$v->token()} not found. Typo?", 107);
                     }
@@ -266,7 +266,7 @@ class TextlogParser
             }
 
             switch ($v->type()) {
-                case Tokenizer::USER_ALIAS:
+                case Tokenizer::PLAYER_ALIAS:
                     if (empty($participants[$v->token()])) {
                         throw new ParseException("Failed to parse tempai statement. Player {$v->token()} not found. Typo?", 117);
                     }
@@ -587,7 +587,7 @@ class TextlogParser
             }
             if ($k > 0 &&
                 $tokens[$k-1]->type() == Tokenizer::FROM &&
-                $t->type() == Tokenizer::USER_ALIAS &&
+                $t->type() == Tokenizer::PLAYER_ALIAS &&
                 $t->token() == $loser->token()
             ) {
                 continue; // loser alias is saved separately, skip it

@@ -30,13 +30,13 @@ require_once __DIR__ . '/Player.php';
  */
 class PlayerRegistrationPrimitive extends Primitive
 {
-    protected static $_table = 'event_registered_users';
+    protected static $_table = 'event_registered_players';
 
     protected static $_fieldsMapping = [
-        'id' => '_id',
-        'event_id' => '_eventId',
-        'user_id' => '_playerId',
-        'auth_token' => '_token',
+        'id'            => '_id',
+        'event_id'      => '_eventId',
+        'player_id'     => '_playerId',
+        'auth_token'    => '_token',
     ];
 
     protected function _getFieldsTransforms()
@@ -68,13 +68,13 @@ class PlayerRegistrationPrimitive extends Primitive
 
     protected function _create()
     {
-        $userReg = $this->_db->table(self::$_table)->create();
+        $playerReg = $this->_db->table(self::$_table)->create();
         if (empty($this->_token)) {
             $this->_token = sha1('PlayerReg' . microtime());
         }
 
         try {
-            $success = $this->_save($userReg);
+            $success = $this->_save($playerReg);
             if ($success) {
                 $this->_id = $this->_db->lastInsertId();
             }
@@ -136,8 +136,8 @@ class PlayerRegistrationPrimitive extends Primitive
     public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
     {
         return self::_findBySeveral($db, [
-            'user_id' => [$playerId],
-            'event_id' => [$eventId]
+            'player_id' => [$playerId],
+            'event_id'  => [$eventId]
         ], ['onlyLast' => true]);
     }
 

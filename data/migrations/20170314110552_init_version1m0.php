@@ -111,7 +111,6 @@ class InitVersion1m0 extends AbstractMigration
                 'comment' => 'table rules, either in JSON or as a predefined ID'])
 
             ->addIndex('owner_formation')
-            ->addIndex('owner_user')
             ->addIndex('lobby_id', ['name' => 'event_lobby'])
 
             ->addForeignKey('owner_formation', 'formation')

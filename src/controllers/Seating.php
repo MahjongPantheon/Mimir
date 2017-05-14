@@ -155,7 +155,7 @@ class SeatingController extends Controller
 
         $seatingInfo = SessionPrimitive::getPlayersSeatingInEvent($this->_db, $eventId);
         $tables = array_chunk(array_map(function ($el) {
-            return $el['user_id'];
+            return $el['player_id'];
         }, $seatingInfo), 4);
 
         return [$playersMap, $tables];

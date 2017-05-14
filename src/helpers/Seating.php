@@ -39,8 +39,8 @@ class Seating
 
         // push new seating to our array, but reformat it first
         $newSeating = [];
-        foreach ($seating as $user => $rating) {
-            $newSeating []= $user;
+        foreach ($seating as $player => $rating) {
+            $newSeating []= $player;
         }
         $newSeating = array_chunk($newSeating, 4);
         $seatings = array_merge($previousSeatings, $newSeating);
@@ -133,8 +133,8 @@ class Seating
 
         // push new seating to our array, but reformat it first
         $newSeating = [];
-        foreach ($seating as $user => $rating) {
-            $newSeating []= $user;
+        foreach ($seating as $player => $rating) {
+            $newSeating []= $player;
         }
         $newSeating = array_chunk($newSeating, 4);
         $games []= $newSeating;
@@ -159,7 +159,7 @@ class Seating
             }
         }
 
-        foreach ($crossings as /*$user => */$opponentsList) {
+        foreach ($crossings as /*$player => */$opponentsList) {
             foreach ($opponentsList as /*$opponent => */$crossingList) {
                 if (count($crossingList) <= 1) {
                     continue;

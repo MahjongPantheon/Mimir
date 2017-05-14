@@ -49,13 +49,13 @@ class EventModel extends Model
         // get data from primitives, and some raw data
         $reggedPlayers = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
         $historyItems = PlayerHistoryPrimitive::findLastByEvent($this->_db, $eventId);
-        $seatings = $this->_db->table('session_user')
-            ->join('session', 'session.id = session_user.session_id')
-            ->join('user', 'user.id = session_user.user_id')
-            ->select('session_user.order')
-            ->select('session_user.user_id')
-            ->select('session_user.session_id')
-            ->select('user.display_name')
+        $seatings = $this->_db->table('session_player')
+            ->join('session', 'session.id = session_player.session_id')
+            ->join('player', 'player.id = session_player.player_id')
+            ->select('session_player.order')
+            ->select('session_player.player_id')
+            ->select('session_player.session_id')
+            ->select('player.display_name')
             ->select('session.table_index')
             ->where('session.event_id', $eventId)
             ->orderByDesc('session.id')
@@ -75,7 +75,7 @@ class EventModel extends Model
         }
 
         return array_map(function ($seat) use (&$ratings) {
-            $seat['rating'] = $ratings[$seat['user_id']];
+            $seat['rating'] = $ratings[$seat['player_id']];
             return $seat;
         }, $seatings);
     }
@@ -617,7 +617,7 @@ class EventModel extends Model
                 $reggedItems = PlayerRegistrationPrimitive::findByPlayerAndEvent($this->_db, $eItem->getPlayerId(), $event[0]->getId());
                 // check that games are not started yet
                 if ($event[0]->getLastTimer() && empty($reggedItems)) {
-                    // do not allow new users to enter already tournament
+                    // do not allow new players to enter already tournament
                     // but allow to reenroll/reenter pin for already participating people
                     throw new BadActionException('Pin is expired: game sessions are already started.');
                 }

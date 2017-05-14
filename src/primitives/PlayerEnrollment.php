@@ -30,13 +30,13 @@ require_once __DIR__ . '/Player.php';
  */
 class PlayerEnrollmentPrimitive extends Primitive
 {
-    protected static $_table = 'event_enrolled_users';
+    protected static $_table = 'event_enrolled_players';
 
     protected static $_fieldsMapping = [
-        'id' => '_id',
-        'event_id' => '_eventId',
-        'user_id' => '_playerId',
-        'reg_pin' => '_pin',
+        'id'        => '_id',
+        'event_id'  => '_eventId',
+        'player_id' => '_playerId',
+        'reg_pin'   => '_pin',
     ];
 
     protected function _getFieldsTransforms()
@@ -69,13 +69,13 @@ class PlayerEnrollmentPrimitive extends Primitive
 
     protected function _create()
     {
-        $userReg = $this->_db->table(self::$_table)->create();
+        $playerReg = $this->_db->table(self::$_table)->create();
         if (empty($this->_pin)) {
             $this->_pin = mt_rand(100000, 999999);
         }
 
         try {
-            $success = $this->_save($userReg);
+            $success = $this->_save($playerReg);
             if ($success) {
                 $this->_id = $this->_db->lastInsertId();
             }
@@ -136,7 +136,7 @@ class PlayerEnrollmentPrimitive extends Primitive
     public static function findByPlayerAndEvent(IDb $db, $playerId, $eventId)
     {
         return self::_findBySeveral($db, [
-            'user_id' => [$playerId],
+            'player_id' => [$playerId],
             'event_id' => [$eventId]
         ], ['onlyLast' => true]);
     }
