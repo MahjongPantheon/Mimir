@@ -28,7 +28,7 @@ class EventsController extends Controller
      * @param string $description
      * @param string $type either 'online' or 'offline' or 'offline_interactive_tournament'
      * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
-     * @param int $gameDuration duration of game in this event
+     * @param int $gameDuration duration of game in this event in minutes
      * @throws BadActionException
      * @return int
      */

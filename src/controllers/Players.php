@@ -190,10 +190,6 @@ class PlayersController extends Controller
     public function getCurrentSessions($playerId, $eventId)
     {
         $this->_log->addInfo('Getting current sessions for player id #' . $playerId . ' at event id #' . $eventId);
-        if (!(new EventModel($this->_db, $this->_config, $this->_meta))->checkToken($playerId, $eventId)) {
-            throw new AuthFailedException('Authentication failed! Ask for some assistance from admin team', 403);
-        }
-
         $sessions = SessionPrimitive::findByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
 
         $result = array_map(function (SessionPrimitive $session) {
