@@ -72,7 +72,7 @@ Exceptions:
 
 ### getGameOverview
 Parameters:
-* **$sessionHashcode** (_string_) 
+* **$gameHashCode** (_string_) 
 
 Returns: _array_ 
 
@@ -157,6 +157,14 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### getTablesStateT
+Parameters:
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### getCurrentGamesT
 Parameters:
 
@@ -210,7 +218,7 @@ Parameters:
 * **$description** (_string_) 
 * **$type** (_string_) either 'online' or 'offline' or 'offline_interactive_tournament'
 * **$ruleset** (_string_) one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
-* **$gameDuration** (_int_) duration of game in this event
+* **$gameDuration** (_int_) duration of game in this event in minutes
 
 Returns: _int_ 
 
@@ -264,7 +272,7 @@ Returns: _void_
 Exceptions:
 * _InvalidParametersException_ 
 
-### enrollPlayer
+### enrollPlayerCP
 Parameters:
 * **$playerId** (_integer_) 
 * **$eventId** (_integer_) 
@@ -298,6 +306,7 @@ Exceptions:
 
 ### endGame
 Parameters:
+* **$gameHashcode** (_string_) Hashcode of game
 
 Returns: _bool_ Success?
 

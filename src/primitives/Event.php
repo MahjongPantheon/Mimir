@@ -127,7 +127,7 @@ class EventPrimitive extends Primitive
      */
     protected $_redZone;
     /**
-     * Game duration for current event, in seconds
+     * Game duration for current event, in minutes
      * @var int
      */
     protected $_gameDuration;
@@ -309,7 +309,7 @@ class EventPrimitive extends Primitive
     }
 
     /**
-     * @param int $gameDuration
+     * @param int $gameDuration in minutes
      * @return EventPrimitive
      */
     public function setGameDuration($gameDuration)

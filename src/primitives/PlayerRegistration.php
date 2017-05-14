@@ -190,6 +190,10 @@ class PlayerRegistrationPrimitive extends Primitive
      */
     public static function findEventAndPlayerByToken(IDb $db, $token)
     {
+        if (empty($token)) {
+            return null;
+        }
+
         $result = self::_findBy($db, 'auth_token', [$token]);
         if (empty($result)) {
             return null;
