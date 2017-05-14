@@ -51,6 +51,7 @@ class SessionPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
+            '_id'           => $this->_integerTransform(true),
             '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'user_id'),
             '_eventId'      => $this->_integerTransform(),
             '_representationalHash' => $this->_stringTransform(true),
@@ -60,7 +61,6 @@ class SessionPrimitive extends Primitive
             '_startDate'    => $this->_stringTransform(true),
             '_endDate'      => $this->_stringTransform(true),
             '_status'       => $this->_stringTransform(true),
-            '_id'           => $this->_integerTransform(true),
             '_current'      => [
                 'serialize' => function (SessionState $obj = null) {
                     if (!$obj) {
@@ -297,6 +297,8 @@ class SessionPrimitive extends Primitive
         }
 
         $orm = $db->table(static::$_table)->tableAlias('s')
+            ->select('*')
+            ->select('s.id', 'id') // session_user also has 'id' field, we need to select it explicitly
             ->join(self::REL_USER, ['sp.session_id', '=', 's.id'], 'sp');
 
         foreach ($conditions as $key => $identifiers) {

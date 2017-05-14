@@ -46,18 +46,11 @@ dev:
 req:
 	php bin/rpc.php "$(filter-out $@,$(MAKECMDGOALS))"
 
-init_sqlite_nointeractive:
+init_dev_sqlite:
 	@echo '' > $(SQLITE_FILE)
-	@cat src/fixtures/init/sqlite.sql \
-		| sqlite3 $(SQLITE_FILE)
+	@bin/phinx migrate -e development
 
-init_sqlite:
-	@echo "This will delete and recreate $(SQLITE_FILE)! Press Enter to confirm or Ctrl+C to abort"
-	@read
-	make init_sqlite_nointeractive
+init_test_sqlite:
+	@echo '' > $(SQLITE_FILE)
+	@bin/phinx migrate -e testing
 
-init_mysql:
-	@cat src/fixtures/init/mysql.sql
-
-init_pgsql:
-	@cat src/fixtures/init/postgres.sql

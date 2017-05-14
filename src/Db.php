@@ -210,7 +210,7 @@ class Db implements IDb
         if (!is_dir(dirname($db))) {
             mkdir(dirname($db));
         }
-        shell_exec('cd ' . __DIR__ . '/../ && SQLITE_FILE=' . $db . ' make init_sqlite_nointeractive');
+        shell_exec('cd ' . __DIR__ . '/../ && SQLITE_FILE=' . $db . ' make init_test_sqlite');
 
         if (self::$__testingInstance === null) {
             $cfg = new Config(__DIR__ . '/../tests/util/config.php');

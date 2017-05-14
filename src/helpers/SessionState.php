@@ -79,6 +79,9 @@ class SessionState
     public function __construct(Ruleset $rules, $playersIds)
     {
         $this->_rules = $rules;
+        if (count($playersIds) != 4) {
+            throw new InvalidParametersException('Players count is not 4');
+        }
         $this->_scores = array_combine(
             $playersIds,
             array_fill(0, 4, $rules->startPoints())
