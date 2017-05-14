@@ -19,7 +19,7 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require_once __DIR__ . '/../vendor/heilage-nsk/idiorm/src/idiorm.php';
+require_once __DIR__ . '/../vendor/ctizen/idiorm/src/idiorm.php';
 require_once __DIR__ . '/../src/interfaces/IDb.php';
 require_once __DIR__ . '/../src/Config.php';
 

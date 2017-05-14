@@ -48,7 +48,7 @@ class UpdateVersion1m1 extends AbstractMigration
                 sync_start = 1,
                 auto_seating = 1,
                 sort_by_games = 1,
-                allow_player_append = 0,
+                allow_player_append = 1,
                 is_online = 1,
                 use_timer = 0,
                 is_textlog = 0
@@ -65,6 +65,8 @@ class UpdateVersion1m1 extends AbstractMigration
          * - Call save() after all modifications of indexes and FKs.
          * - Changing field name in table causes sqlite to drop all indexes in table (sic!).
          * So after column rename you should recreate all indexes.
+         * - But, postgres doesn't drop indexes like sqlite does %) So we should drop them manually.
+         * Any added index should be dropped first.
          */
 
         $this->getOutput()->setVerbosity(256);
@@ -81,8 +83,7 @@ class UpdateVersion1m1 extends AbstractMigration
             ->addForeignKey('owner_player', 'player')
             ->save();
         $this->table('event')
-            ->removeIndex(['owner_user'])
-            ->removeIndex(['owner_formation'])
+            ->removeIndex(['lobby_id'])
             ->addIndex('lobby_id', ['name' => 'event_lobby'])
             ->save();
         $this->table('event_enrolled_players')
@@ -109,6 +110,10 @@ class UpdateVersion1m1 extends AbstractMigration
             ->dropForeignKey('user_id')
             ->renameColumn('user_id', 'player_id')
             ->addForeignKey('player_id', 'player')
+            ->save();
+        $this->table('session_player')
+            ->addIndex('session_id') // for FK
+            // don't add explicit index for player_id - it's created when foreign key is recreated
             ->save();
         $this->table('session_player')
             ->removeIndexByName('session_user_uniq')
