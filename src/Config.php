@@ -22,11 +22,15 @@ class Config
     protected $_data;
 
     /**
-     * @param string $baseFile config file location
+     * @param string $fileOrSource config file location
      */
-    public function __construct($baseFile)
+    public function __construct($fileOrSource)
     {
-        $this->_data = require $baseFile;
+        if (is_array($fileOrSource)) { // not file name, just whole config
+            $this->_data = $fileOrSource;
+        } else {
+            $this->_data = require $fileOrSource;
+        }
     }
 
     /**
