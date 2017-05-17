@@ -77,7 +77,7 @@ class TournamentStagingSeeder extends AbstractSeed
         $meta = new \Riichi\Meta($_SERVER);
         $model = new \Riichi\TextmodeSessionModel($db, $config, $meta);
 
-        $games = array_chunk($games, 10); // 10 games is enough, just to speed up seeding
+        $games = array_slice($games, 0, 10); // 10 games is enough, just to speed up seeding
 
         foreach ($games as $log) {
             $model->addGame($event->getId(), $log);
