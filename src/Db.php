@@ -19,7 +19,7 @@ namespace Riichi;
 
 use \Idiorm\ORM;
 
-require_once __DIR__ . '/../vendor/heilage-nsk/idiorm/src/idiorm.php';
+require_once __DIR__ . '/../vendor/ctizen/idiorm/src/idiorm.php';
 require_once __DIR__ . '/../src/interfaces/IDb.php';
 require_once __DIR__ . '/../src/Config.php';
 
@@ -210,7 +210,7 @@ class Db implements IDb
         if (!is_dir(dirname($db))) {
             mkdir(dirname($db));
         }
-        shell_exec('cd ' . __DIR__ . '/../ && SQLITE_FILE=' . $db . ' make init_sqlite_nointeractive');
+        shell_exec('cd ' . __DIR__ . '/../ && SQLITE_FILE=' . $db . ' make init_test_sqlite');
 
         if (self::$__testingInstance === null) {
             $cfg = new Config(__DIR__ . '/../tests/util/config.php');

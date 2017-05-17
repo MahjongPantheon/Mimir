@@ -24,6 +24,11 @@ echo sprintf(
     $pid
 ) . PHP_EOL;
 
+$testconf = require(__DIR__ . '/util/config.php');
+echo "\033[34mServer-side errors and exceptions are printed to " . realpath($testconf['verboseLog'])
+    . " - check it out in case of any misunderstandings! Also you may use trigger_error to get some "
+    . "debug output from server side\033[0m" . PHP_EOL;
+
 // Kill the web server when the process ends
 register_shutdown_function(
     function () use ($pid) {

@@ -542,8 +542,8 @@ class RoundPrimitive extends Primitive
     public function setRiichiUsers($riichiUsers)
     {
         $this->_riichiUsers = $riichiUsers;
-        $this->_riichiIds = array_map(function (PlayerPrimitive $user) {
-            return $user->getId();
+        $this->_riichiIds = array_map(function (PlayerPrimitive $player) {
+            return $player->getId();
         }, $riichiUsers);
         return $this;
     }
@@ -639,8 +639,8 @@ class RoundPrimitive extends Primitive
     public function setTempaiUsers($tempaiUsers)
     {
         $this->_tempaiUsers = $tempaiUsers;
-        $this->_tempaiIds = array_map(function (PlayerPrimitive $user) {
-            return $user->getId();
+        $this->_tempaiIds = array_map(function (PlayerPrimitive $player) {
+            return $player->getId();
         }, $tempaiUsers);
         return $this;
     }

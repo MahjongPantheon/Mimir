@@ -121,17 +121,17 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent = new EventPrimitive($this->_db);
         $newEvent
             ->setTitle('event1')
-            ->setOwnerUser($newUser)
+            ->setOwnerPlayer($newUser)
             ->setDescription('eventdesc1')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
 
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()])[0];
-        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerUserId()); // before fetch
-        $this->assertNotEmpty($eventCopy->getOwnerUser());
-        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerUser()->getId());
-        $this->assertTrue($newUser !== $eventCopy->getOwnerUser()); // different objects!
+        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerPlayerId()); // before fetch
+        $this->assertNotEmpty($eventCopy->getOwnerPlayer());
+        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerPlayer()->getId());
+        $this->assertTrue($newUser !== $eventCopy->getOwnerPlayer()); // different objects!
     }
 
     public function testRelationOwnerFormation()

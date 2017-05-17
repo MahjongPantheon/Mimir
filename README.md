@@ -44,7 +44,7 @@ You also will need standard `make` utility to use following shortcuts.
 - Use `make autofix` to fix all codestyle problems, that can be fixed automatically.
 - Use `make apidoc` to regenerate api methods documentation file.
 - Remember to use PSR2 coding standards when adding php code.
-- The [DB schema](src/fixtures/init/ansi.sql) should be written in ANSI SQL92 and should pass any compliance tests. If any of DB-specific things are required, use post-processing tools (see Makefile sections for examples of generating sqlite/mysql/pgsql specific schemas).
+- The DB migrations are implemented using [Phinx](http://docs.phinx.org), see its documentation for details. Also you may run `make init_dev_sqlite` to create empty development DB for local testing purposes.
 
 To generate or recreate sqlite db, run `make init_sqlite`.
 To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.

@@ -29,14 +29,14 @@ require_once __DIR__ . '/../Primitive.php';
  */
 class PlayerPrimitive extends Primitive
 {
-    protected static $_table = 'user';
+    protected static $_table = 'player';
 
     protected static $_fieldsMapping = [
-        'id' => '_id',
-        'display_name' => '_displayName',
-        'ident' => '_ident',
-        'alias' => '_alias',
-        'tenhou_id' => '_tenhouId'
+        'id'            => '_id',
+        'display_name'  => '_displayName',
+        'ident'         => '_ident',
+        'alias'         => '_alias',
+        'tenhou_id'     => '_tenhouId'
     ];
 
     protected function _getFieldsTransforms()
@@ -73,7 +73,7 @@ class PlayerPrimitive extends Primitive
     protected $_tenhouId;
 
     /**
-     * Find users by local ids (primary key)
+     * Find players by local ids (primary key)
      *
      * @param IDb $db
      * @param int[] $ids
@@ -86,7 +86,7 @@ class PlayerPrimitive extends Primitive
     }
 
     /**
-     * Find users by [oauth] idents (indexed search)
+     * Find players by [oauth] idents (indexed search)
      *
      * @param IDb $db
      * @param int[] $idents
@@ -99,7 +99,7 @@ class PlayerPrimitive extends Primitive
     }
 
     /**
-     * Find users by alias (indexed search)
+     * Find players by alias (indexed search)
      *
      * @param IDb $db
      * @param int[] $idents
@@ -112,7 +112,7 @@ class PlayerPrimitive extends Primitive
     }
 
     /**
-     * Find users by tenhou ids (indexed search)
+     * Find players by tenhou ids (indexed search)
      *
      * @param IDb $db
      * @param int[] $ids
@@ -126,8 +126,8 @@ class PlayerPrimitive extends Primitive
 
     protected function _create()
     {
-        $user = $this->_db->table(self::$_table)->create();
-        $success = $this->_save($user);
+        $player = $this->_db->table(self::$_table)->create();
+        $success = $this->_save($player);
         if ($success) {
             $this->_id = $this->_db->lastInsertId();
         }

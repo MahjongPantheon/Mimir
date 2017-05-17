@@ -57,7 +57,7 @@ class GamesController extends Controller
         $this->_log->addInfo('Starting new game (by token)');
         $data = (new EventModel($this->_db, $this->_config, $this->_meta))->dataFromToken();
         if (empty($data)) {
-            throw new InvalidParametersException('Invalid user token', 401);
+            throw new InvalidParametersException('Invalid player token', 401);
         }
         return $this->start($data->getEventId(), $players);
     }
