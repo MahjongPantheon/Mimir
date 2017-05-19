@@ -306,6 +306,26 @@ class PlayersController extends Controller
     }
 
     /**
+     * Get last recorded round for session by hashcode
+     *
+     * @param string $hashcode
+     * @throws EntityNotFoundException
+     * @return array|null
+     */
+    public function getLastRoundByHashcode($hashcode)
+    {
+        $this->_log->addInfo('Getting last round for hashcode ' . $hashcode);
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$hashcode]);
+        if (empty($session)) {
+            return null;
+        }
+
+        $data = $this->_getLastRoundCommon($session[0]);
+        $this->_log->addInfo('Successfully got last round for hashcode ' . $hashcode);
+        return $data;
+    }
+
+    /**
      * Get last recorded round with player in event
      *
      * @param int $playerId
@@ -321,6 +341,18 @@ class PlayersController extends Controller
             return null;
         }
 
+        $data = $this->_getLastRoundCommon($session);
+        $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);
+        return $data;
+    }
+
+    /**
+     * Common formatting for last round getter
+     * @param SessionPrimitive $session
+     * @return array|null
+     */
+    protected function _getLastRoundCommon(SessionPrimitive $session)
+    {
         $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
         /** @var MultiRoundPrimitive $lastRound */
         $lastRound = MultiRoundHelper::findLastRound($rounds);
@@ -362,8 +394,6 @@ class PlayersController extends Controller
             'kanuradora' => $multiGet($lastRound, 'getKanuradora'),
             'openHand'   => $multiGet($lastRound, 'getOpenHand')
         ];
-
-        $this->_log->addInfo('Successfully got last round for player id #' . $playerId . ' at event id #' . $eventId);
 
         return $result;
     }
