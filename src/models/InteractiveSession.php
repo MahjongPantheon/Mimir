@@ -133,8 +133,7 @@ class InteractiveSessionModel extends Model
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         if ($dry) {
-            /** @var $state SessionState */
-            list($state, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
+            list(, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
 
             $multiGet = function (RoundPrimitive $p, $method) {
                 if ($p instanceof MultiRoundPrimitive) {
@@ -169,7 +168,7 @@ class InteractiveSessionModel extends Model
             ];
         }
 
-        return $round->save() && $session->updateCurrentState($round);
+        return $round->save() && $session->updateCurrentState($round) && $this->_trackUpdate($gameHashcode);
     }
 
     /**
@@ -275,6 +274,20 @@ class InteractiveSessionModel extends Model
 
         $lastRound = MultiRoundHelper::findLastRound($rounds);
         $session[0]->rollback($lastRound); // this also does session save & drop round
+        return true;
+    }
+
+    /**
+     * Send event to predefined tracker about new data in game
+     * @param $gameHashcode
+     * @return bool
+     */
+    protected function _trackUpdate($gameHashcode)
+    {
+        if (!empty($this->_config->getValue('trackerUrl'))) {
+            file_get_contents(sprintf($this->_config->getValue('trackerUrl'), $gameHashcode));
+        }
+
         return true;
     }
 }
