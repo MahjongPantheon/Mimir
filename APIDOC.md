@@ -133,6 +133,15 @@ Returns: _array|null_
 Exceptions:
 * _EntityNotFoundException_ 
 
+### getLastRoundByHash
+Parameters:
+* **$hashcode** (_string_) 
+
+Returns: _array|null_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
+
 ### getGameConfigT
 Parameters:
 
@@ -348,10 +357,10 @@ Exceptions:
 Parameters:
 * **$ident** (_string_) oauth ident, if any
 * **$alias** (_string_) textlog alias for quicker enter
-* **$displayName** (_string_) how to display user in stats
+* **$displayName** (_string_) how to display player in stats
 * **$tenhouId** (_string_) tenhou username
 
-Returns: _int_ user id
+Returns: _int_ player id
 
 Exceptions:
 * _MalformedPayloadException_ 
@@ -359,13 +368,13 @@ Exceptions:
 
 ### updatePlayer
 Parameters:
-* **$id** (_int_) user to update
+* **$id** (_int_) player to update
 * **$ident** (_string_) oauth ident, if any
 * **$alias** (_string_) textlog alias for quicker enter
-* **$displayName** (_string_) how to display user in stats
+* **$displayName** (_string_) how to display player in stats
 * **$tenhouId** (_string_) tenhou username
 
-Returns: _int_ user id
+Returns: _int_ player id
 
 Exceptions:
 * _EntityNotFoundException_ 

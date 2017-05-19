@@ -43,6 +43,7 @@ return [
     'addOnlineReplay'    => ['GamesController', 'addOnlineReplay'],
     'getLastResults'     => ['PlayersController', 'getLastResults'],
     'getLastRound'       => ['PlayersController', 'getLastRound'],
+    'getLastRoundByHash' => ['PlayersController', 'getLastRoundByHashcode'],
 
     'getGameConfigT'     => ['EventsController', 'getGameConfigFromToken'],
     'getTimerStateT'     => ['EventsController', 'getTimerStateFromToken'],
