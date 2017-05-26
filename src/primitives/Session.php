@@ -426,11 +426,11 @@ class SessionPrimitive extends Primitive
      */
     public function getStartDate()
     {
-        return $this->_startDate;
+        return $this->_getLocalDate($this->_startDate);
     }
 
     /**
-     * @param string $date
+     * @param string $date UTC date string
      * @return $this
      */
     public function setEndDate($date)
@@ -444,7 +444,7 @@ class SessionPrimitive extends Primitive
      */
     public function getEndDate()
     {
-        return $this->_endDate;
+        return $this->_getLocalDate($this->_endDate);
     }
 
     /**
@@ -684,5 +684,19 @@ class SessionPrimitive extends Primitive
         $this->_current = $round->getLastSessionState();
         $round->drop();
         $this->save();
+    }
+
+    /**
+     * Return local date for current event timezone
+     * @param $utcDate
+     * @return string
+     * @throws EntityNotFoundException
+     */
+    protected function _getLocalDate($utcDate)
+    {
+        $timezone = $this->getEvent()->getTimezone();
+        $date = new \DateTime($utcDate);
+        $date->setTimezone(new \DateTimeZone($timezone));
+        return $date->format('Y-m-d H:i:s');
     }
 }

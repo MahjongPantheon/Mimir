@@ -47,6 +47,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'));
         $this->_event->save();

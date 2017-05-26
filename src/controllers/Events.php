@@ -29,10 +29,11 @@ class EventsController extends Controller
      * @param string $type either 'online' or 'offline' or 'offline_interactive_tournament'
      * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
      * @param int $gameDuration duration of game in this event in minutes
+     * @param int $timezone Shift in hours from GMT
      * @throws BadActionException
      * @return int
      */
-    public function createEvent($title, $description, $type, $ruleset, $gameDuration)
+    public function createEvent($title, $description, $type, $ruleset, $gameDuration, $timezone)
     {
         $this->_log->addInfo('Creating new [' . $type . '] event with [' . $ruleset . '] rules');
 
@@ -41,6 +42,7 @@ class EventsController extends Controller
             ->setDescription($description)
             ->setType($type)
             ->setGameDuration($gameDuration)
+            ->setTimeZone($timezone)
             ->setRuleset(Ruleset::instance($ruleset))
             // ->setStartTime('')   // TODO
             // ->setEndTime('')     // TODO
@@ -300,6 +302,7 @@ class EventsController extends Controller
             'redZone'             => $rules->redZone(), // in seconds!
             'yellowZone'          => $rules->yellowZone(), // in seconds!
             'gameDuration'        => $event[0]->getGameDuration(), // in minutes!
+            'timezone'            => $event[0]->getTimezone(),
             'isOnline'            => (bool)$event[0]->getIsOnline(),
             'autoSeating'         => (bool)$event[0]->getAutoSeating(),
             'isTextlog'           => (bool)$event[0]->getIsTextlog(),

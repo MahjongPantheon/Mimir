@@ -53,6 +53,7 @@ class EventPrimitive extends Primitive
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
+        'timezone'          => '_timezone'
     ];
 
     protected function _getFieldsTransforms()
@@ -73,6 +74,7 @@ class EventPrimitive extends Primitive
             '_autoSeating'        => $this->_integerTransform(),
             '_sortByGames'        => $this->_integerTransform(),
             '_allowPlayerAppend'  => $this->_integerTransform(),
+            '_timezone'           => $this->_stringTransform(),
             '_useTimer'           => $this->_integerTransform(),
             '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [
@@ -131,6 +133,11 @@ class EventPrimitive extends Primitive
      * @var int
      */
     protected $_gameDuration;
+    /**
+     * Timezone description string (like UTC or Europe/Moscow)
+     * @var string
+     */
+    protected $_timezone;
     /**
      * Owner organisation
      * @var FormationPrimitive|null
@@ -343,6 +350,24 @@ class EventPrimitive extends Primitive
     public function getLastTimer()
     {
         return $this->_lastTimer;
+    }
+
+    /**
+     * @param string $timezone
+     * @return EventPrimitive
+     */
+    public function setTimezone($timezone)
+    {
+        $this->_timezone = $timezone;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->_timezone;
     }
 
     /**
