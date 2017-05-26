@@ -88,6 +88,7 @@ class InteractiveSessionModel extends Model
             throw new DatabaseException('Couldn\'t save session data to DB!');
         }
 
+        $this->_trackUpdate($newSession->getRepresentationalHash());
         return $newSession->getRepresentationalHash();
     }
 
@@ -183,7 +184,7 @@ class InteractiveSessionModel extends Model
     public function addPenalty($eventId, $playerId, $amount, $reason)
     {
         if (!$this->checkAdminToken()) {
-            throw new AuthFailedException('Only administrators are allowed to drop last round');
+            throw new AuthFailedException('Only administrators are allowed to add penalties');
         }
 
         $session = SessionPrimitive::findLastByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
