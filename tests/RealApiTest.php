@@ -40,6 +40,7 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $evt = (new EventPrimitive($db))
             ->setRuleset(Ruleset::instance('ema')) // TODO: why 'tenhounet' rules fail? o_0
             ->setType('offline')
+            ->setTimezone('UTC')
             ->setTitle('test')
             ->setDescription('test')
             ->setGameDuration(1); // for timers check

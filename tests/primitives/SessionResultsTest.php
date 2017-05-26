@@ -76,6 +76,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset($this->_ruleset);
         $this->_event->save();

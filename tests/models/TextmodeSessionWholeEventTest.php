@@ -66,6 +66,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         $this->_db = Db::__getCleanTestingInstance();
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
+            ->setTimezone('UTC')
             ->setDescription('desc')
             ->setType('offline')
             ->setRuleset(Ruleset::instance('ema'));

@@ -38,6 +38,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setDescription('eventdesc1')
             ->setIsOnline(1)
+            ->setTimezone('UTC')
             ->setAllowPlayerAppend(0)
             ->setAutoSeating(1)
             ->setIsTextlog(0)
@@ -53,6 +54,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $newEvent->getSyncStart());
         $this->assertEquals(0, $newEvent->getAllowPlayerAppend());
         $this->assertEquals(0, $newEvent->getIsTextlog());
+        $this->assertEquals('UTC', $newEvent->getTimezone());
 
         $success = $newEvent->save();
         $this->assertTrue($success, "Saved event");
@@ -65,6 +67,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
@@ -81,6 +84,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->setLobbyId('some_lobby')
@@ -98,6 +102,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
@@ -122,6 +127,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setOwnerPlayer($newUser)
+            ->setTimezone('UTC')
             ->setDescription('eventdesc1')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
@@ -157,6 +163,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setOwnerFormation($newFormation)
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();

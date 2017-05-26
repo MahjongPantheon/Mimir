@@ -17,4 +17,4 @@
  */
 namespace Riichi;
 
-date_default_timezone_set('Asia/Novosibirsk');
+date_default_timezone_set('UTC');
