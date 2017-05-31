@@ -91,6 +91,25 @@ class EventModel extends Model
         $tablesCount = count($reggedPlayers) / 4;
 
         $lastGames = SessionPrimitive::findByEventAndStatus($this->_db, $eventId, ['finished', 'inprogress'], 0, $tablesCount);
+        return $this->_formatTablesState($lastGames);
+    }
+
+    /**
+     * Find all playing tables on global level
+     * @return array
+     */
+    public function getGlobalTablesState()
+    {
+        $games = SessionPrimitive::findAllInProgress($this->_db);
+        return $this->_formatTablesState($games);
+    }
+
+    /**
+     * @param SessionPrimitive[] $lastGames
+     * @return array
+     */
+    protected function _formatTablesState($lastGames)
+    {
         $output = [];
         foreach ($lastGames as $game) {
             $rounds = RoundPrimitive::findBySessionIds($this->_db, [$game->getId()]);
@@ -609,6 +628,11 @@ class EventModel extends Model
     {
         $success = false;
         $token = null;
+
+        if ($pin === '0000000000') {
+            // Special pin & token for universal watcher
+            return '0000000000';
+        }
 
         $eItem = PlayerEnrollmentPrimitive::findByPin($this->_db, $pin);
         if ($eItem) {

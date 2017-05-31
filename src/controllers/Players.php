@@ -221,6 +221,10 @@ class PlayersController extends Controller
     public function getCurrentSessionsFromToken()
     {
         $this->_log->addInfo('Getting current sessions (by token)');
+        if ($this->_meta->isGlobalWatcher()) {
+            return [];
+        }
+
         $data = (new EventModel($this->_db, $this->_config, $this->_meta))->dataFromToken();
         if (empty($data)) {
             throw new InvalidParametersException('Invalid player token', 401);

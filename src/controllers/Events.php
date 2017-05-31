@@ -123,12 +123,18 @@ class EventsController extends Controller
     {
         $this->_log->addInfo('Getting tables state for event (by token)');
         $eventModel = new EventModel($this->_db, $this->_config, $this->_meta);
-        $reg = $eventModel->dataFromToken();
-        if (empty($reg)) {
-            throw new InvalidParametersException('Invalid player token', 401);
+
+        if ($this->_meta->isGlobalWatcher()) {
+            $data = $eventModel->getGlobalTablesState();
+        } else {
+            $reg = $eventModel->dataFromToken();
+            if (empty($reg)) {
+                throw new InvalidParametersException('Invalid player token', 401);
+            }
+
+            $data = $eventModel->getTablesState($reg->getEventId());
         }
 
-        $data = $eventModel->getTablesState($reg->getEventId());
         $this->_log->addInfo('Successfully got tables state for event (by token)');
         return $data;
     }
