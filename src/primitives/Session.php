@@ -188,6 +188,18 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * Find all sessions in progress
+     *
+     * @param IDb $db
+     * @throws \Exception
+     * @return SessionPrimitive[]
+     */
+    public static function findAllInProgress(IDb $db)
+    {
+        return self::_findBy($db, 'status', ['inprogress']);
+    }
+
+    /**
      * Find sessions by client-aware hash list (indexed search)
      *
      * @param IDb $db

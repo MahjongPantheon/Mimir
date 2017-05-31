@@ -69,4 +69,9 @@ class Meta
     {
         header('X-Api-Version: ' . intval($major) . '.' . intval($minor));
     }
+
+    public function isGlobalWatcher()
+    {
+        return $this->_authToken === '0000000000';
+    }
 }
