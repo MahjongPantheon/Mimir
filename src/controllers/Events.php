@@ -365,6 +365,28 @@ class EventsController extends Controller
     }
 
     /**
+     * Get achievements list for event
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getAchievements($eventId)
+    {
+        $this->_log->addInfo('Getting achievements list for event id# ' . $eventId);
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $table = (new EventModel($this->_db, $this->_config, $this->_meta))->getAchievements($event[0]->getId());
+
+        $this->_log->addInfo('Successfully received achievements list for event id# ' . $eventId);
+        return $table;
+    }
+
+    /**
      * Get last games sorted by date (latest go first)
      *
      * @param integer $eventId
