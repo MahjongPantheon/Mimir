@@ -303,6 +303,15 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### getAchievements
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### startGame
 Parameters:
 * **$eventId** (_int_) Event this session belongs to

@@ -26,6 +26,7 @@ require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../primitives/PlayerEnrollment.php';
 require_once __DIR__ . '/../primitives/PlayerHistory.php';
+require_once __DIR__ . '/../primitives/Achievements.php';
 require_once __DIR__ . '/../primitives/Round.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 
@@ -78,6 +79,28 @@ class EventModel extends Model
             $seat['rating'] = $ratings[$seat['player_id']];
             return $seat;
         }, $seatings);
+    }
+
+    /**
+     * Get achievements list
+     * @throws AuthFailedException
+     * @param $eventId
+     * @return array
+     */
+    public function getAchievements($eventId)
+    {
+        if (!$this->checkAdminToken()) {
+            throw new AuthFailedException('Only administrators are allowed to view achievements');
+        }
+
+        return [
+            'bestHand' => AchievementsPrimitive::getBestHandOfEvent($this->_db, $eventId),
+            'bestTsumoist' => AchievementsPrimitive::getBestTsumoistInSingleSession($this->_db, $eventId),
+            'braveSapper' => AchievementsPrimitive::getBraveSappers($this->_db, $eventId),
+            'chomboMaster' => AchievementsPrimitive::getChomboMasters($this->_db, $eventId),
+            'dovakin' => AchievementsPrimitive::getDovakins($this->_db, $eventId),
+            'yakuman' => AchievementsPrimitive::getYakumans($this->_db, $eventId)
+        ];
     }
 
     /**
