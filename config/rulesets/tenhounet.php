@@ -52,6 +52,9 @@ class RulesetTenhounet extends Ruleset
         'timerPolicy'           => 'none',
         'yellowZone'            => 0,
         'redZone'               => 0,
+        'penaltyStep'           => 0,
+        'maxPenalty'            => 0,
+        'minPenalty'            => 0,
         'uma' => [
             1 => 15,
             2 => 5,
