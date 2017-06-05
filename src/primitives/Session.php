@@ -32,7 +32,7 @@ require_once __DIR__ . '/SessionResults.php';
 class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';
-    const REL_USER = 'session_user';
+    const REL_USER = 'session_player';
 
     protected static $_fieldsMapping = [
         'id'                    => '_id',
@@ -43,7 +43,7 @@ class SessionPrimitive extends Primitive
         'orig_link'             => '_origLink',
         'start_date'            => '_startDate',
         'end_date'              => '_endDate',
-        '::session_user'        => '_playersIds', // external many-to-many relation
+        '::session_player'      => '_playersIds', // external many-to-many relation
         'status'                => '_status',
         'intermediate_results'  => '_current',
     ];
@@ -51,7 +51,8 @@ class SessionPrimitive extends Primitive
     protected function _getFieldsTransforms()
     {
         return [
-            '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'user_id'),
+            '_id'           => $this->_integerTransform(true),
+            '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'player_id'),
             '_eventId'      => $this->_integerTransform(),
             '_representationalHash' => $this->_stringTransform(true),
             '_replayHash'   => $this->_stringTransform(true),
@@ -60,7 +61,6 @@ class SessionPrimitive extends Primitive
             '_startDate'    => $this->_stringTransform(true),
             '_endDate'      => $this->_stringTransform(true),
             '_status'       => $this->_stringTransform(true),
-            '_id'           => $this->_integerTransform(true),
             '_current'      => [
                 'serialize' => function (SessionState $obj = null) {
                     if (!$obj) {
@@ -188,6 +188,18 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * Find all sessions in progress
+     *
+     * @param IDb $db
+     * @throws \Exception
+     * @return SessionPrimitive[]
+     */
+    public static function findAllInProgress(IDb $db)
+    {
+        return self::_findBy($db, 'status', ['inprogress']);
+    }
+
+    /**
      * Find sessions by client-aware hash list (indexed search)
      *
      * @param IDb $db
@@ -218,7 +230,7 @@ class SessionPrimitive extends Primitive
             ['status' => (array)$state, 'event_id' => [$eventId]],
             [
                 'limit' => $limit, 'offset'  => $offset,
-                'order' => 'desc', 'orderBy' => 'end_date'
+                'order' => 'desc', 'orderBy' => 'id'
             ]
         );
     }
@@ -233,7 +245,7 @@ class SessionPrimitive extends Primitive
     public static function getPlayersSeatingInEvent(IDb $db, $eventId)
     {
         return $db->table(self::$_table)
-            ->select('user_id')
+            ->select('player_id')
             ->select('order')
             ->join(self::REL_USER, [self::REL_USER . '.session_id', '=', self::$_table . '.id'])
             ->where(self::$_table . '.event_id', $eventId)
@@ -260,7 +272,7 @@ class SessionPrimitive extends Primitive
         $orm = $db->table(self::$_table)
             ->select(self::$_table . '.*')
             ->leftOuterJoin(self::REL_USER, [self::REL_USER . '.session_id', '=', self::$_table . '.id'])
-            ->where(self::REL_USER . '.user_id', $playerId)
+            ->where(self::REL_USER . '.player_id', $playerId)
             ->where(self::$_table . '.event_id', $eventId)
             ->groupBy(self::$_table . '.id');
         if ($withStatus !== '*') {
@@ -289,7 +301,7 @@ class SessionPrimitive extends Primitive
     public static function findLastByPlayerAndEvent(IDb $db, $playerId, $eventId, $withStatus = '*')
     {
         $conditions = [
-            'sp.user_id'  => [$playerId],
+            'sp.player_id'  => [$playerId],
             's.event_id' => [$eventId]
         ];
         if ($withStatus !== '*') {
@@ -297,6 +309,8 @@ class SessionPrimitive extends Primitive
         }
 
         $orm = $db->table(static::$_table)->tableAlias('s')
+            ->select('*')
+            ->select('s.id', 'id') // session_player also has 'id' field, we need to select it explicitly
             ->join(self::REL_USER, ['sp.session_id', '=', 's.id'], 'sp');
 
         foreach ($conditions as $key => $identifiers) {
@@ -424,11 +438,11 @@ class SessionPrimitive extends Primitive
      */
     public function getStartDate()
     {
-        return $this->_startDate;
+        return $this->_getLocalDate($this->_startDate);
     }
 
     /**
-     * @param string $date
+     * @param string $date UTC date string
      * @return $this
      */
     public function setEndDate($date)
@@ -442,7 +456,7 @@ class SessionPrimitive extends Primitive
      */
     public function getEndDate()
     {
-        return $this->_endDate;
+        return $this->_getLocalDate($this->_endDate);
     }
 
     /**
@@ -452,8 +466,8 @@ class SessionPrimitive extends Primitive
     public function setPlayers($players)
     {
         $this->_players = $players;
-        $this->_playersIds = array_map(function (PlayerPrimitive $user) {
-            return $user->getId();
+        $this->_playersIds = array_map(function (PlayerPrimitive $player) {
+            return $player->getId();
         }, $players);
 
         return $this;
@@ -570,7 +584,7 @@ class SessionPrimitive extends Primitive
 
         switch ($this->getEvent()->getRuleset()->timerPolicy()) {
             case 'yellowZone':
-                $isInYellowZone = $lastTimer && (
+                $isInYellowZone = $this->getEvent()->getUseTimer() && $lastTimer && (
                     $lastTimer + (
                         $this->getEvent()->getGameDuration() * 60
                         - $this->getEvent()->getRuleset()->yellowZone()
@@ -597,7 +611,7 @@ class SessionPrimitive extends Primitive
                 $this->getCurrentState()->update($round);
                 $success = $this->save();
 
-                $isInRedZone = $lastTimer && (
+                $isInRedZone = $this->getEvent()->getUseTimer() && $lastTimer && (
                     $lastTimer + (
                         $this->getEvent()->getGameDuration() * 60
                         - $this->getEvent()->getRuleset()->redZone()
@@ -660,7 +674,7 @@ class SessionPrimitive extends Primitive
                 ->setSession($this)
                 ->calc($this->getEvent()->getRuleset(), $this->getCurrentState(), $this->getPlayersIds());
 
-            $userHistoryItem = PlayerHistoryPrimitive::makeNewHistoryItem(
+            $playerHistoryItem = PlayerHistoryPrimitive::makeNewHistoryItem(
                 $this->_db,
                 $player,
                 $this,
@@ -668,7 +682,7 @@ class SessionPrimitive extends Primitive
                 $result->getPlace()
             );
 
-            return $acc && $result->save() && $userHistoryItem->save();
+            return $acc && $result->save() && $playerHistoryItem->save();
         }, true);
     }
 
@@ -682,5 +696,19 @@ class SessionPrimitive extends Primitive
         $this->_current = $round->getLastSessionState();
         $round->drop();
         $this->save();
+    }
+
+    /**
+     * Return local date for current event timezone
+     * @param $utcDate
+     * @return string
+     * @throws EntityNotFoundException
+     */
+    protected function _getLocalDate($utcDate)
+    {
+        $timezone = $this->getEvent()->getTimezone();
+        $date = new \DateTime($utcDate);
+        $date->setTimezone(new \DateTimeZone($timezone));
+        return $date->format('Y-m-d H:i:s');
     }
 }

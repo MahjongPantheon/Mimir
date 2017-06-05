@@ -19,6 +19,7 @@ namespace Riichi;
 
 require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/Db.php';
+require_once __DIR__ . '/Meta.php';
 require_once __DIR__ . '/ErrorHandler.php';
 
 use Monolog\Logger;
@@ -28,11 +29,13 @@ class Api
 {
     protected $_db;
     protected $_syslog;
+    protected $_meta;
 
     public function __construct($configPath = null)
     {
         $this->_config = new Config(empty($configPath) ? __DIR__ . '/../config/index.php' : $configPath);
         $this->_db = new Db($this->_config);
+        $this->_meta = new Meta($_SERVER);
         $this->_syslog = new Logger('RiichiApi');
         $this->_syslog->pushHandler(new ErrorLogHandler());
 
@@ -77,7 +80,7 @@ class Api
             } else {
                 class_exists($route[0]); // this will ensure class existence
                 $className = __NAMESPACE__ . '\\' . $route[0];
-                $ret['instance'] = $runtimeCache[$route[0]] = new $className($this->_db, $this->_syslog, $this->_config);
+                $ret['instance'] = $runtimeCache[$route[0]] = new $className($this->_db, $this->_syslog, $this->_config, $this->_meta);
             }
 
             return $ret;

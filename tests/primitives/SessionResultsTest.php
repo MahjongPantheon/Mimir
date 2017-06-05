@@ -76,6 +76,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset($this->_ruleset);
         $this->_event->save();
@@ -222,7 +223,7 @@ class SessionResultsPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result1->getScore(), $result2->getScore());
         $this->assertEquals($result1->getRatingDelta(), $result2->getRatingDelta());
         $this->assertEquals(31500, $result1->getScore());
-        $this->assertEquals(41500, $result2->getRatingDelta()); // no base subtraction in ema, 11500+30000
+        $this->assertEquals(11500, $result2->getRatingDelta());
     }
 
     public function testChombo()

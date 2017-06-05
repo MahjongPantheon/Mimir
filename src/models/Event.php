@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../helpers/MultiRound.php';
 require_once __DIR__ . '/../primitives/Event.php';
 require_once __DIR__ . '/../primitives/Session.php';
 require_once __DIR__ . '/../primitives/SessionResults.php';
@@ -25,6 +26,7 @@ require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../primitives/PlayerEnrollment.php';
 require_once __DIR__ . '/../primitives/PlayerHistory.php';
+require_once __DIR__ . '/../primitives/Achievements.php';
 require_once __DIR__ . '/../primitives/Round.php';
 require_once __DIR__ . '/../exceptions/InvalidParameters.php';
 
@@ -48,13 +50,13 @@ class EventModel extends Model
         // get data from primitives, and some raw data
         $reggedPlayers = PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $eventId);
         $historyItems = PlayerHistoryPrimitive::findLastByEvent($this->_db, $eventId);
-        $seatings = $this->_db->table('session_user')
-            ->join('session', 'session.id = session_user.session_id')
-            ->join('user', 'user.id = session_user.user_id')
-            ->select('session_user.order')
-            ->select('session_user.user_id')
-            ->select('session_user.session_id')
-            ->select('user.display_name')
+        $seatings = $this->_db->table('session_player')
+            ->join('session', 'session.id = session_player.session_id')
+            ->join('player', 'player.id = session_player.player_id')
+            ->select('session_player.order')
+            ->select('session_player.player_id')
+            ->select('session_player.session_id')
+            ->select('player.display_name')
             ->select('session.table_index')
             ->where('session.event_id', $eventId)
             ->orderByDesc('session.id')
@@ -74,9 +76,31 @@ class EventModel extends Model
         }
 
         return array_map(function ($seat) use (&$ratings) {
-            $seat['rating'] = $ratings[$seat['user_id']];
+            $seat['rating'] = $ratings[$seat['player_id']];
             return $seat;
         }, $seatings);
+    }
+
+    /**
+     * Get achievements list
+     * @throws AuthFailedException
+     * @param $eventId
+     * @return array
+     */
+    public function getAchievements($eventId)
+    {
+        if (!$this->checkAdminToken()) {
+            throw new AuthFailedException('Only administrators are allowed to view achievements');
+        }
+
+        return [
+            'bestHand' => AchievementsPrimitive::getBestHandOfEvent($this->_db, $eventId),
+            'bestTsumoist' => AchievementsPrimitive::getBestTsumoistInSingleSession($this->_db, $eventId),
+            'braveSapper' => AchievementsPrimitive::getBraveSappers($this->_db, $eventId),
+            'chomboMaster' => AchievementsPrimitive::getChomboMasters($this->_db, $eventId),
+            'dovakin' => AchievementsPrimitive::getDovakins($this->_db, $eventId),
+            'yakuman' => AchievementsPrimitive::getYakumans($this->_db, $eventId)
+        ];
     }
 
     /**
@@ -90,33 +114,39 @@ class EventModel extends Model
         $tablesCount = count($reggedPlayers) / 4;
 
         $lastGames = SessionPrimitive::findByEventAndStatus($this->_db, $eventId, ['finished', 'inprogress'], 0, $tablesCount);
+        return $this->_formatTablesState($lastGames);
+    }
+
+    /**
+     * Find all playing tables on global level
+     * @return array
+     */
+    public function getGlobalTablesState()
+    {
+        $games = SessionPrimitive::findAllInProgress($this->_db);
+        return $this->_formatTablesState($games);
+    }
+
+    /**
+     * @param SessionPrimitive[] $lastGames
+     * @return array
+     */
+    protected function _formatTablesState($lastGames)
+    {
         $output = [];
         foreach ($lastGames as $game) {
-            /** @var RoundPrimitive $lastRound */
-            $lastRound = array_reduce( // TODO: do it on db side
-                RoundPrimitive::findBySessionIds($this->_db, [$game->getId()]),
-                function ($acc, RoundPrimitive $r) {
-                    /** @var RoundPrimitive $acc */
-                    // find max id
-                    return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
-                },
-                null
-            );
+            $rounds = RoundPrimitive::findBySessionIds($this->_db, [$game->getId()]);
+            /** @var MultiRoundPrimitive $lastRound */
+            $lastRound = MultiRoundHelper::findLastRound($rounds);
 
             $output []= [
                 'status' => $game->getStatus(),
                 'hash' => $game->getRepresentationalHash(),
                 'penalties' => $game->getCurrentState()->getPenaltiesLog(),
                 'table_index' => $game->getTableIndex(),
-                'last_round' => $lastRound ? [
-                    'outcome' => $lastRound->getOutcome(),
-                    'winner'  => $lastRound->getWinnerId(),
-                    'loser'   => $lastRound->getLoserId(),
-                    'tempai'  => $lastRound->getTempaiIds(),
-                    'riichi'  => $lastRound->getRiichiIds(),
-                    'han'     => $lastRound->getHan(),
-                    'fu'      => $lastRound->getFu()
-                ] : [],
+                'last_round' => $lastRound ? $this->_formatLastRound($lastRound) : [],
+                'current_round' => $game->getCurrentState()->getRound(),
+                'scores' => $game->getCurrentState()->getScores(),
                 'players' => array_map(function (PlayerPrimitive $p) {
                     return [
                         'id' => $p->getId(),
@@ -129,6 +159,33 @@ class EventModel extends Model
         return $output;
     }
 
+    protected function _formatLastRound(RoundPrimitive $round)
+    {
+        if ($round instanceof MultiRoundPrimitive) {
+            return [
+                'outcome' => $round->getOutcome(),
+                'loser'   => $round->getLoserId(),
+                'riichi'  => $round->getRiichiIds(),
+                'wins'    => array_map(function (RoundPrimitive $round) {
+                    return [
+                        'winner' => $round->getWinnerId(),
+                        'han'    => $round->getHan(),
+                        'fu'     => $round->getFu()
+                    ];
+                }, $round->rounds())
+            ];
+        }
+
+        return [
+            'outcome' => $round->getOutcome(),
+            'winner'  => $round->getWinnerId(),
+            'loser'   => $round->getLoserId(),
+            'tempai'  => $round->getTempaiIds(),
+            'riichi'  => $round->getRiichiIds(),
+            'han'     => $round->getHan(),
+            'fu'      => $round->getFu()
+        ];
+    }
 
     // ------ Last games related -------
 
@@ -347,7 +404,7 @@ class EventModel extends Model
             $playersHistoryItems = array_reverse($playersHistoryItems);
         }
 
-        if ($event->getType() === 'offline_interactive_tournament') {
+        if ($event->getSortByGames()) {
             $this->_stableSort(
                 $playersHistoryItems,
                 function (PlayerHistoryPrimitive $el1, PlayerHistoryPrimitive $el2) {
@@ -367,7 +424,15 @@ class EventModel extends Model
                 'id'            => (int)$el->getPlayerId(),
                 'display_name'  => $playerItems[$el->getPlayerId()]->getDisplayName(),
                 'rating'        => (float)$el->getRating(),
-                'winner_zone'   => ($el->getRating() >= $event->getRuleset()->startRating()),
+                'winner_zone'   => (
+                    $event->getRuleset()->subtractStartPoints()
+                        ? $el->getRating() >= $event->getRuleset()->startRating()
+                        : $el->getRating() >= (
+                            ($event->getRuleset()->startPoints() * $el->getGamesPlayed())
+                                /
+                            ($event->getRuleset()->tenboDivider() * $event->getRuleset()->ratingDivider())
+                        )
+                ),
                 'avg_place'     => round($el->getAvgPlace(), 4),
                 'games_played'  => (int)$el->getGamesPlayed()
             ];
@@ -587,15 +652,20 @@ class EventModel extends Model
         $success = false;
         $token = null;
 
+        if ($pin === '0000000000') {
+            // Special pin & token for universal watcher
+            return '0000000000';
+        }
+
         $eItem = PlayerEnrollmentPrimitive::findByPin($this->_db, $pin);
         if ($eItem) {
             $event = EventPrimitive::findById($this->_db, [$eItem->getEventId()]);
 
-            if ($event[0]->getType() === 'offline_interactive_tournament') {
+            if (!$event[0]->getAllowPlayerAppend()) {
                 $reggedItems = PlayerRegistrationPrimitive::findByPlayerAndEvent($this->_db, $eItem->getPlayerId(), $event[0]->getId());
                 // check that games are not started yet
                 if ($event[0]->getLastTimer() && empty($reggedItems)) {
-                    // do not allow new users to enter already tournament
+                    // do not allow new players to enter already tournament
                     // but allow to reenroll/reenter pin for already participating people
                     throw new BadActionException('Pin is expired: game sessions are already started.');
                 }
@@ -617,7 +687,7 @@ class EventModel extends Model
 
     /**
      * Checks if token is ok.
-     * Reads token value from _SERVER['HTTP_X_AUTH_TOKEN']
+     * Reads token value from X-Auth-Token request header
      *
      * Also should return true to admin-level token to allow everything
      *
@@ -643,8 +713,7 @@ class EventModel extends Model
      */
     public function dataFromToken()
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        return PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $token);
+        return PlayerRegistrationPrimitive::findEventAndPlayerByToken($this->_db, $this->_meta->getAuthToken());
     }
 
     /**
@@ -653,7 +722,6 @@ class EventModel extends Model
      */
     public function checkAdminToken()
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        return $token === $this->_config->getValue('admin.god_token');
+        return $this->_meta->getAuthToken() === $this->_config->getValue('admin.god_token');
     }
 }

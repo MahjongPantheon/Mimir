@@ -40,6 +40,7 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $evt = (new EventPrimitive($db))
             ->setRuleset(Ruleset::instance('ema')) // TODO: why 'tenhounet' rules fail? o_0
             ->setType('offline')
+            ->setTimezone('UTC')
             ->setTitle('test')
             ->setDescription('test')
             ->setGameDuration(1); // for timers check
@@ -91,10 +92,10 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $this->_client->execute('addPlayer', ['p3', 'p3', 'player3', null]);
         $this->_client->execute('addPlayer', ['p4', 'p4', 'player4', null]);
 
-        $pin1 = $this->_client->execute('enrollPlayer', [1, 1]);
-        $pin2 = $this->_client->execute('enrollPlayer', [2, 1]);
-        $pin3 = $this->_client->execute('enrollPlayer', [3, 1]);
-        $pin4 = $this->_client->execute('enrollPlayer', [4, 1]);
+        $pin1 = $this->_client->execute('enrollPlayerCP', [1, 1]);
+        $pin2 = $this->_client->execute('enrollPlayerCP', [2, 1]);
+        $pin3 = $this->_client->execute('enrollPlayerCP', [3, 1]);
+        $pin4 = $this->_client->execute('enrollPlayerCP', [4, 1]);
 
         $this->_client->execute('registerPlayer', [$pin1]);
         $this->_client->execute('registerPlayer', [$pin2]);
@@ -186,10 +187,10 @@ class RealApiTest extends \PHPUnit_Framework_TestCase
         $this->_client->execute('addPlayer', ['p3', 'p3', 'player3', null]);
         $this->_client->execute('addPlayer', ['p4', 'p4', 'player4', null]);
 
-        $pin1 = $this->_client->execute('enrollPlayer', [1, 1]);
-        $pin2 = $this->_client->execute('enrollPlayer', [2, 1]);
-        $pin3 = $this->_client->execute('enrollPlayer', [3, 1]);
-        $pin4 = $this->_client->execute('enrollPlayer', [4, 1]);
+        $pin1 = $this->_client->execute('enrollPlayerCP', [1, 1]);
+        $pin2 = $this->_client->execute('enrollPlayerCP', [2, 1]);
+        $pin3 = $this->_client->execute('enrollPlayerCP', [3, 1]);
+        $pin4 = $this->_client->execute('enrollPlayerCP', [4, 1]);
 
         $this->_client->execute('registerPlayer', [$pin1]);
         $this->_client->execute('registerPlayer', [$pin2]);

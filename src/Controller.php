@@ -36,10 +36,21 @@ abstract class Controller
      */
     protected $_config;
 
-    public function __construct(IDb $db, Logger $log, Config $config)
+    /**
+     * @var Meta
+     */
+    protected $_meta;
+
+    public function __construct(IDb $db, Logger $log, Config $config, Meta $meta)
     {
         $this->_db = $db;
         $this->_log = $log;
         $this->_config = $config;
+        $this->_meta = $meta;
+
+        $this->_meta->sendVersionHeader(
+            $this->_config->getValue('api.version_major'),
+            $this->_config->getValue('api.version_minor')
+        );
     }
 }

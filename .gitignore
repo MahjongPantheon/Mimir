@@ -1,5 +1,5 @@
 .idea/
 config/local/*
 vendor/
-data/*
+data/db.sqlite
 tests/data/*

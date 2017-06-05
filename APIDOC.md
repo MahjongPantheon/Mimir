@@ -72,7 +72,7 @@ Exceptions:
 
 ### getGameOverview
 Parameters:
-* **$sessionHashcode** (_string_) 
+* **$gameHashCode** (_string_) 
 
 Returns: _array_ 
 
@@ -133,6 +133,15 @@ Returns: _array|null_
 Exceptions:
 * _EntityNotFoundException_ 
 
+### getLastRoundByHash
+Parameters:
+* **$hashcode** (_string_) 
+
+Returns: _array|null_ 
+
+Exceptions:
+* _EntityNotFoundException_ 
+
 ### getGameConfigT
 Parameters:
 
@@ -150,6 +159,14 @@ Exceptions:
 * _InvalidParametersException_ 
 
 ### getAllPlayersT
+Parameters:
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getTablesStateT
 Parameters:
 
 Returns: _array_ 
@@ -210,7 +227,8 @@ Parameters:
 * **$description** (_string_) 
 * **$type** (_string_) either 'online' or 'offline' or 'offline_interactive_tournament'
 * **$ruleset** (_string_) one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
-* **$gameDuration** (_int_) duration of game in this event
+* **$gameDuration** (_int_) duration of game in this event in minutes
+* **$timezone** (_int_) Shift in hours from GMT
 
 Returns: _int_ 
 
@@ -264,7 +282,7 @@ Returns: _void_
 Exceptions:
 * _InvalidParametersException_ 
 
-### enrollPlayer
+### enrollPlayerCP
 Parameters:
 * **$playerId** (_integer_) 
 * **$eventId** (_integer_) 
@@ -277,6 +295,15 @@ Exceptions:
 * _InvalidParametersException_ 
 
 ### getAllEnrolled
+Parameters:
+* **$eventId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getAchievements
 Parameters:
 * **$eventId** (_integer_) 
 
@@ -298,6 +325,7 @@ Exceptions:
 
 ### endGame
 Parameters:
+* **$gameHashcode** (_string_) Hashcode of game
 
 Returns: _bool_ Success?
 
@@ -339,10 +367,10 @@ Exceptions:
 Parameters:
 * **$ident** (_string_) oauth ident, if any
 * **$alias** (_string_) textlog alias for quicker enter
-* **$displayName** (_string_) how to display user in stats
+* **$displayName** (_string_) how to display player in stats
 * **$tenhouId** (_string_) tenhou username
 
-Returns: _int_ user id
+Returns: _int_ player id
 
 Exceptions:
 * _MalformedPayloadException_ 
@@ -350,13 +378,13 @@ Exceptions:
 
 ### updatePlayer
 Parameters:
-* **$id** (_int_) user to update
+* **$id** (_int_) player to update
 * **$ident** (_string_) oauth ident, if any
 * **$alias** (_string_) textlog alias for quicker enter
-* **$displayName** (_string_) how to display user in stats
+* **$displayName** (_string_) how to display player in stats
 * **$tenhouId** (_string_) tenhou username
 
-Returns: _int_ user id
+Returns: _int_ player id
 
 Exceptions:
 * _EntityNotFoundException_ 

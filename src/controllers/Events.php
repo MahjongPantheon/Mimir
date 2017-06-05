@@ -28,11 +28,12 @@ class EventsController extends Controller
      * @param string $description
      * @param string $type either 'online' or 'offline' or 'offline_interactive_tournament'
      * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
-     * @param int $gameDuration duration of game in this event
+     * @param int $gameDuration duration of game in this event in minutes
+     * @param int $timezone Shift in hours from GMT
      * @throws BadActionException
      * @return int
      */
-    public function createEvent($title, $description, $type, $ruleset, $gameDuration)
+    public function createEvent($title, $description, $type, $ruleset, $gameDuration, $timezone)
     {
         $this->_log->addInfo('Creating new [' . $type . '] event with [' . $ruleset . '] rules');
 
@@ -41,6 +42,7 @@ class EventsController extends Controller
             ->setDescription($description)
             ->setType($type)
             ->setGameDuration($gameDuration)
+            ->setTimeZone($timezone)
             ->setRuleset(Ruleset::instance($ruleset))
             // ->setStartTime('')   // TODO
             // ->setEndTime('')     // TODO
@@ -88,9 +90,9 @@ class EventsController extends Controller
     public function getAllRegisteredPlayersFromToken()
     {
         $this->_log->addInfo('Getting all players for event (by token)');
-        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))->dataFromToken();
         if (empty($data)) {
-            throw new InvalidParametersException('Invalid user token', 401);
+            throw new InvalidParametersException('Invalid player token', 401);
         }
         return $this->getAllRegisteredPlayers($data->getEventId());
     }
@@ -105,11 +107,38 @@ class EventsController extends Controller
     public function getTablesState($eventId)
     {
         $this->_log->addInfo('Getting tables state for event #' . $eventId);
-        $data = (new EventModel($this->_db, $this->_config))
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->getTablesState($eventId);
         $this->_log->addInfo('Successfully got tables state for event #' . $eventId);
         return $data;
     }
+
+    /**
+     * Get tables state in tournament from token
+     *
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getTablesStateFromToken()
+    {
+        $this->_log->addInfo('Getting tables state for event (by token)');
+        $eventModel = new EventModel($this->_db, $this->_config, $this->_meta);
+
+        if ($this->_meta->isGlobalWatcher()) {
+            $data = $eventModel->getGlobalTablesState();
+        } else {
+            $reg = $eventModel->dataFromToken();
+            if (empty($reg)) {
+                throw new InvalidParametersException('Invalid player token', 401);
+            }
+
+            $data = $eventModel->getTablesState($reg->getEventId());
+        }
+
+        $this->_log->addInfo('Successfully got tables state for event (by token)');
+        return $data;
+    }
+
 
     /**
      * Get current seating in tournament
@@ -121,7 +150,7 @@ class EventsController extends Controller
     public function getCurrentSeating($eventId)
     {
         $this->_log->addInfo('Getting current seating for event #' . $eventId);
-        $data = (new EventModel($this->_db, $this->_config))
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->getCurrentSeating($eventId);
         $this->_log->addInfo('Successfully got current seating for event #' . $eventId);
         return $data;
@@ -137,7 +166,7 @@ class EventsController extends Controller
     public function registerPlayer($pin)
     {
         $this->_log->addInfo('Registering pin code #' . $pin);
-        $authToken = (new EventModel($this->_db, $this->_config))
+        $authToken = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->registerPlayerPin($pin);
         $this->_log->addInfo('Successfully registered pin code #' . $pin);
         return $authToken;
@@ -154,7 +183,7 @@ class EventsController extends Controller
     public function registerPlayerAdmin($playerId, $eventId)
     {
         $this->_log->addInfo('Registering player id# ' . $playerId . ' for event id# ' . $eventId);
-        $success = (new EventModel($this->_db, $this->_config))
+        $success = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->registerPlayer($playerId, $eventId);
         $this->_log->addInfo('Successfully registered player id# ' . $playerId . ' for event id# ' . $eventId);
         return $success;
@@ -171,7 +200,7 @@ class EventsController extends Controller
     public function unregisterPlayerAdmin($playerId, $eventId)
     {
         $this->_log->addInfo('Unregistering player id# ' . $playerId . ' for event id# ' . $eventId);
-        (new EventModel($this->_db, $this->_config))->unregisterPlayer($playerId, $eventId);
+        (new EventModel($this->_db, $this->_config, $this->_meta))->unregisterPlayer($playerId, $eventId);
         $this->_log->addInfo('Successfully unregistered player id# ' . $playerId . ' for event id# ' . $eventId);
     }
 
@@ -186,7 +215,7 @@ class EventsController extends Controller
     public function enrollPlayer($playerId, $eventId)
     {
         $this->_log->addInfo('Enrolling player id# ' . $playerId . ' for event id# ' . $eventId);
-        $pin = (new EventModel($this->_db, $this->_config))
+        $pin = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->enrollPlayer($eventId, $playerId);
         $this->_log->addInfo('Successfully enrolled player id# ' . $playerId . ' for event id# ' . $eventId);
         return $pin;
@@ -274,13 +303,20 @@ class EventsController extends Controller
             'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
             'eventStatHost'       => $event[0]->getStatHost(),
+            'useTimer'            => (bool)$event[0]->getUseTimer(),
             'timerPolicy'         => $rules->timerPolicy(),
             'redZone'             => $rules->redZone(), // in seconds!
             'yellowZone'          => $rules->yellowZone(), // in seconds!
             'gameDuration'        => $event[0]->getGameDuration(), // in minutes!
-            'isOnline'            => $event[0]->getType() === 'online',
-            'autoSeating'         => $event[0]->getType() === 'offline_interactive_tournament', // TODO refine condition
+            'timezone'            => $event[0]->getTimezone(),
+            'isOnline'            => (bool)$event[0]->getIsOnline(),
+            'autoSeating'         => (bool)$event[0]->getAutoSeating(),
+            'isTextlog'           => (bool)$event[0]->getIsTextlog(),
+            'syncStart'           => (bool)$event[0]->getSyncStart(),
+            'sortByGames'         => (bool)$event[0]->getSortByGames(),
+            'allowPlayerAppend'   => (bool)$event[0]->getAllowPlayerAppend(),
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
+            'subtractStartPoints' => $rules->subtractStartPoints(),
         ];
 
         $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
@@ -296,9 +332,9 @@ class EventsController extends Controller
     public function getGameConfigFromToken()
     {
         $this->_log->addInfo('Getting config for event (by token)');
-        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))->dataFromToken();
         if (empty($data)) {
-            throw new InvalidParametersException('Invalid user token', 401);
+            throw new InvalidParametersException('Invalid player token', 401);
         }
         return $this->getGameConfig($data->getEventId());
     }
@@ -321,10 +357,32 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $table = (new EventModel($this->_db, $this->_config))
+        $table = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->getRatingTable($event[0], $orderBy, $order);
 
         $this->_log->addInfo('Successfully received rating table for event id# ' . $eventId);
+        return $table;
+    }
+
+    /**
+     * Get achievements list for event
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getAchievements($eventId)
+    {
+        $this->_log->addInfo('Getting achievements list for event id# ' . $eventId);
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $table = (new EventModel($this->_db, $this->_config, $this->_meta))->getAchievements($event[0]->getId());
+
+        $this->_log->addInfo('Successfully received achievements list for event id# ' . $eventId);
         return $table;
     }
 
@@ -346,7 +404,7 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
-        $table = (new EventModel($this->_db, $this->_config))
+        $table = (new EventModel($this->_db, $this->_config, $this->_meta))
             ->getLastFinishedGames($event[0], $limit, $offset);
 
         $this->_log->addInfo('Successfully got games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);
@@ -402,9 +460,9 @@ class EventsController extends Controller
     public function getTimerStateFromToken()
     {
         $this->_log->addInfo('Getting timer for event (by token)');
-        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))->dataFromToken();
         if (empty($data)) {
-            throw new InvalidParametersException('Invalid user token', 401);
+            throw new InvalidParametersException('Invalid player token', 401);
         }
         return $this->getTimerState($data->getEventId());
     }

@@ -37,12 +37,24 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
-            ->setType('online')
+            ->setIsOnline(1)
+            ->setTimezone('UTC')
+            ->setAllowPlayerAppend(0)
+            ->setAutoSeating(1)
+            ->setIsTextlog(0)
+            ->setSortByGames(1)
+            ->setSyncStart(1)
             ->setRuleset(Ruleset::instance('jpmlA'));
 
         $this->assertEquals('event1', $newEvent->getTitle());
         $this->assertEquals('eventdesc1', $newEvent->getDescription());
-        $this->assertEquals('online', $newEvent->getType());
+        $this->assertEquals(1, $newEvent->getIsOnline());
+        $this->assertEquals(1, $newEvent->getAutoSeating());
+        $this->assertEquals(1, $newEvent->getSortByGames());
+        $this->assertEquals(1, $newEvent->getSyncStart());
+        $this->assertEquals(0, $newEvent->getAllowPlayerAppend());
+        $this->assertEquals(0, $newEvent->getIsTextlog());
+        $this->assertEquals('UTC', $newEvent->getTimezone());
 
         $success = $newEvent->save();
         $this->assertTrue($success, "Saved event");
@@ -55,6 +67,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
@@ -71,6 +84,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->setLobbyId('some_lobby')
@@ -88,6 +102,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent
             ->setTitle('event1')
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
@@ -111,17 +126,18 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
         $newEvent = new EventPrimitive($this->_db);
         $newEvent
             ->setTitle('event1')
-            ->setOwnerUser($newUser)
+            ->setOwnerPlayer($newUser)
+            ->setTimezone('UTC')
             ->setDescription('eventdesc1')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();
 
         $eventCopy = EventPrimitive::findById($this->_db, [$newEvent->getId()])[0];
-        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerUserId()); // before fetch
-        $this->assertNotEmpty($eventCopy->getOwnerUser());
-        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerUser()->getId());
-        $this->assertTrue($newUser !== $eventCopy->getOwnerUser()); // different objects!
+        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerPlayerId()); // before fetch
+        $this->assertNotEmpty($eventCopy->getOwnerPlayer());
+        $this->assertEquals($newUser->getId(), $eventCopy->getOwnerPlayer()->getId());
+        $this->assertTrue($newUser !== $eventCopy->getOwnerPlayer()); // different objects!
     }
 
     public function testRelationOwnerFormation()
@@ -147,6 +163,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTitle('event1')
             ->setOwnerFormation($newFormation)
             ->setDescription('eventdesc1')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
             ->save();

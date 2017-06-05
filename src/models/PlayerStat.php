@@ -339,6 +339,11 @@ class PlayerStatModel extends Model
             ) {
                 $acc['riichi_lost']++;
             }
+            if (($r->getOutcome() === 'draw' || $r->getOutcome() === 'abort')
+                && in_array($playerId, $r->getRiichiIds())
+            ) {
+                $acc['riichi_lost']++;
+            }
             if (($r->getOutcome() === 'ron' || $r->getOutcome() === 'tsumo')
                 && $r->getLoserId() == $playerId && in_array($playerId, $r->getRiichiIds())
             ) {

@@ -44,10 +44,25 @@ You also will need standard `make` utility to use following shortcuts.
 - Use `make autofix` to fix all codestyle problems, that can be fixed automatically.
 - Use `make apidoc` to regenerate api methods documentation file.
 - Remember to use PSR2 coding standards when adding php code.
-- The [DB schema](src/fixtures/init/ansi.sql) should be written in ANSI SQL92 and should pass any compliance tests. If any of DB-specific things are required, use post-processing tools (see Makefile sections for examples of generating sqlite/mysql/pgsql specific schemas).
+- The DB migrations are implemented using [Phinx](http://docs.phinx.org), see its documentation for details. Also you may run `make init_dev_sqlite` to create empty development DB for local testing purposes.
 
 To generate or recreate sqlite db, run `make init_sqlite`.
 To generate sql dump for mysql or pgsql, run `make init_mysql` or `make init_pgsql` - this will echo dump to stdout, so you can redirect the stream into the file you want.
+
+Nginx is the recommended web server to run Mimir. See *nginx.example.com* file for typical installation nginx config.
+
+### Versioning
+
+Mimir uses Semver-like versioning system: *Major*.*Minor*.*Bugfix*
+- Major version change occurs when breaking changes are made to the API. 
+- Minor version changes when non-breaking fixes and features are implemented.  
+- Bugfix version changes when one or several bug fixes are applied, and they do not change any essential system behavior.
+
+Mimir's API protocol version matches Mimir's major and minor version: *Major*.*Minor*
+- Clients should pass desired protocol version as X-Api-Version header.
+- Mimir response also contains same header with current API protocol version.
+- Different major versions of API are not expected to be compatible at all. Client should upgrade or downgrade to match API version.
+- Different minor versions are expected to be forward and partially backward compatible. Client may lack some functionality and may not use some of response fields. But it's guaranteed that no existing functionality of any client within single major version could be broken.
 
 ### Legend
 

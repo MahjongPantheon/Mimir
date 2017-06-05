@@ -33,7 +33,7 @@ class PlayerHistoryPrimitive extends Primitive
 
     protected static $_fieldsMapping = [
         'id'            => '_id',
-        'user_id'       => '_playerId',
+        'player_id'     => '_playerId',
         'session_id'    => '_sessionId',
         'event_id'      => '_eventId',
         'rating'        => '_rating',
@@ -121,8 +121,8 @@ class PlayerHistoryPrimitive extends Primitive
         }
 
         return self::_findBySeveral($db, [
-            'user_id'  => [$playerId],
-            'event_id' => [$eventId]
+            'player_id'  => [$playerId],
+            'event_id'   => [$eventId]
         ]);
     }
 
@@ -139,7 +139,7 @@ class PlayerHistoryPrimitive extends Primitive
             $orm = $db->table(static::$_table);
             $orm->selectExpr('max(id)', 'mx')
                 ->where('event_id', $eventId)
-                ->groupBy('user_id');
+                ->groupBy('player_id');
             $ids = array_map(function ($el) {
                 return $el['mx'];
             }, $orm->findArray());
@@ -149,8 +149,8 @@ class PlayerHistoryPrimitive extends Primitive
         }
 
         return self::_findBySeveral($db, [
-            'user_id'  => [$playerId],
-            'event_id' => [$eventId]
+            'player_id'  => [$playerId],
+            'event_id'   => [$eventId]
         ], ['onlyLast' => true]);
     }
 
@@ -163,8 +163,8 @@ class PlayerHistoryPrimitive extends Primitive
     public static function findBySession(IDb $db, $playerId, $sessionId)
     {
         return self::_findBySeveral($db, [
-            'user_id'    => [$playerId],
-            'session_id' => [$sessionId]
+            'player_id'    => [$playerId],
+            'session_id'   => [$sessionId]
         ], ['onlyLast' => true]); // should be only one or none, getting last is ok
     }
 

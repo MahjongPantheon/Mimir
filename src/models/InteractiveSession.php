@@ -18,6 +18,7 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../Model.php';
+require_once __DIR__ . '/../helpers/MultiRound.php';
 require_once __DIR__ . '/../primitives/Player.php';
 require_once __DIR__ . '/../primitives/Event.php';
 require_once __DIR__ . '/../primitives/Round.php';
@@ -87,6 +88,7 @@ class InteractiveSessionModel extends Model
             throw new DatabaseException('Couldn\'t save session data to DB!');
         }
 
+        $this->_trackUpdate($newSession->getRepresentationalHash());
         return $newSession->getRepresentationalHash();
     }
 
@@ -132,8 +134,7 @@ class InteractiveSessionModel extends Model
         $round = RoundPrimitive::createFromData($this->_db, $session, $roundData);
 
         if ($dry) {
-            /** @var $state SessionState */
-            list($state, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
+            list(, $paymentsInfo) = $session->dryRunUpdateCurrentState($round);
 
             $multiGet = function (RoundPrimitive $p, $method) {
                 if ($p instanceof MultiRoundPrimitive) {
@@ -168,7 +169,7 @@ class InteractiveSessionModel extends Model
             ];
         }
 
-        return $round->save() && $session->updateCurrentState($round);
+        return $round->save() && $session->updateCurrentState($round) && $this->_trackUpdate($gameHashcode);
     }
 
     /**
@@ -183,7 +184,7 @@ class InteractiveSessionModel extends Model
     public function addPenalty($eventId, $playerId, $amount, $reason)
     {
         if (!$this->checkAdminToken()) {
-            throw new AuthFailedException('Only administrators are allowed to drop last round');
+            throw new AuthFailedException('Only administrators are allowed to add penalties');
         }
 
         $session = SessionPrimitive::findLastByPlayerAndEvent($this->_db, $playerId, $eventId, 'inprogress');
@@ -224,7 +225,7 @@ class InteractiveSessionModel extends Model
     protected function _checkAuth($playersIds, $eventId)
     {
         // Check that real session player is trying to enter data
-        $evMdl = new EventModel($this->_db, $this->_config);
+        $evMdl = new EventModel($this->_db, $this->_config, $this->_meta);
         if (!$evMdl->checkToken($playersIds[0], $eventId) &&
             !$evMdl->checkToken($playersIds[1], $eventId) &&
             !$evMdl->checkToken($playersIds[2], $eventId) &&
@@ -240,8 +241,7 @@ class InteractiveSessionModel extends Model
      */
     public function checkAdminToken()
     {
-        $token = empty($_SERVER['HTTP_X_AUTH_TOKEN']) ? '' : $_SERVER['HTTP_X_AUTH_TOKEN'];
-        return $token === $this->_config->getValue('admin.god_token');
+        return $this->_meta->getAuthToken() === $this->_config->getValue('admin.god_token');
     }
 
     /**
@@ -273,13 +273,22 @@ class InteractiveSessionModel extends Model
             throw new InvalidParametersException('No recorded rounds found for session id#' . $session[0]->getId());
         }
 
-        $lastRound = array_reduce($rounds, function ($acc, RoundPrimitive $r) {
-            /** @var RoundPrimitive $acc */
-            // find max id
-            return (!$acc || $r->getId() > $acc->getId()) ? $r : $acc;
-        }, null);
-
+        $lastRound = MultiRoundHelper::findLastRound($rounds);
         $session[0]->rollback($lastRound); // this also does session save & drop round
+        return true;
+    }
+
+    /**
+     * Send event to predefined tracker about new data in game
+     * @param $gameHashcode
+     * @return bool
+     */
+    protected function _trackUpdate($gameHashcode)
+    {
+        if (!empty($this->_config->getValue('trackerUrl'))) {
+            file_get_contents(sprintf($this->_config->getValue('trackerUrl'), $gameHashcode));
+        }
+
         return true;
     }
 }

@@ -46,6 +46,7 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
             ->setDescription('desc')
+            ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'));
         $this->_event->save();
@@ -264,10 +265,10 @@ class SessionPrimitiveTest extends \PHPUnit_Framework_TestCase
 
         $seating = SessionPrimitive::getPlayersSeatingInEvent($this->_db, $this->_event->getId());
         $this->assertEquals([
-            ['user_id' => 1, 'order' => 1],
-            ['user_id' => 2, 'order' => 2],
-            ['user_id' => 3, 'order' => 3],
-            ['user_id' => 4, 'order' => 4],
+            ['player_id' => 1, 'order' => 1],
+            ['player_id' => 2, 'order' => 2],
+            ['player_id' => 3, 'order' => 3],
+            ['player_id' => 4, 'order' => 4],
         ], $seating);
     }
 }

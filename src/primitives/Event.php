@@ -30,7 +30,7 @@ require_once __DIR__ . '/../Ruleset.php';
 class EventPrimitive extends Primitive
 {
     protected static $_table = 'event';
-    const REL_USER = 'event_registered_users';
+    const REL_USER = 'event_registered_players';
 
     protected static $_fieldsMapping = [
         'id'                => '_id',
@@ -41,24 +41,41 @@ class EventPrimitive extends Primitive
         'game_duration'     => '_gameDuration',
         'last_timer'        => '_lastTimer',
         'owner_formation'   => '_ownerFormationId',
-        'owner_user'        => '_ownerUserId',
-        'type'              => '_type',
+        'owner_player'      => '_ownerPlayerId',
+        'type'              => '_type', // DEPRECATED: to be removed in 2.x
+        'is_online'         => '_isOnline',
+        'is_textlog'        => '_isTextlog',
+        'sync_start'        => '_syncStart',
+        'auto_seating'      => '_autoSeating',
+        'sort_by_games'     => '_sortByGames',
+        'use_timer'         => '_useTimer',
+        'allow_player_append' => '_allowPlayerAppend',
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
+        'timezone'          => '_timezone'
     ];
 
     protected function _getFieldsTransforms()
     {
         return [
             '_ownerFormationId'   => $this->_integerTransform(true),
-            '_ownerUserId'        => $this->_integerTransform(true),
+            '_ownerPlayerId'      => $this->_integerTransform(true),
             '_startTime'          => $this->_stringTransform(true),
             '_endTime'            => $this->_stringTransform(true),
             '_gameDuration'       => $this->_integerTransform(true),
             '_lastTimer'          => $this->_integerTransform(true),
             '_id'                 => $this->_integerTransform(true),
             '_lobbyId'            => $this->_stringTransform(true),
+            '_type'               => $this->_stringTransform(), // DEPRECATED: to be removed in 2.x
+            '_isOnline'           => $this->_integerTransform(),
+            '_isTextlog'          => $this->_integerTransform(),
+            '_syncStart'          => $this->_integerTransform(),
+            '_autoSeating'        => $this->_integerTransform(),
+            '_sortByGames'        => $this->_integerTransform(),
+            '_allowPlayerAppend'  => $this->_integerTransform(),
+            '_timezone'           => $this->_stringTransform(),
+            '_useTimer'           => $this->_integerTransform(),
             '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
@@ -112,10 +129,15 @@ class EventPrimitive extends Primitive
      */
     protected $_redZone;
     /**
-     * Game duration for current event, in seconds
+     * Game duration for current event, in minutes
      * @var int
      */
     protected $_gameDuration;
+    /**
+     * Timezone description string (like UTC or Europe/Moscow)
+     * @var string
+     */
+    protected $_timezone;
     /**
      * Owner organisation
      * @var FormationPrimitive|null
@@ -130,19 +152,54 @@ class EventPrimitive extends Primitive
      * Owner player
      * @var PlayerPrimitive|null
      */
-    protected $_ownerUser = null;
+    protected $_ownerPlayer = null;
     /**
      * Owner player id
      * @var int
      */
-    protected $_ownerUserId;
+    protected $_ownerPlayerId;
     /**
-     * online/offline
-     * tournament/local rating
-     * interactive/simple
-     * @var string
+     * Event type: online/offline, tournament/simple, etc
+     * @deprecated to be removed in 2.x
+     * @var int
      */
     protected $_type;
+    /**
+     * should tables start synchronously or not (if not, players may start games when they want)
+     * @var int
+     */
+    protected $_syncStart;
+    /**
+     * enable automatic seating feature. Disabled if allow_player_append == true.
+     * @var int
+     */
+    protected $_autoSeating;
+    /**
+     * if true, players' rating table is sorted by games count first.
+     * @var int
+     */
+    protected $_sortByGames;
+    /**
+     * if true, new player may join event even if some games are already finished. Also, if true, games may
+     * be started only manually, and even when players count is not divisible by 4.
+     * @var int
+     */
+    protected $_allowPlayerAppend;
+    /**
+     * if true, event is treated as online (paifu log parser is used). Disabled if is_textlog = true
+     * @var int
+     */
+    protected $_isOnline;
+    /**
+     * if true, timer is shown in mobile app, also timer page is available in administration tools
+     * @var int
+     */
+    protected $_useTimer;
+    /**
+     * if true, non-interactive text log parser is used. For offline games.
+     * @var int
+     */
+    protected $_isTextlog;
     /**
      * Tenhou lobby id (for online events)
      * @var string
@@ -259,7 +316,7 @@ class EventPrimitive extends Primitive
     }
 
     /**
-     * @param int $gameDuration
+     * @param int $gameDuration in minutes
      * @return EventPrimitive
      */
     public function setGameDuration($gameDuration)
@@ -293,6 +350,24 @@ class EventPrimitive extends Primitive
     public function getLastTimer()
     {
         return $this->_lastTimer;
+    }
+
+    /**
+     * @param string $timezone
+     * @return EventPrimitive
+     */
+    public function setTimezone($timezone)
+    {
+        $this->_timezone = $timezone;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return $this->_timezone;
     }
 
     /**
@@ -375,13 +450,13 @@ class EventPrimitive extends Primitive
     }
 
     /**
-     * @param null|\Riichi\PlayerPrimitive $ownerUser
+     * @param null|\Riichi\PlayerPrimitive $ownerPlayer
      * @return EventPrimitive
      */
-    public function setOwnerUser(PlayerPrimitive $ownerUser)
+    public function setOwnerPlayer(PlayerPrimitive $ownerPlayer)
     {
-        $this->_ownerUser = $ownerUser;
-        $this->_ownerUserId = $ownerUser->getId();
+        $this->_ownerPlayer = $ownerPlayer;
+        $this->_ownerPlayerId = $ownerPlayer->getId();
         return $this;
     }
 
@@ -389,24 +464,24 @@ class EventPrimitive extends Primitive
      * @throws EntityNotFoundException
      * @return null|\Riichi\PlayerPrimitive
      */
-    public function getOwnerUser()
+    public function getOwnerPlayer()
     {
-        if (!$this->_ownerUser) {
-            $foundUsers = PlayerPrimitive::findById($this->_db, [$this->_ownerUserId]);
-            if (empty($foundUsers)) {
-                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_ownerUserId . ' not found in DB');
+        if (!$this->_ownerPlayer) {
+            $foundPlayers = PlayerPrimitive::findById($this->_db, [$this->_ownerPlayerId]);
+            if (empty($foundPlayers)) {
+                throw new EntityNotFoundException("Entity PlayerPrimitive with id#" . $this->_ownerPlayerId . ' not found in DB');
             }
-            $this->_ownerUser = $foundUsers[0];
+            $this->_ownerPlayer = $foundPlayers[0];
         }
-        return $this->_ownerUser;
+        return $this->_ownerPlayer;
     }
 
     /**
      * @return int
      */
-    public function getOwnerUserId()
+    public function getOwnerPlayerId()
     {
-        return $this->_ownerUserId;
+        return $this->_ownerPlayerId;
     }
 
     /**
@@ -447,6 +522,7 @@ class EventPrimitive extends Primitive
 
     /**
      * @param string $type
+     * @deprecated to be removed in 2.x
      * @return EventPrimitive
      */
     public function setType($type)
@@ -456,11 +532,150 @@ class EventPrimitive extends Primitive
     }
 
     /**
+     * @deprecated to be removed in 2.x
      * @return string
      */
     public function getType()
     {
         return $this->_type;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSyncStart()
+    {
+        return $this->_syncStart;
+    }
+
+    /**
+     * @param int $syncStart
+     * @return EventPrimitive
+     */
+    public function setSyncStart($syncStart)
+    {
+        $this->_syncStart = $syncStart;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAutoSeating()
+    {
+        if ($this->_allowPlayerAppend) {
+            return false;
+        }
+
+        return $this->_autoSeating;
+    }
+
+    /**
+     * @param int $autoSeating
+     * @return EventPrimitive
+     */
+    public function setAutoSeating($autoSeating)
+    {
+        $this->_autoSeating = $autoSeating;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSortByGames()
+    {
+        return $this->_sortByGames;
+    }
+
+    /**
+     * @param int $sortByGames
+     * @return EventPrimitive
+     */
+    public function setSortByGames($sortByGames)
+    {
+        $this->_sortByGames = $sortByGames;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAllowPlayerAppend()
+    {
+        return $this->_allowPlayerAppend;
+    }
+
+    /**
+     * @param int $allowPlayerAppend
+     * @return EventPrimitive
+     */
+    public function setAllowPlayerAppend($allowPlayerAppend)
+    {
+        $this->_allowPlayerAppend = $allowPlayerAppend;
+        $this->_type = $allowPlayerAppend ? 'offline' : 'offline_interactive_tournament'; // DEPRECATED: to be removed in 2.x
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getIsOnline()
+    {
+        if ($this->_isTextlog) {
+            return false;
+        }
+
+        return $this->_isOnline;
+    }
+
+    /**
+     * @param int $isOnline
+     * @return EventPrimitive
+     */
+    public function setIsOnline($isOnline)
+    {
+        $this->_isOnline = $isOnline;
+        if ($isOnline) {
+            $this->_type = 'online'; // DEPRECATED: to be removed in 2.x
+        }
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getIsTextlog()
+    {
+        return $this->_isTextlog;
+    }
+
+    /**
+     * @param int $isTextlog
+     * @return EventPrimitive
+     */
+    public function setIsTextlog($isTextlog)
+    {
+        $this->_isTextlog = $isTextlog;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUseTimer()
+    {
+        return $this->_useTimer;
+    }
+
+    /**
+     * @param int $useTimer
+     * @return EventPrimitive
+     */
+    public function setUseTimer($useTimer)
+    {
+        $this->_useTimer = $useTimer;
+        return $this;
     }
 
     /**

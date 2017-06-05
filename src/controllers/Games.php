@@ -38,7 +38,7 @@ class GamesController extends Controller
     public function start($eventId, $players)
     {
         $this->_log->addInfo('Starting game with players id# ' . implode(',', $players));
-        $gameHash = (new InteractiveSessionModel($this->_db, $this->_config))->startGame($eventId, $players);
+        $gameHash = (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))->startGame($eventId, $players);
         $this->_log->addInfo('Successfully started game with players id# ' . implode(',', $players));
         return $gameHash;
     }
@@ -55,9 +55,9 @@ class GamesController extends Controller
     public function startFromToken($players)
     {
         $this->_log->addInfo('Starting new game (by token)');
-        $data = (new EventModel($this->_db, $this->_config))->dataFromToken();
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))->dataFromToken();
         if (empty($data)) {
-            throw new InvalidParametersException('Invalid user token', 401);
+            throw new InvalidParametersException('Invalid player token', 401);
         }
         return $this->start($data->getEventId(), $players);
     }
@@ -72,7 +72,7 @@ class GamesController extends Controller
     public function dropLastRound($gameHashcode)
     {
         $this->_log->addInfo('Dropping last round from session #' . $gameHashcode);
-        $success = (new InteractiveSessionModel($this->_db, $this->_config))->dropLastRound($gameHashcode);
+        $success = (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))->dropLastRound($gameHashcode);
         $this->_log->addInfo('Successfully dropped last round from session #' . $gameHashcode);
         return $success;
     }
@@ -80,7 +80,7 @@ class GamesController extends Controller
     /**
      * Explicitly force end of interactive game
      *
-     * @param $gameHashcode string Hashcode of game
+     * @param string $gameHashcode Hashcode of game
      * @throws DatabaseException
      * @throws BadActionException
      * @return bool Success?
@@ -88,7 +88,7 @@ class GamesController extends Controller
     public function end($gameHashcode)
     {
         $this->_log->addInfo('Finishing game # ' . $gameHashcode);
-        $result = (new InteractiveSessionModel($this->_db, $this->_config))->endGame($gameHashcode);
+        $result = (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))->endGame($gameHashcode);
         $this->_log->addInfo(($result ? 'Successfully finished' : 'Failed to finish') . ' game # ' . $gameHashcode);
         return $result;
     }
@@ -106,7 +106,7 @@ class GamesController extends Controller
     public function addRound($gameHashcode, $roundData, $dry = false)
     {
         $this->_log->addInfo('Adding new round to game # ' . $gameHashcode);
-        $result = (new InteractiveSessionModel($this->_db, $this->_config))->addRound($gameHashcode, $roundData, $dry);
+        $result = (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))->addRound($gameHashcode, $roundData, $dry);
         $this->_log->addInfo(($result ? 'Successfully added' : 'Failed to add') . ' new round to game # ' . $gameHashcode);
         return $result;
     }
@@ -125,7 +125,7 @@ class GamesController extends Controller
     public function addPenalty($eventId, $playerId, $amount, $reason)
     {
         $this->_log->addInfo('Adding penalty for player #' . $playerId. ' to event # ' . $eventId);
-        $result = (new InteractiveSessionModel($this->_db, $this->_config))
+        $result = (new InteractiveSessionModel($this->_db, $this->_config, $this->_meta))
             ->addPenalty($eventId, $playerId, $amount, $reason);
         $this->_log->addInfo('Successfully added penalty for player #' . $playerId. ' to event # ' . $eventId);
         return $result;
@@ -151,15 +151,15 @@ class GamesController extends Controller
      *      ]
      * ]
      *
-     * @param string $sessionHashcode
+     * @param string $gameHashCode
      * @throws EntityNotFoundException
      * @throws InvalidParametersException
      * @return array
      */
-    public function getSessionOverview($sessionHashcode)
+    public function getSessionOverview($gameHashCode)
     {
-        $this->_log->addInfo('Getting session overview for game # ' . $sessionHashcode);
-        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$sessionHashcode]);
+        $this->_log->addInfo('Getting session overview for game # ' . $gameHashCode);
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$gameHashCode]);
         if (empty($session)) {
             throw new InvalidParametersException("Couldn't find session in DB", 404);
         }
@@ -187,7 +187,7 @@ class GamesController extends Controller
             ]
         ];
 
-        $this->_log->addInfo('Successfully got session overview for game # ' . $sessionHashcode);
+        $this->_log->addInfo('Successfully got session overview for game # ' . $gameHashCode);
         return $result;
     }
 
@@ -205,7 +205,7 @@ class GamesController extends Controller
     public function addTextLog($eventId, $text)
     {
         $this->_log->addInfo('Saving new game for event id# ' . $eventId);
-        $success = (new TextmodeSessionModel($this->_db, $this->_config))->addGame($eventId, $text);
+        $success = (new TextmodeSessionModel($this->_db, $this->_config, $this->_meta))->addGame($eventId, $text);
         $this->_log->addInfo('Successfully saved game for event id# ' . $eventId);
         return $success;
     }
@@ -224,7 +224,7 @@ class GamesController extends Controller
     public function addOnlineReplay($eventId, $link)
     {
         $this->_log->addInfo('Saving new online game for event id# ' . $eventId);
-        $success = (new OnlineSessionModel($this->_db, $this->_config))->addGame($eventId, $link);
+        $success = (new OnlineSessionModel($this->_db, $this->_config, $this->_meta))->addGame($eventId, $link);
         $this->_log->addInfo('Successfully saved online game for event id# ' . $eventId);
         return $success;
     }

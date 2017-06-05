@@ -25,9 +25,12 @@ before_script:
   - phpenv config-add tests/php-disable-http-raw.ini
   - mysql -e 'create database api_test;'
   - psql -c 'create database api_test;' -U postgres
+  - mkdir -p tests/data && echo '' > tests/data/db.sqlite
+  - echo 'Current working directory:' `pwd`
 
 script:
-- make init_sqlite_nointeractive
-- make init_mysql | mysql -uroot api_test
-- make init_pgsql | psql -U postgres api_test
+- bin/phinx migrate -e testing # this will test sqlite
+- bin/phinx migrate -e travis_mysql
+- bin/phinx migrate -e travis_pgsql
+- ls -la tests/data
 - make check_ci

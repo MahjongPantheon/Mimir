@@ -25,6 +25,7 @@ require_once __DIR__ . '/../../src/primitives/PlayerRegistration.php';
 require_once __DIR__ . '/../../src/primitives/Player.php';
 require_once __DIR__ . '/../../src/primitives/Event.php';
 require_once __DIR__ . '/../../src/Db.php';
+require_once __DIR__ . '/../../src/Meta.php';
 
 use \JsonSchema\SchemaStorage;
 use \JsonSchema\Validator;
@@ -48,6 +49,10 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
      * @var Config
      */
     protected $_config;
+    /**
+     * @var Meta
+     */
+    protected $_meta;
 
     public function testMakeTournament()
     {
@@ -57,9 +62,11 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         $this->_config = new Config(getenv('OVERRIDE_CONFIG_PATH'));
         $_SERVER['HTTP_X_AUTH_TOKEN'] = $this->_config->getValue('admin.god_token');
 
+        $this->_meta = new Meta($_SERVER);
         $this->_db = Db::__getCleanTestingInstance();
         $this->_event = (new EventPrimitive($this->_db))
             ->setTitle('title')
+            ->setTimezone('UTC')
             ->setDescription('desc')
             ->setType('offline')
             ->setRuleset(Ruleset::instance('ema'));
@@ -78,7 +85,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
             return $p;
         }, $playerNames);
 
-        $model = new TextmodeSessionModel($this->_db, $this->_config);
+        $model = new TextmodeSessionModel($this->_db, $this->_config, $this->_meta);
 
         foreach ($games as $log) {
             $model->addGame($this->_event->getId(), $log);
@@ -86,7 +93,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         // no exceptions - ok!
 
         // Make some stats and check them
-        $statModel = new PlayerStatModel($this->_db, $this->_config);
+        $statModel = new PlayerStatModel($this->_db, $this->_config, $this->_meta);
         $stats = $statModel->getStats($this->_event->getId(), '10');
         $this->assertEquals(8 + 1, count($stats['rating_history'])); // initial + 8 games
         $this->assertEquals(8, count($stats['score_history']));
@@ -107,7 +114,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([], $validator->getErrors());
 
         // Make rating table
-        $eventModel = new EventModel($this->_db, $this->_config);
+        $eventModel = new EventModel($this->_db, $this->_config, $this->_meta);
         $ratings = $eventModel->getRatingTable($this->_event, 'avg_place', 'asc');
         $this->assertNotEmpty($ratings);
         $this->assertEquals(8, $ratings[0]['games_played']);
