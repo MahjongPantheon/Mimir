@@ -193,7 +193,7 @@ class InteractiveSessionModel extends Model
         }
 
         if (!$session->getEvent()->getUsePenalty()) {
-            throw new InvalidParametersException('This event is not support adding penalties');
+            throw new InvalidParametersException('This event doesn\'t support adding penalties');
         }
 
         if (!in_array($playerId, $session->getPlayersIds())) {

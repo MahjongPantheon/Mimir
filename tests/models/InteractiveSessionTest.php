@@ -275,7 +275,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Riichi\InvalidParametersException
-     * @expectedExceptionMessage This event is not support adding penalties
+     * @expectedExceptionMessage This event doesn't support adding penalties
      */
     public function testAddPenaltyToEventWithEmptyPenaltyFlag()
     {
