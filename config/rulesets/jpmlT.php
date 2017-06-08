@@ -1,4 +1,4 @@
-<?ph,p
+<?php
 /*  Mimir: mahjong games storage
  *  Copyright (C) 2016  o.klimenko aka ctizen
  *
