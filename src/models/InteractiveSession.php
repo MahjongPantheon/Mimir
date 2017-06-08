@@ -192,6 +192,10 @@ class InteractiveSessionModel extends Model
             throw new InvalidParametersException("Couldn't find session in DB");
         }
 
+        if (!$session->getEvent()->getUsePenalty()) {
+            throw new InvalidParametersException('This event is not support adding penalties');
+        }
+
         if (!in_array($playerId, $session->getPlayersIds())) {
             throw new InvalidParametersException("This player does not play this game");
         }
