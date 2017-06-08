@@ -47,6 +47,9 @@ class RulesetTenhounet extends Ruleset
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
         'autoRegisterUsers'     => true,
+        'minPenalty'            => 10,
+        'maxPenalty'            => 200,
+        'penaltyStep'           => 10,
         'gameExpirationTime'    => 27, // hours, to cover JST difference
         'withLeadingDealerGameOver' => true,
         'timerPolicy'           => 'none',

@@ -49,6 +49,7 @@ class EventPrimitive extends Primitive
         'auto_seating'      => '_autoSeating',
         'sort_by_games'     => '_sortByGames',
         'use_timer'         => '_useTimer',
+        'use_penalty'       => '_usePenalty',
         'allow_player_append' => '_allowPlayerAppend',
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
@@ -76,6 +77,7 @@ class EventPrimitive extends Primitive
             '_allowPlayerAppend'  => $this->_integerTransform(),
             '_timezone'           => $this->_stringTransform(),
             '_useTimer'           => $this->_integerTransform(),
+            '_usePenalty'           => $this->_integerTransform(),
             '_statHost'           => $this->_stringTransform(),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
@@ -195,6 +197,11 @@ class EventPrimitive extends Primitive
      * @var int
      */
     protected $_useTimer;
+    /**
+     * if true, penalty page is available in administration tools
+     * @var int
+     */
+    protected $_usePenalty;
     /**
      * if true, non-interactive text log parser is used. For offline games.
      * @var int
@@ -669,12 +676,30 @@ class EventPrimitive extends Primitive
     }
 
     /**
+     * @return int
+     */
+    public function getUsePenalty()
+    {
+        return $this->_usePenalty;
+    }
+
+    /**
      * @param int $useTimer
      * @return EventPrimitive
      */
     public function setUseTimer($useTimer)
     {
         $this->_useTimer = $useTimer;
+        return $this;
+    }
+
+    /**
+     * @param int $usePenalty
+     * @return EventPrimitive
+     */
+    public function setUsePenalty($usePenalty)
+    {
+        $this->_usePenalty = $usePenalty;
         return $this;
     }
 
