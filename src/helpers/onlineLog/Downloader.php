@@ -22,30 +22,9 @@ require_once __DIR__ . '/../../exceptions/Download.php';
 
 class Downloader
 {
-    /**
-     * @var Db
-     */
-    protected $_db;
-
-    public function __construct(Db $db)
-    {
-        $this->_db = $db;
-    }
 
     /**
-     * Check if requested game is already in DB
-     *
-     * @param $replayHash
-     * @return bool
-     */
-    protected function _alreadyAdded($replayHash)
-    {
-        $result = SessionPrimitive::findByReplayHash($this->_db, [$replayHash]);
-        return !empty($result);
-    }
-
-    /**
-     * Get replay data from remote
+     * Get replay data from a remote server
      *
      * @param $logUrl
      * @return array [hash => string, content => string]
@@ -53,16 +32,11 @@ class Downloader
      */
     public function getReplay($logUrl)
     {
-        $queryString = parse_url($logUrl, PHP_URL_QUERY);
-        parse_str($queryString, $out);
+        $replayHash = $this->getReplayHash($logUrl);
+        $replayHash = $this->_decodeHash($replayHash);
 
-        $logHash = $this->_decodeHash($out['log']);
-        if ($this->_alreadyAdded($logHash)) {
-            throw new DownloadException('This replay is already in our DB!');
-        }
-
-        $logUrl = base64_decode("aHR0cDovL2UubWp2LmpwLzAvbG9nL3BsYWluZmlsZXMuY2dpPw==") . $logHash;
-        $fallbackLogUrl = base64_decode("aHR0cDovL2UubWp2LmpwLzAvbG9nL2FyY2hpdmVkLmNnaT8=") . $logHash;
+        $logUrl = base64_decode("aHR0cDovL2UubWp2LmpwLzAvbG9nL3BsYWluZmlsZXMuY2dpPw==") . $replayHash;
+        $fallbackLogUrl = base64_decode("aHR0cDovL2UubWp2LmpwLzAvbG9nL2FyY2hpdmVkLmNnaT8=") . $replayHash;
 
         $content = @file_get_contents($logUrl);
         if (!$content) {
@@ -73,9 +47,38 @@ class Downloader
         }
 
         return [
-            'hash'    => $logHash,
+            'decoded_hash'    => $replayHash,
             'content' => $content
         ];
+    }
+
+    /**
+     * Validate domain and get attributes
+     *
+     * @param $logUrl
+     * @return boolean
+     * @throws DownloadException
+     */
+    public function validateUrl($logUrl)
+    {
+        $validDomain = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv');
+        if (strpos($logUrl, $validDomain) === false || strpos($logUrl, 'log=') === false) {
+            throw new DownloadException('Invalid replay link');
+        }
+        return true;
+    }
+
+    /**
+     * Parse get attributes and find game hash
+     *
+     * @param $logUrl
+     * @return string
+     */
+    public function getReplayHash($logUrl)
+    {
+        $queryString = parse_url($logUrl, PHP_URL_QUERY);
+        parse_str($queryString, $out);
+        return $out['log'];
     }
 
     /**

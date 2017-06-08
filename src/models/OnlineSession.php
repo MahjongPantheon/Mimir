@@ -29,31 +29,50 @@ class OnlineSessionModel extends Model
 {
     /**
      * @param $eventId int
-     * @param $gameLink string
+     * @param $logUrl string
+     * @param $gameContent string
      * @return bool
      * @throws InvalidParametersException
      * @throws MalformedPayloadException
      * @throws ParseException
      */
-    public function addGame($eventId, $gameLink)
+    public function addGame($eventId, $logUrl, $gameContent = '')
     {
         $event = EventPrimitive::findById($this->_db, [$eventId]);
         if (empty($event)) {
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
+        $event = $event[0];
 
-        $this->_checkGameExpired($gameLink, $event[0]->getRuleset());
+        $this->_checkGameExpired($logUrl, $event->getRuleset());
 
-        $downloader = new Downloader($this->_db);
-        $replay = $downloader->getReplay($gameLink);
+        $downloader = new Downloader();
+        $downloader->validateUrl($logUrl);
+        $replay_hash = $downloader->getReplayHash($logUrl);
+
+        $addedSession = SessionPrimitive::findByReplayHash($this->_db, [$replay_hash]);
+        if (!empty($addedSession)) {
+            throw new InvalidParametersException('This game already added to the system');
+        }
+
+        # if game log wasn't set, let's download it from the server
+        if ($gameContent == '') {
+            $replay = $downloader->getReplay($logUrl);
+            $gameContent = $replay['content'];
+        }
 
         $parser = new OnlineParser($this->_db);
         $session = (new SessionPrimitive($this->_db))
-            ->setEvent($event[0])
+            ->setEvent($event)
+            ->setReplayHash($replay_hash)
             ->setStatus('inprogress');
 
-        list($success, $originalScore/*, $debug*/) = $parser->parseToSession($session, $replay['content']);
+        list($success, $originalScore, $rounds/*, $debug*/) = $parser->parseToSession($session, $gameContent);
         $success = $success && $session->save();
+        foreach ($rounds as $round) {
+            $round->setSession($session);
+            $success = $success && $round->save();
+        }
         $success = $success && $session->finish();
 
         $calculatedScore = $session->getCurrentState()->getScores();

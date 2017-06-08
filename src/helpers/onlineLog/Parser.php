@@ -18,6 +18,9 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../exceptions/Parser.php';
+require_once __DIR__ . '/../../helpers/YakuMap.php';
+require_once __DIR__ . '/../../primitives/Round.php';
+require_once __DIR__ . '/../../primitives/PlayerHistory.php';
 
 class OnlineParser
 {
@@ -60,8 +63,10 @@ class OnlineParser
 
         $success = true;
         $scores = [];
+        $rounds = [];
         foreach ($this->_roundData as $round) {
             $savedRound = RoundPrimitive::createFromData($this->_db, $session, $round);
+            $rounds []= $savedRound;
             $success = $success && $session->updateCurrentState($savedRound);
             $scores []= $session->getCurrentState()->getScores();
         }
@@ -74,7 +79,7 @@ class OnlineParser
                 . implode("\t", $scores[$i]);
         }
 
-        return [$success, $this->_parseOutcome($content), $debug];
+        return [$success, $this->_parseOutcome($content), $rounds, $debug];
     }
 
     /**
@@ -143,30 +148,18 @@ class OnlineParser
             ];
 
             if (!empty($this->_players['NoName'])) {
-                throw new ParseException('No unnamed players are allowed in replays');
+                throw new ParseException('"NoName" players are not allowed in replays');
             }
 
             $players = PlayerPrimitive::findByTenhouId($this->_db, array_keys($this->_players));
 
-            # let's auto register missed players
-            # maybe flag to do it should be in the event settings
             if (count($players) !== count($this->_players)) {
                 $registeredPlayers = array_map(function (PlayerPrimitive $p) {
                     return $p->getTenhouId();
                 }, $players);
-
                 $missedPlayers = array_diff(array_keys($this->_players), $registeredPlayers);
-                foreach ($missedPlayers as $i => $tenhouId) {
-                    $ident = sha1($tenhouId);
-                    $player = (new PlayerPrimitive($this->_db))
-                        ->setAlias($tenhouId)
-                        ->setDisplayName($tenhouId)
-                        ->setIdent($ident)
-                        ->setTenhouId($tenhouId);
-                    $player->save();
-
-                    $players[] = $player;
-                }
+                $missedPlayers = join(', ', $missedPlayers);
+                throw new ParseException('Not all tenhou nicknames were registered in the system: ' . $missedPlayers);
             }
 
             if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
@@ -323,8 +316,9 @@ class OnlineParser
     protected function _tokenGO(\XMLReader $reader, SessionPrimitive $session)
     {
         $lobby = $reader->getAttribute('lobby');
-        if ($session->getEvent()->getLobbyId() != $lobby) {
-            throw new MalformedPayloadException('Provided replay does not belong to current event (wrong lobby)');
+        $eventLobby = $session->getEvent()->getLobbyId();
+        if ($eventLobby != $lobby) {
+            throw new ParseException('Provided replay doesn\'t belong to the event lobby ' . $eventLobby);
         }
     }
 }

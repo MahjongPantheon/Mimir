@@ -47,6 +47,9 @@ class EventsController extends Controller
             // ->setStartTime('')   // TODO
             // ->setEndTime('')     // TODO
         ;
+        if ($type == 'online') {
+            $event->setIsOnline(1);
+        }
         $success = $event->save();
         if (!$success) {
             throw new BadActionException('Somehow we couldn\'t create event - this should not happen');

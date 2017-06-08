@@ -606,6 +606,11 @@ class SessionPrimitive extends Primitive
                     $this->getCurrentState()->update($round);
                     $success = $this->save();
                 }
+
+                if ($this->getCurrentState()->isFinished()) {
+                    $success = $success && $this->finish();
+                }
+
                 break;
             case 'redZone':
                 $this->getCurrentState()->update($round);
@@ -621,14 +626,15 @@ class SessionPrimitive extends Primitive
                 if ($isInRedZone) {
                     $this->getCurrentState()->forceFinish();
                 }
+
+                if ($this->getCurrentState()->isFinished()) {
+                    $success = $success && $this->finish();
+                }
+
                 break;
             default: // no zones, just update
                 $this->getCurrentState()->update($round);
                 $success = $this->save();
-        }
-
-        if ($this->getCurrentState()->isFinished()) {
-            $success = $success && $this->finish();
         }
 
         return $success;

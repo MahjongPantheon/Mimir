@@ -80,7 +80,7 @@ class SessionState
     {
         $this->_rules = $rules;
         if (count($playersIds) != 4) {
-            throw new InvalidParametersException('Players count is not 4' . json_encode($playersIds));
+            throw new InvalidParametersException('Players count is not 4: ' . json_encode($playersIds));
         }
         $this->_scores = array_combine(
             $playersIds,
