@@ -388,7 +388,7 @@ class EventsController extends Controller
     }
 
     /**
-     * Get last games sorted by date (latest go first)
+     * Get last games for the event
      *
      * @param integer $eventId
      * @param integer $limit
