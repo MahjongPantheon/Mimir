@@ -162,9 +162,11 @@ class OnlineParser
                 throw new ParseException('Not all tenhou nicknames were registered in the system: ' . $missedPlayers);
             }
 
-            if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
+//            if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
+//            }
+            if ($session->getEvent()->getAllowPlayerAppend()) {
                 foreach ($players as $player) {
-                    // ok to re-register every time, it just will do nothing in db if record exists
+                    // it is ok to re-register every time, it just will do nothing in db if record exists
                     (new PlayerRegistrationPrimitive($this->_db))
                         ->setReg($player, $session->getEvent())
                         ->save();

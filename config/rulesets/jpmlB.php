@@ -41,7 +41,6 @@ class RulesetJpmlB extends Ruleset
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => true,
         'tonpuusen'             => false,
-        'autoRegisterUsers'     => false,
         'gameExpirationTime'    => false,
         'minPenalty'            => 10,
         'maxPenalty'            => 200,

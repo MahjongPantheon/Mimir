@@ -41,7 +41,6 @@ class RulesetEma extends Ruleset
         'withNagashiMangan'     => false,
         'withKiriageMangan'     => false,
         'tonpuusen'             => false,
-        'autoRegisterUsers'     => false,
         'gameExpirationTime'    => false,
         'minPenalty'            => 100,
         'maxPenalty'            => 20000,

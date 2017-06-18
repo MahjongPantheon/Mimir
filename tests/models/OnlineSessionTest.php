@@ -80,6 +80,7 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
             ->setDescription('desc')
             ->setType('online')
             ->setLobbyId('1111')
+            ->setAllowPlayerAppend(1)
             ->setRuleset(Ruleset::instance('tenhounet'));
         $this->_event->save();
 
@@ -102,9 +103,6 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
                 ->setIdent('oauth' . $i)
                 ->setTenhouId($tenhouNickname);
             $p->save();
-            (new PlayerRegistrationPrimitive($this->_db))
-                ->setReg($p, $this->_event)
-                ->save();
             return $p;
         }, [1, 2, 3, 4], $tenhouNicknames);
     }
@@ -141,6 +139,9 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
 
         $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
         $this->assertEquals(9, count($rounds));
+
+        $registered = PlayerRegistrationPrimitive::findRegisteredPlayersByEvent($this->_db, $this->_event->getId());
+        $this->assertEquals(4, count($registered));
     }
 
     // Negative tests
@@ -162,7 +163,7 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Riichi\ParseException
      * @expectedExceptionMessage Not all tenhou nicknames were registered in the system: tenhou1, tenhou2
      */
-    public function testAddGameWithNotRegisteredPlayers()
+    public function testAddGameWithNotRegisteredInSystemPlayers()
     {
         $this->playersRegistration(['another1', 'another2', 'tenhou3', 'tenhou4']);
 
@@ -228,5 +229,20 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
 
         $invalidDomain = 'http://localhost?log=1';
         $this->assertFalse($downloader->validateUrl($invalidDomain));
+    }
+
+    /**
+     * @expectedException \Riichi\MalformedPayloadException
+     * @expectedExceptionMessage Player id #1 is not registered for this event
+     */
+    public function testAddGameWithNotRegisteredToEventPlayers()
+    {
+        $this->playersRegistration();
+
+        $this->_event->setAllowPlayerAppend(0);
+        $this->_event->save();
+
+        $session = new OnlineSessionModel($this->_db, $this->_config, $this->_meta);
+        $session->addGame($this->_event->getId(), $this->_gameLink, $this->_gameContent);
     }
 }
