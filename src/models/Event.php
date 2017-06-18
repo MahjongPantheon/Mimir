@@ -257,7 +257,8 @@ class EventModel extends Model
      * @param $rounds RoundPrimitive[][]
      * @return array
      */
-    protected function _formatGameResults($session, $sessionResults, $rounds) {
+    protected function _formatGameResults($session, $sessionResults, $rounds)
+    {
         return [
             'date' => $session->getEndDate(),
             'replay_link' => $session->getOrigLink(),
