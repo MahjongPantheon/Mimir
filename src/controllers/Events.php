@@ -413,6 +413,34 @@ class EventsController extends Controller
     }
 
     /**
+     * Get game information
+     *
+     * @param integer $eventId
+     * @param integer $sessionId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getGame($eventId, $sessionId)
+    {
+        $this->_log->addInfo('Getting game for event id# ' . $eventId . ' and for session id#' . $sessionId);
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $session = SessionPrimitive::findById($this->_db, [$sessionId]);
+        if (empty($session)) {
+            throw new InvalidParametersException('Session id#' . $sessionId . ' not found in DB');
+        }
+
+        $result = (new EventModel($this->_db, $this->_config, $this->_meta))->getFinishedGame($event[0], $session[0]);
+
+        $this->_log->addInfo('Successfully got game for event id# ' . $eventId . ' and for session id#' . $sessionId);
+        return $result;
+    }
+
+    /**
      * @param integer $eventId
      * @throws InvalidParametersException
      * @return array

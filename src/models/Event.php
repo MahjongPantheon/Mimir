@@ -221,23 +221,57 @@ class EventModel extends Model
         ];
 
         foreach ($games as $session) {
-            $result['games'][$session->getId()] = [
-                'date' => $session->getEndDate(),
-                'replay_link' => $session->getOrigLink(),
-                'players' => array_map('intval', $session->getPlayersIds()),
-                'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
-                    return [
-                        'score'         => (int) $el->getScore(),
-                        'rating_delta'  => (float) $el->getRatingDelta(),
-                        'place'         => (int) $el->getPlace()
-                    ];
-                }, $sessionResults[$session->getId()]),
-                'penalties' => $session->getCurrentState()->getPenaltiesLog(),
-                'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
-            ];
+            $result['games'][$session->getId()] = $this->_formatGameResults($session, $sessionResults, $rounds);
         }
 
         return $result;
+    }
+
+    /**
+     * @param EventPrimitive $event
+     * @param SessionPrimitive $session
+     * @return array
+     * @throws InvalidParametersException
+     */
+    public function getFinishedGame(EventPrimitive $event, SessionPrimitive $session)
+    {
+        if ($session->getEvent()->getId() != $event->getId()) {
+            throw new InvalidParametersException('Session doesn\'t belong to the specified event');
+        }
+
+        /** @var SessionResultsPrimitive[][] $sessionResults */
+        $sessionResults = $this->_getSessionResults([$session->getId()]);
+
+        /** @var RoundPrimitive[][] $rounds */
+        $rounds = $this->_getRounds([$session->getId()]);
+
+        return [
+            'games' => [$session->getId() => $this->_formatGameResults($session, $sessionResults, $rounds)],
+            'players' => $this->_getPlayersOfGames([$session])
+        ];
+    }
+
+    /**
+     * @param $session SessionPrimitive
+     * @param $sessionResults SessionResultsPrimitive[][]
+     * @param $rounds RoundPrimitive[][]
+     * @return array
+     */
+    protected function _formatGameResults($session, $sessionResults, $rounds) {
+        return [
+            'date' => $session->getEndDate(),
+            'replay_link' => $session->getOrigLink(),
+            'players' => array_map('intval', $session->getPlayersIds()),
+            'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
+                return [
+                    'score'         => (int) $el->getScore(),
+                    'rating_delta'  => (float) $el->getRatingDelta(),
+                    'place'         => (int) $el->getPlace()
+                ];
+            }, $sessionResults[$session->getId()]),
+            'penalties' => $session->getCurrentState()->getPenaltiesLog(),
+            'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
+        ];
     }
 
     /**

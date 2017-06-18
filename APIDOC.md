@@ -33,6 +33,16 @@ Returns: _array_
 Exceptions:
 * _InvalidParametersException_ 
 
+### getGame
+Parameters:
+* **$eventId** (_integer_) 
+* **$sessionId** (_integer_) 
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
 ### getCurrentGames
 Parameters:
 * **$playerId** (_int_) 
