@@ -11,6 +11,9 @@
             "date": {
               "type": "string"
             },
+            "hash": {
+              "type": "string"
+            },
             "replay_link": {
               "type": "string"
             },

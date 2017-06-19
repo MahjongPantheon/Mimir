@@ -228,17 +228,12 @@ class EventModel extends Model
     }
 
     /**
-     * @param EventPrimitive $event
      * @param SessionPrimitive $session
      * @return array
      * @throws InvalidParametersException
      */
-    public function getFinishedGame(EventPrimitive $event, SessionPrimitive $session)
+    public function getFinishedGame(SessionPrimitive $session)
     {
-        if ($session->getEvent()->getId() != $event->getId()) {
-            throw new InvalidParametersException('Session doesn\'t belong to the specified event');
-        }
-
         /** @var SessionResultsPrimitive[][] $sessionResults */
         $sessionResults = $this->_getSessionResults([$session->getId()]);
 
@@ -260,6 +255,7 @@ class EventModel extends Model
     protected function _formatGameResults($session, $sessionResults, $rounds)
     {
         return [
+            'hash' => $session->getRepresentationalHash(),
             'date' => $session->getEndDate(),
             'replay_link' => $session->getOrigLink(),
             'players' => array_map('intval', $session->getPlayersIds()),

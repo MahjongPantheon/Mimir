@@ -35,8 +35,7 @@ Exceptions:
 
 ### getGame
 Parameters:
-* **$eventId** (_integer_) 
-* **$sessionId** (_integer_) 
+* **$representationalHash** (_string_) 
 
 Returns: _array_ 
 
