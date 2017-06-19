@@ -225,9 +225,16 @@ class SessionPrimitive extends Primitive
      * @throws \Exception
      * @return SessionPrimitive[]
      */
-    public static function findByEventAndStatus(IDb $db, $eventId, $state, $offset = 0, $limit = null, $orderBy = 'id',
-                                                $order = 'desc')
-    {
+    public static function findByEventAndStatus(
+        IDb $db,
+        $eventId,
+        $state,
+        $offset = 0,
+        $limit = null,
+        $orderBy = 'id',
+        $order = 'desc'
+    ) {
+    
         return self::_findBySeveral(
             $db,
             ['status' => (array)$state, 'event_id' => [$eventId]],
