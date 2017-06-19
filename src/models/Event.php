@@ -221,7 +221,7 @@ class EventModel extends Model
         ];
 
         foreach ($games as $session) {
-            $result['games'][$session->getId()] = $this->_formatGameResults($session, $sessionResults, $rounds);
+            $result['games'][] = $this->_formatGameResults($session, $sessionResults, $rounds);
         }
 
         return $result;
@@ -241,7 +241,7 @@ class EventModel extends Model
         $rounds = $this->_getRounds([$session->getId()]);
 
         return [
-            'games' => [$session->getId() => $this->_formatGameResults($session, $sessionResults, $rounds)],
+            'games' => [$this->_formatGameResults($session, $sessionResults, $rounds)],
             'players' => $this->_getPlayersOfGames([$session])
         ];
     }
