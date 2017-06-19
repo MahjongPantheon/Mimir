@@ -27,6 +27,8 @@ Parameters:
 * **$eventId** (_integer_) 
 * **$limit** (_integer_) 
 * **$offset** (_integer_) 
+* **$orderBy** (_string_) either 'id' or 'end_date'
+* **$order** (_string_) either 'asc' or 'desc'
 
 Returns: _array_ 
 

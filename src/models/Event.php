@@ -193,16 +193,20 @@ class EventModel extends Model
      * @param EventPrimitive $event
      * @param integer $limit
      * @param integer $offset
+     * @param string $orderBy
+     * @param string $order
      * @return array
      */
-    public function getLastFinishedGames(EventPrimitive $event, $limit, $offset)
+    public function getLastFinishedGames(EventPrimitive $event, $limit, $offset, $orderBy, $order)
     {
         $games = SessionPrimitive::findByEventAndStatus(
             $this->_db,
             $event->getId(),
             'finished',
             $offset,
-            $limit
+            $limit,
+            $orderBy,
+            $order
         );
 
         $sessionIds = array_map(function (SessionPrimitive $el) {
