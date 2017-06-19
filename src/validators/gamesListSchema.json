@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "games": {
-      "type": "object",
+      "type": "array",
       "patternProperties": {
         "^\\d+$": {
           "type": "object",
@@ -91,7 +91,8 @@
             "players",
             "final_results",
             "rounds",
-            "replay_link"
+            "replay_link",
+            "hash"
           ]
         }
       }
