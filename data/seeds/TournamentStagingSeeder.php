@@ -49,6 +49,7 @@ class TournamentStagingSeeder extends AbstractSeed
             ->setTitle('title')
             ->setDescription('desc')
             ->setType('offline')
+            ->setTimezone('Europe/Moscow')
             ->setRuleset(\Riichi\Ruleset::instance('ema'));
         $event->save();
         return $event;
