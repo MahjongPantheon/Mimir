@@ -27,6 +27,17 @@ Parameters:
 * **$eventId** (_integer_) 
 * **$limit** (_integer_) 
 * **$offset** (_integer_) 
+* **$orderBy** (_string_) either 'id' or 'end_date'
+* **$order** (_string_) either 'asc' or 'desc'
+
+Returns: _array_ 
+
+Exceptions:
+* _InvalidParametersException_ 
+
+### getGame
+Parameters:
+* **$representationalHash** (_string_) 
 
 Returns: _array_ 
 
@@ -228,7 +239,7 @@ Parameters:
 * **$type** (_string_) either 'online' or 'offline' or 'offline_interactive_tournament'
 * **$ruleset** (_string_) one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
 * **$gameDuration** (_int_) duration of game in this event in minutes
-* **$timezone** (_int_) Shift in hours from GMT
+* **$timezone** (_string_) name of timezone, 'Asia/Irkutsk' for example
 
 Returns: _int_ 
 

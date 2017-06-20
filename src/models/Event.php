@@ -193,16 +193,20 @@ class EventModel extends Model
      * @param EventPrimitive $event
      * @param integer $limit
      * @param integer $offset
+     * @param string $orderBy
+     * @param string $order
      * @return array
      */
-    public function getLastFinishedGames(EventPrimitive $event, $limit, $offset)
+    public function getLastFinishedGames(EventPrimitive $event, $limit, $offset, $orderBy, $order)
     {
         $games = SessionPrimitive::findByEventAndStatus(
             $this->_db,
             $event->getId(),
             'finished',
             $offset,
-            $limit
+            $limit,
+            $orderBy,
+            $order
         );
 
         $sessionIds = array_map(function (SessionPrimitive $el) {
@@ -221,23 +225,54 @@ class EventModel extends Model
         ];
 
         foreach ($games as $session) {
-            $result['games'][$session->getId()] = [
-                'date' => $session->getEndDate(),
-                'replay_link' => $session->getOrigLink(),
-                'players' => array_map('intval', $session->getPlayersIds()),
-                'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
-                    return [
-                        'score'         => (int) $el->getScore(),
-                        'rating_delta'  => (float) $el->getRatingDelta(),
-                        'place'         => (int) $el->getPlace()
-                    ];
-                }, $sessionResults[$session->getId()]),
-                'penalties' => $session->getCurrentState()->getPenaltiesLog(),
-                'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
-            ];
+            $result['games'][] = $this->_formatGameResults($session, $sessionResults, $rounds);
         }
 
         return $result;
+    }
+
+    /**
+     * @param SessionPrimitive $session
+     * @return array
+     * @throws InvalidParametersException
+     */
+    public function getFinishedGame(SessionPrimitive $session)
+    {
+        /** @var SessionResultsPrimitive[][] $sessionResults */
+        $sessionResults = $this->_getSessionResults([$session->getId()]);
+
+        /** @var RoundPrimitive[][] $rounds */
+        $rounds = $this->_getRounds([$session->getId()]);
+
+        return [
+            'games' => [$this->_formatGameResults($session, $sessionResults, $rounds)],
+            'players' => $this->_getPlayersOfGames([$session])
+        ];
+    }
+
+    /**
+     * @param $session SessionPrimitive
+     * @param $sessionResults SessionResultsPrimitive[][]
+     * @param $rounds RoundPrimitive[][]
+     * @return array
+     */
+    protected function _formatGameResults($session, $sessionResults, $rounds)
+    {
+        return [
+            'hash' => $session->getRepresentationalHash(),
+            'date' => $session->getEndDate(),
+            'replay_link' => $session->getOrigLink(),
+            'players' => array_map('intval', $session->getPlayersIds()),
+            'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
+                return [
+                    'score'         => (int) $el->getScore(),
+                    'rating_delta'  => (float) $el->getRatingDelta(),
+                    'place'         => (int) $el->getPlace()
+                ];
+            }, $sessionResults[$session->getId()]),
+            'penalties' => $session->getCurrentState()->getPenaltiesLog(),
+            'rounds' => array_map([$this, '_formatRound'], $rounds[$session->getId()]),
+        ];
     }
 
     /**

@@ -33,6 +33,7 @@ return [
     'getGameConfig'      => ['EventsController', 'getGameConfig'],
     'getRatingTable'     => ['EventsController', 'getRatingTable'],
     'getLastGames'       => ['EventsController', 'getLastGames'],
+    'getGame'            => ['EventsController', 'getGame'],
     'getCurrentGames'    => ['PlayersController', 'getCurrentSessions'],
     'getAllPlayers'      => ['EventsController', 'getAllRegisteredPlayers'],
     'getPlayerIdByIdent' => ['PlayersController', 'getIdByIdent'],
