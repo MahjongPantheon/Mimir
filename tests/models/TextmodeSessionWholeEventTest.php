@@ -134,7 +134,7 @@ class TextmodeSessionWholeEventTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([], $validatorRating->getErrors());
 
         // Try getting last games list
-        $data = $eventModel->getLastFinishedGames($this->_event, 10, 0);
+        $data = $eventModel->getLastFinishedGames($this->_event, 10, 0, 'id', 'desc');
         $this->assertNotEmpty($data['games']);
         $this->assertNotEmpty($data['players']);
         $this->assertEquals(10, count($data['games']));

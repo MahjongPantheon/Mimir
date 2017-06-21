@@ -3,94 +3,96 @@
   "type": "object",
   "properties": {
     "games": {
-      "type": "object",
-      "patternProperties": {
-        "^\\d+$": {
-          "type": "object",
-          "properties": {
-            "date": {
-              "type": "string"
-            },
-            "replay_link": {
-              "type": "string"
-            },
-            "players": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            },
-            "final_results": {
-              "type": "object",
-              "patternProperties": {
-                "^\\d+$": {
-                  "type": "object",
-                  "properties": {
-                    "score": {
-                      "type": "integer"
-                    },
-                    "rating_delta": {
-                      "type": "number"
-                    },
-                    "place": {
-                      "type": "integer"
-                    },
-                    "additionalProperties": false,
-                    "required": [
-                      "score",
-                      "rating",
-                      "place"
-                    ]
-                  }
-                }
-              }
-            },
-            "penalties": {
-              "type": "array",
-              "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "replay_link": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "final_results": {
+            "type": "object",
+            "patternProperties": {
+              "^\\d+$": {
                 "type": "object",
                 "properties": {
-                  "who": {
+                  "score": {
                     "type": "integer"
                   },
-                  "amount": {
-                    "type": "integer"
+                  "rating_delta": {
+                    "type": "number"
                   },
-                  "reason": {
-                    "type": "string"
+                  "place": {
+                    "type": "integer"
                   },
                   "additionalProperties": false,
                   "required": [
-                    "who",
-                    "amount",
-                    "reason"
+                    "score",
+                    "rating",
+                    "place"
                   ]
                 }
               }
-            },
-            "rounds": {
-              "type": "array",
-              "items": {
-                "oneOf": [
-                  { "$ref": "#/definitions/ron" },
-                  { "$ref": "#/definitions/multiron" },
-                  { "$ref": "#/definitions/tsumo" },
-                  { "$ref": "#/definitions/draw" },
-                  { "$ref": "#/definitions/abort" },
-                  { "$ref": "#/definitions/chombo" }
+            }
+          },
+          "penalties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "who": {
+                  "type": "integer"
+                },
+                "amount": {
+                  "type": "integer"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "additionalProperties": false,
+                "required": [
+                  "who",
+                  "amount",
+                  "reason"
                 ]
               }
             }
           },
-          "additionalProperties": false,
-          "required": [
-            "date",
-            "players",
-            "final_results",
-            "rounds",
-            "replay_link"
-          ]
-        }
+          "rounds": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "$ref": "#/definitions/ron" },
+                { "$ref": "#/definitions/multiron" },
+                { "$ref": "#/definitions/tsumo" },
+                { "$ref": "#/definitions/draw" },
+                { "$ref": "#/definitions/abort" },
+                { "$ref": "#/definitions/chombo" }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "players",
+          "final_results",
+          "rounds",
+          "replay_link",
+          "hash"
+        ]
       }
     },
     "players": {

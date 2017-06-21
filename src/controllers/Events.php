@@ -29,7 +29,7 @@ class EventsController extends Controller
      * @param string $type either 'online' or 'offline' or 'offline_interactive_tournament'
      * @param string $ruleset one of possible ruleset names ('ema', 'jpmlA', 'tenhounet', or any other supported by system)
      * @param int $gameDuration duration of game in this event in minutes
-     * @param int $timezone Shift in hours from GMT
+     * @param string $timezone name of timezone, 'Asia/Irkutsk' for example
      * @throws BadActionException
      * @return int
      */
@@ -306,6 +306,7 @@ class EventsController extends Controller
             'eventTitle'          => $event[0]->getTitle(),
             'eventStatHost'       => $event[0]->getStatHost(),
             'useTimer'            => (bool)$event[0]->getUseTimer(),
+            'usePenalty'          => (bool)$event[0]->getUsePenalty(),
             'timerPolicy'         => $rules->timerPolicy(),
             'redZone'             => $rules->redZone(), // in seconds!
             'yellowZone'          => $rules->yellowZone(), // in seconds!
@@ -345,8 +346,8 @@ class EventsController extends Controller
      * Get rating table for event
      *
      * @param integer $eventId
-     * @param string $orderBy  either 'name', 'rating' or 'avg_place'
-     * @param string $order  either 'asc' or 'desc'
+     * @param string $orderBy either 'name', 'rating' or 'avg_place'
+     * @param string $order either 'asc' or 'desc'
      * @throws InvalidParametersException
      * @return array
      */
@@ -389,15 +390,17 @@ class EventsController extends Controller
     }
 
     /**
-     * Get last games sorted by date (latest go first)
+     * Get last games for the event
      *
      * @param integer $eventId
      * @param integer $limit
      * @param integer $offset
+     * @param string $orderBy either 'id' or 'end_date'
+     * @param string $order either 'asc' or 'desc'
      * @throws InvalidParametersException
      * @return array
      */
-    public function getLastGames($eventId, $limit, $offset)
+    public function getLastGames($eventId, $limit, $offset, $orderBy = 'id', $order = 'desc')
     {
         $this->_log->addInfo('Getting games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);
 
@@ -406,11 +409,37 @@ class EventsController extends Controller
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
 
+        if (!in_array($orderBy, ['id', 'end_date']) || !in_array($order, ['asc', 'desc'])) {
+            throw new InvalidParametersException('Invalid order attributes');
+        }
+
         $table = (new EventModel($this->_db, $this->_config, $this->_meta))
-            ->getLastFinishedGames($event[0], $limit, $offset);
+            ->getLastFinishedGames($event[0], $limit, $offset, $orderBy, $order);
 
         $this->_log->addInfo('Successfully got games list [' . $limit . '/' . $offset . '] for event id# ' . $eventId);
         return $table;
+    }
+
+    /**
+     * Get game information
+     *
+     * @param string $representationalHash
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getGame($representationalHash)
+    {
+        $this->_log->addInfo('Getting game for session hash#' . $representationalHash);
+
+        $session = SessionPrimitive::findByRepresentationalHash($this->_db, [$representationalHash]);
+        if (empty($session)) {
+            throw new InvalidParametersException('Session hash#' . $representationalHash . ' not found in DB');
+        }
+
+        $result = (new EventModel($this->_db, $this->_config, $this->_meta))->getFinishedGame($session[0]);
+
+        $this->_log->addInfo('Successfully got game for session hash#' . $representationalHash);
+        return $result;
     }
 
     /**

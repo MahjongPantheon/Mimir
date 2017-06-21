@@ -63,6 +63,7 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
             ->setTitle('title')
             ->setTimezone('UTC')
             ->setDescription('desc')
+            ->setUsePenalty(1)
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'));
         $this->_event->save();
@@ -245,7 +246,52 @@ class SessionModelTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($session->addRound($hash, $roundData));
     }
 
+    public function testAddPenalty()
+    {
+        $session = new InteractiveSessionModel($this->_db, $this->_config, $this->_meta);
+        $hash = $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
+        );
+
+        $playerId = $this->_players[0]->getId();
+
+        $success = $session->addPenalty($this->_event->getId(), $playerId, 100, 'Just like that');
+        $this->assertTrue($success);
+
+        $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash])[0];
+        $this->assertEquals([$playerId => -100], $sessionPrimitive->getCurrentState()->getPenalties());
+
+        $success = $session->addPenalty($this->_event->getId(), $playerId, 200, 'Just like that');
+        $this->assertTrue($success);
+
+        $sessionPrimitive = SessionPrimitive::findByRepresentationalHash($this->_db, [$hash])[0];
+        $this->assertEquals([$playerId => -300], $sessionPrimitive->getCurrentState()->getPenalties());
+    }
+
     // Negative tests
+
+    /**
+     * @expectedException \Riichi\InvalidParametersException
+     * @expectedExceptionMessage This event doesn't support adding penalties
+     */
+    public function testAddPenaltyToEventWithEmptyPenaltyFlag()
+    {
+        $this->_event->setUsePenalty(0);
+        $this->_event->save();
+
+        $session = new InteractiveSessionModel($this->_db, $this->_config, $this->_meta);
+        $session->startGame(
+            $this->_event->getId(),
+            array_map(function (PlayerPrimitive $p) {
+                return $p->getId();
+            }, $this->_players)
+        );
+
+        $session->addPenalty($this->_event->getId(), $this->_players[0]->getId(), 100, 'Just like that');
+    }
 
     /**
      * @expectedException \Riichi\InvalidUserException
