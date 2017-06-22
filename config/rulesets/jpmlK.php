@@ -32,7 +32,7 @@ class RulesetJpmlK extends Ruleset
         'riichiGoesToWinner'    => false,
         'extraChomboPayments'   => true,
         'chomboPenalty'         => 0,
-        'withAtamahane'         => true,
+        'withAtamahane'         => false,
         'withAbortives'         => true,
         'withKuitan'            => false,
         'withKazoe'             => false,
@@ -48,7 +48,7 @@ class RulesetJpmlK extends Ruleset
         'penaltyStep'           => 10,
         'timerPolicy'           => 'redZone',
         'yellowZone'            => 0,
-        'redZone'               => 300, // 5min
+        'redZone'               => 600, // 10min
         'withLeadingDealerGameOver' => true
     ];
 
