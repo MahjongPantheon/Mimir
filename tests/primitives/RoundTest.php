@@ -65,8 +65,7 @@ class RoundPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setEvent($this->_event)
             ->setPlayers($this->_players)
             ->setStatus('inprogress')
-            ->setReplayHash('')
-            ->setOrigLink('');
+            ->setReplayHash('');
         $this->_session->save();
     }
 

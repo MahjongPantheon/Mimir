@@ -261,7 +261,7 @@ class EventModel extends Model
         return [
             'hash' => $session->getRepresentationalHash(),
             'date' => $session->getEndDate(),
-            'replay_link' => $session->getOrigLink(),
+            'replay_link' => $session->getReplayLink(),
             'players' => array_map('intval', $session->getPlayersIds()),
             'final_results' => $this->_arrayMapPreserveKeys(function (SessionResultsPrimitive $el) {
                 return [

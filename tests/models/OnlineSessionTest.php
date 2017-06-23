@@ -136,6 +136,7 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_event->getId(), $session->getEventId());
         $this->assertEquals('finished', $session->getStatus());
         $this->assertEquals($this->_gameId, $session->getReplayHash());
+        $this->assertEquals($this->_gameLink, $session->getReplayLink());
 
         $rounds = RoundPrimitive::findBySessionIds($this->_db, [$session->getId()]);
         $this->assertEquals(9, count($rounds));
@@ -203,7 +204,7 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Riichi\InvalidParametersException
-     * @expectedExceptionMessage This game already added to the system
+     * @expectedExceptionMessage This game is already added to the system
      */
     public function testAddAlreadyAddedGame()
     {

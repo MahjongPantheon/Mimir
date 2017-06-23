@@ -182,6 +182,7 @@ class OnlineParser
     {
         $winner = array_keys($this->_players)[$reader->getAttribute('who')];
         $loser = array_keys($this->_players)[$reader->getAttribute('fromWho')];
+        $open_hand = $reader->getAttribute('m') ? 1 : 0;
         $outcomeType = ($winner == $loser ? 'tsumo' : 'ron');
 
         list($fu) = explode(',', $reader->getAttribute('ten'));
@@ -205,6 +206,7 @@ class OnlineParser
                 'kanuradora' => 0,
                 'yaku' => implode(',', $yakuData['yaku']),
                 'riichi' => $riichi,
+                'open_hand' => $open_hand
             ];
 
             $this->_checkScores []= $this->_makeScores($reader->getAttribute('sc'));
@@ -227,6 +229,7 @@ class OnlineParser
                         'kanuradora' => $roundRecord['kanuradora'],
                         'yaku' => $roundRecord['yaku'],
                         'riichi' => $roundRecord['riichi'],
+                        'open_hand' => $roundRecord['open_hand']
                     ]]
                 ];
             }
@@ -242,6 +245,7 @@ class OnlineParser
                 'kanuradora' => 0,
                 'yaku' => implode(',', $yakuData['yaku']),
                 'riichi' => $this->_getRiichi(),
+                'open_hand' => $open_hand
             ];
 
             $this->_roundData []= $roundRecord;

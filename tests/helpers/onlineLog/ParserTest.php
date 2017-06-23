@@ -17,6 +17,7 @@
  */
 namespace Riichi;
 
+require_once __DIR__ . '/../../../src/Db.php';
 require_once __DIR__ . '/../../../src/helpers/onlineLog/Parser.php';
 require_once __DIR__ . '/../../../src/primitives/PlayerRegistration.php';
 
@@ -75,15 +76,14 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
             ->setEvent($this->_event)
             ->setPlayers($this->_players)
             ->setStatus('inprogress')
-            ->setReplayHash('')
-            ->setOrigLink('');
+            ->setReplayHash('');
         $this->_session->save();
     }
 
     public function testParseUsualGame()
     {
         $content = file_get_contents(__DIR__ . '/testdata/usual.xml');
-        list($success, $results/*, $debug*/) = (new OnlineParser($this->_db))
+        list($success, $results, $rounds) = (new OnlineParser($this->_db))
             ->parseToSession($this->_session, $content);
 
         $this->assertTrue($success);
@@ -91,6 +91,16 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
             $results,
             $this->_session->getCurrentState()->getScores()
         );
+
+        $open_hands = 0;
+        foreach ($rounds as $round) {
+            if ($round->getOpenHand()) {
+                $open_hands++;
+            }
+        }
+
+        $this->assertEquals(16, count($rounds));
+        $this->assertEquals(7, $open_hands);
     }
 
     public function testParseYakumanDoubleRon()

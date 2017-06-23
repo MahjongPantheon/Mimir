@@ -44,15 +44,15 @@ class OnlineSessionModel extends Model
         }
         $event = $event[0];
 
-        $this->_checkGameExpired($logUrl, $event->getRuleset());
-
         $downloader = new Downloader();
         $downloader->validateUrl($logUrl);
         $replay_hash = $downloader->getReplayHash($logUrl);
 
-        $addedSession = SessionPrimitive::findByReplayHash($this->_db, [$replay_hash]);
+        $this->_checkGameExpired($logUrl, $event->getRuleset());
+
+        $addedSession = SessionPrimitive::findByReplayHashAndEvent($this->_db, $eventId, $replay_hash);
         if (!empty($addedSession)) {
-            throw new InvalidParametersException('This game already added to the system');
+            throw new InvalidParametersException('This game is already added to the system');
         }
 
         # if game log wasn't set, let's download it from the server
