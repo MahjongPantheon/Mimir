@@ -220,12 +220,16 @@ class EventModel extends Model
             $offset = $gamesCount - $event->getSeriesLength();
             $limit = $event->getSeriesLength();
             $currentSeries = array_slice($playerGames, $offset, $limit);
-            $sessionIds = array_map(function ($el) {
+            $currentSeriesSessionIds = array_map(function ($el) {
                 return $el['sessionId'];
             }, $currentSeries);
+            $currentSeriesScores = array_reduce($currentSeries, function ($i, $item) {
+                return $i += $item['score'];
+            });
 
             $bestSeries['playerId'] = $playerId;
-            $bestSeries['currentSeries'] = $sessionIds;
+            $bestSeries['currentSeries'] = $currentSeriesSessionIds;
+            $bestSeries['currentSeriesScores'] = $currentSeriesScores;
 
             $seriesResults[] = $bestSeries;
         }
@@ -247,6 +251,7 @@ class EventModel extends Model
                 'best_series_scores' => $item['scoresSum'],
                 'best_series' => $this->_formatSeries($playerId, $item['sessionIds'], $games, $sessionResults),
                 'current_series' => $this->_formatSeries($playerId, $item['currentSeries'], $games, $sessionResults),
+                'current_series_scores' => $item['currentSeriesScores'],
             ];
         }
 
