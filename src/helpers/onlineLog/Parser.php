@@ -162,8 +162,6 @@ class OnlineParser
                 throw new ParseException('Not all tenhou nicknames were registered in the system: ' . $missedPlayers);
             }
 
-//            if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
-//            }
             if ($session->getEvent()->getAllowPlayerAppend()) {
                 foreach ($players as $player) {
                     // it is ok to re-register every time, it just will do nothing in db if record exists
@@ -182,7 +180,7 @@ class OnlineParser
     {
         $winner = array_keys($this->_players)[$reader->getAttribute('who')];
         $loser = array_keys($this->_players)[$reader->getAttribute('fromWho')];
-        $open_hand = $reader->getAttribute('m') ? 1 : 0;
+        $openHand = $reader->getAttribute('m') ? 1 : 0;
         $outcomeType = ($winner == $loser ? 'tsumo' : 'ron');
 
         list($fu) = explode(',', $reader->getAttribute('ten'));
@@ -206,7 +204,7 @@ class OnlineParser
                 'kanuradora' => 0,
                 'yaku' => implode(',', $yakuData['yaku']),
                 'riichi' => $riichi,
-                'open_hand' => $open_hand
+                'open_hand' => $openHand
             ];
 
             $this->_checkScores []= $this->_makeScores($reader->getAttribute('sc'));
@@ -245,7 +243,7 @@ class OnlineParser
                 'kanuradora' => 0,
                 'yaku' => implode(',', $yakuData['yaku']),
                 'riichi' => $this->_getRiichi(),
-                'open_hand' => $open_hand
+                'open_hand' => $openHand
             ];
 
             $this->_roundData []= $roundRecord;

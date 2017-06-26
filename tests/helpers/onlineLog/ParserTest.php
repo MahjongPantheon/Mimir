@@ -92,15 +92,15 @@ class OnlinelogParserTest extends \PHPUnit_Framework_TestCase
             $this->_session->getCurrentState()->getScores()
         );
 
-        $open_hands = 0;
+        $openHands = 0;
         foreach ($rounds as $round) {
             if ($round->getOpenHand()) {
-                $open_hands++;
+                $openHands++;
             }
         }
 
         $this->assertEquals(16, count($rounds));
-        $this->assertEquals(7, $open_hands);
+        $this->assertEquals(7, $openHands);
     }
 
     public function testParseYakumanDoubleRon()

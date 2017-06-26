@@ -46,11 +46,11 @@ class OnlineSessionModel extends Model
 
         $downloader = new Downloader();
         $downloader->validateUrl($logUrl);
-        $replay_hash = $downloader->getReplayHash($logUrl);
+        $replayHash = $downloader->getReplayHash($logUrl);
 
         $this->_checkGameExpired($logUrl, $event->getRuleset());
 
-        $addedSession = SessionPrimitive::findByReplayHashAndEvent($this->_db, $eventId, $replay_hash);
+        $addedSession = SessionPrimitive::findByReplayHashAndEvent($this->_db, $eventId, $replayHash);
         if (!empty($addedSession)) {
             throw new InvalidParametersException('This game is already added to the system');
         }
@@ -64,7 +64,7 @@ class OnlineSessionModel extends Model
         $parser = new OnlineParser($this->_db);
         $session = (new SessionPrimitive($this->_db))
             ->setEvent($event)
-            ->setReplayHash($replay_hash)
+            ->setReplayHash($replayHash)
             ->setStatus('inprogress');
 
         list($success, $originalScore, $rounds/*, $debug*/) = $parser->parseToSession($session, $gameContent);
