@@ -318,6 +318,7 @@ class EventsController extends Controller
             'allowPlayerAppend'   => (bool)$event[0]->getAllowPlayerAppend(),
             'withLeadingDealerGameover' => $rules->withLeadingDealerGameOver(),
             'subtractStartPoints' => $rules->subtractStartPoints(),
+            'seriesLength'        => $event[0]->getSeriesLength()
         ];
 
         $this->_log->addInfo('Successfully received config for event id# ' . $eventId);
@@ -438,6 +439,28 @@ class EventsController extends Controller
 
         $this->_log->addInfo('Successfully got game for session hash#' . $representationalHash);
         return $result;
+    }
+
+    /**
+     * Get games series for each player in event
+     *
+     * @param integer $eventId
+     * @throws InvalidParametersException
+     * @return array
+     */
+    public function getGamesSeries($eventId)
+    {
+        $this->_log->addInfo('Getting games series for event id# ' . $eventId);
+
+        $event = EventPrimitive::findById($this->_db, [$eventId]);
+        if (empty($event)) {
+            throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
+        }
+
+        $data = (new EventModel($this->_db, $this->_config, $this->_meta))->getGamesSeries($event[0]);
+
+        $this->_log->addInfo('Successfully got games series for event id# ' . $eventId);
+        return $data;
     }
 
     /**

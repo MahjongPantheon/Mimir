@@ -104,6 +104,180 @@ class EventModel extends Model
     }
 
     /**
+     * @param EventPrimitive $event
+     * @return array
+     * @throws InvalidParametersException
+     */
+    public function getGamesSeries(EventPrimitive $event)
+    {
+        if ($event->getSeriesLength() == 0) {
+            throw new InvalidParametersException('This event doesn\'t support series');
+        }
+
+        $gamesRaw = SessionPrimitive::findByEventAndStatus(
+            $this->_db,
+            $event->getId(),
+            'finished'
+        );
+
+        $games = [];
+        foreach ($gamesRaw as $game) {
+            $games[$game->getId()] = $game;
+        }
+
+        // load and group by player all session results
+        $results = SessionResultsPrimitive::findByEventId($this->_db, [$event->getId()]);
+        $playersData = [];
+        foreach ($results as $item) {
+            if (empty($playersData[$item->getPlayerId()])) {
+                $playersData[$item->getPlayerId()] = [];
+            }
+
+            $playersData[$item->getPlayerId()][] = [
+                'sessionId' => $item->getSessionId(),
+                'score' => $item->getScore(),
+                'place' => $item->getPlace(),
+            ];
+        }
+
+        $sessionResults = [];
+        foreach ($results as $item) {
+            if (empty($sessionResults[$item->getSessionId()])) {
+                $sessionResults[$item->getSessionId()] = [];
+            }
+            $sessionResults[$item->getSessionId()][$item->getPlayerId()] = $item;
+        }
+
+        // we had to consider only players with enough games
+        $filteredPlayersData = [];
+        foreach ($playersData as $playerId => $playerGames) {
+            if (count($playerGames) >= $event->getSeriesLength()) {
+                $filteredPlayersData[$playerId] = $playerGames;
+            }
+        }
+
+        // let's find a best series for the filtered players
+        $seriesResults = [];
+        foreach ($filteredPlayersData as $playerId => $playerGames) {
+            $offset = 0;
+            $limit = $event->getSeriesLength();
+            $gamesCount = count($playerGames);
+
+            // make sure that games were sorted (newest goes first)
+            uasort($playerGames, function ($a, $b) {
+                return $a['sessionId'] - $b['sessionId'];
+            });
+
+            $bestSeries = null;
+            while (($offset + $limit) <= $gamesCount) {
+                $slicedGames = array_slice($playerGames, $offset, $limit);
+                $places = array_reduce($slicedGames, function ($i, $item) {
+                    return $i += $item['place'];
+                });
+                $scores = array_reduce($slicedGames, function ($i, $item) {
+                    return $i += $item['score'];
+                });
+
+                $sessionIds = array_map(function ($el) {
+                    return $el['sessionId'];
+                }, $slicedGames);
+
+                if (!$bestSeries) {
+                    // for the first iteration we should get the first series
+                    $bestSeries = [
+                        'placesSum'  => $places,
+                        'scoresSum'  => $scores,
+                        'sessionIds' => $sessionIds,
+                    ];
+                } else {
+                    // the less places the better
+                    if ($places <= $bestSeries['placesSum']) {
+                        // we can have multiple series with same places sum
+                        // let's get the one with better scores in that case
+                        if ($places == $bestSeries['placesSum']) {
+                            // the bigger scores the better
+                            if ($scores > $bestSeries['scoresSum']) {
+                                $bestSeries = [
+                                    'placesSum'  => $places,
+                                    'scoresSum'  => $scores,
+                                    'sessionIds' => $sessionIds,
+                                ];
+                            }
+                        } else {
+                            $bestSeries = [
+                                'placesSum'  => $places,
+                                'scoresSum'  => $scores,
+                                'sessionIds' => $sessionIds,
+                            ];
+                        }
+                    }
+                }
+
+                $offset++;
+            }
+
+            // it is useful to know current player series
+            $offset = $gamesCount - $event->getSeriesLength();
+            $limit = $event->getSeriesLength();
+            $currentSeries = array_slice($playerGames, $offset, $limit);
+            $currentSeriesSessionIds = array_map(function ($el) {
+                return $el['sessionId'];
+            }, $currentSeries);
+            $currentSeriesScores = array_reduce($currentSeries, function ($i, $item) {
+                return $i += $item['score'];
+            });
+
+            $bestSeries['playerId'] = $playerId;
+            $bestSeries['currentSeries'] = $currentSeriesSessionIds;
+            $bestSeries['currentSeriesScores'] = $currentSeriesScores;
+
+            $seriesResults[] = $bestSeries;
+        }
+
+        uasort($seriesResults, function ($a, $b) {
+            $diff = $a['placesSum'] - $b['placesSum'];
+            if ($diff) {
+                return $diff;
+            }
+            return $b['scoresSum'] - $a['scoresSum'];
+        });
+
+        $players = $this->_getPlayersOfGames($games);
+        $formattedResults = [];
+        foreach ($seriesResults as $item) {
+            $playerId = $item['playerId'];
+            $formattedResults[] = [
+                'player' => $players[$item['playerId']],
+                'best_series_scores' => $item['scoresSum'],
+                'best_series' => $this->_formatSeries($playerId, $item['sessionIds'], $games, $sessionResults),
+                'current_series' => $this->_formatSeries($playerId, $item['currentSeries'], $games, $sessionResults),
+                'current_series_scores' => $item['currentSeriesScores'],
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * @param int $playerId
+     * @param int[] $seriesIds
+     * @param SessionPrimitive[] $sessions
+     * @param SessionResultsPrimitive[] $sessionResults
+     * @return array
+     */
+    private function _formatSeries($playerId, $seriesIds, $sessions, $sessionResults)
+    {
+        $result = [];
+        foreach ($seriesIds as $seriesId) {
+            $result[] = [
+                'hash' => $sessions[$seriesId]->getRepresentationalHash(),
+                'place' => $sessionResults[$seriesId][$playerId]->getPlace()
+            ];
+        }
+        return $result;
+    }
+
+    /**
      * Find out currently playing tables state (for tournaments only)
      * @param integer $eventId
      * @return array
