@@ -54,7 +54,8 @@ class EventPrimitive extends Primitive
         'stat_host'         => '_statHost',
         'lobby_id'          => '_lobbyId',
         'ruleset'           => '_ruleset',
-        'timezone'          => '_timezone'
+        'timezone'          => '_timezone',
+        'series_length'     => '_seriesLength',
     ];
 
     protected function _getFieldsTransforms()
@@ -77,8 +78,9 @@ class EventPrimitive extends Primitive
             '_allowPlayerAppend'  => $this->_integerTransform(),
             '_timezone'           => $this->_stringTransform(),
             '_useTimer'           => $this->_integerTransform(),
-            '_usePenalty'           => $this->_integerTransform(),
+            '_usePenalty'         => $this->_integerTransform(),
             '_statHost'           => $this->_stringTransform(),
+            '_seriesLength'       => $this->_integerTransform(),
             '_ruleset'            => [
                 'serialize' => function (Ruleset $rules) {
                     return $rules->title();
@@ -217,6 +219,11 @@ class EventPrimitive extends Primitive
      * @var Ruleset
      */
     protected $_ruleset;
+    /**
+     * How many games should be in the series
+     * @var integer
+     */
+    protected $_seriesLength;
 
     public function __construct(IDb $db)
     {
@@ -730,5 +737,23 @@ class EventPrimitive extends Primitive
     public function getRegisteredPlayersIds()
     {
         return PlayerRegistrationPrimitive::findRegisteredPlayersIdsByEvent($this->_db, $this->getId());
+    }
+
+    /**
+     * @return integer
+     */
+    public function getSeriesLength()
+    {
+        return $this->_seriesLength;
+    }
+
+    /**
+     * @param integer $seriesLength
+     * @return EventPrimitive
+     */
+    public function setSeriesLength($seriesLength)
+    {
+        $this->_seriesLength = $seriesLength;
+        return $this;
     }
 }
