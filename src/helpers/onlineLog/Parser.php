@@ -18,6 +18,9 @@
 namespace Riichi;
 
 require_once __DIR__ . '/../../exceptions/Parser.php';
+require_once __DIR__ . '/../../helpers/YakuMap.php';
+require_once __DIR__ . '/../../primitives/Round.php';
+require_once __DIR__ . '/../../primitives/PlayerHistory.php';
 
 class OnlineParser
 {
@@ -60,12 +63,11 @@ class OnlineParser
 
         $success = true;
         $scores = [];
+        $rounds = [];
         foreach ($this->_roundData as $round) {
-            $success = $success && $session->updateCurrentState(
-                RoundPrimitive::createFromData($this->_db, $session, $round)
-            );
-            // TODO: potential error! RoundPrimitive->save() should be called before updating current state!
-
+            $savedRound = RoundPrimitive::createFromData($this->_db, $session, $round);
+            $rounds []= $savedRound;
+            $success = $success && $session->updateCurrentState($savedRound);
             $scores []= $session->getCurrentState()->getScores();
         }
 
@@ -77,7 +79,7 @@ class OnlineParser
                 . implode("\t", $scores[$i]);
         }
 
-        return [$success, $this->_parseOutcome($content), $debug];
+        return [$success, $this->_parseOutcome($content), $rounds, $debug];
     }
 
     /**
@@ -146,17 +148,23 @@ class OnlineParser
             ];
 
             if (!empty($this->_players['NoName'])) {
-                throw new ParseException('No unnamed players are allowed in replays');
+                throw new ParseException('"NoName" players are not allowed in replays');
             }
 
-            $players = PlayerPrimitive::findByAlias($this->_db, array_keys($this->_players));
+            $players = PlayerPrimitive::findByTenhouId($this->_db, array_keys($this->_players));
+
             if (count($players) !== count($this->_players)) {
-                throw new ParseException('Some of players are not found in DB (' . implode(',', array_keys($this->_players)) . ')');
+                $registeredPlayers = array_map(function (PlayerPrimitive $p) {
+                    return $p->getTenhouId();
+                }, $players);
+                $missedPlayers = array_diff(array_keys($this->_players), $registeredPlayers);
+                $missedPlayers = join(', ', $missedPlayers);
+                throw new ParseException('Not all tenhou nicknames were registered in the system: ' . $missedPlayers);
             }
 
-            if ($session->getEvent()->getRuleset()->autoRegisterUsers()) {
+            if ($session->getEvent()->getAllowPlayerAppend()) {
                 foreach ($players as $player) {
-                    // ok to re-register every time, it just will do nothing in db if record exists
+                    // it is ok to re-register every time, it just will do nothing in db if record exists
                     (new PlayerRegistrationPrimitive($this->_db))
                         ->setReg($player, $session->getEvent())
                         ->save();
@@ -172,6 +180,7 @@ class OnlineParser
     {
         $winner = array_keys($this->_players)[$reader->getAttribute('who')];
         $loser = array_keys($this->_players)[$reader->getAttribute('fromWho')];
+        $openHand = $reader->getAttribute('m') ? 1 : 0;
         $outcomeType = ($winner == $loser ? 'tsumo' : 'ron');
 
         list($fu) = explode(',', $reader->getAttribute('ten'));
@@ -195,6 +204,7 @@ class OnlineParser
                 'kanuradora' => 0,
                 'yaku' => implode(',', $yakuData['yaku']),
                 'riichi' => $riichi,
+                'open_hand' => $openHand
             ];
 
             $this->_checkScores []= $this->_makeScores($reader->getAttribute('sc'));
@@ -217,6 +227,7 @@ class OnlineParser
                         'kanuradora' => $roundRecord['kanuradora'],
                         'yaku' => $roundRecord['yaku'],
                         'riichi' => $roundRecord['riichi'],
+                        'open_hand' => $roundRecord['open_hand']
                     ]]
                 ];
             }
@@ -232,6 +243,7 @@ class OnlineParser
                 'kanuradora' => 0,
                 'yaku' => implode(',', $yakuData['yaku']),
                 'riichi' => $this->_getRiichi(),
+                'open_hand' => $openHand
             ];
 
             $this->_roundData []= $roundRecord;
@@ -308,8 +320,9 @@ class OnlineParser
     protected function _tokenGO(\XMLReader $reader, SessionPrimitive $session)
     {
         $lobby = $reader->getAttribute('lobby');
-        if ($session->getEvent()->getLobbyId() != $lobby) {
-            throw new MalformedPayloadException('Provided replay does not belong to current event (wrong lobby)');
+        $eventLobby = $session->getEvent()->getLobbyId();
+        if ($eventLobby != $lobby) {
+            throw new ParseException('Provided replay doesn\'t belong to the event lobby ' . $eventLobby);
         }
     }
 }

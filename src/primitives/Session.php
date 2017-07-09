@@ -40,7 +40,6 @@ class SessionPrimitive extends Primitive
         'representational_hash' => '_representationalHash',
         'replay_hash'           => '_replayHash',
         'table_index'           => '_tableIndex',
-        'orig_link'             => '_origLink',
         'start_date'            => '_startDate',
         'end_date'              => '_endDate',
         '::session_player'      => '_playersIds', // external many-to-many relation
@@ -57,7 +56,6 @@ class SessionPrimitive extends Primitive
             '_representationalHash' => $this->_stringTransform(true),
             '_replayHash'   => $this->_stringTransform(true),
             '_tableIndex'   => $this->_integerTransform(true),
-            '_origLink'     => $this->_stringTransform(true),
             '_startDate'    => $this->_stringTransform(true),
             '_endDate'      => $this->_stringTransform(true),
             '_status'       => $this->_stringTransform(true),
@@ -112,12 +110,6 @@ class SessionPrimitive extends Primitive
      * @var int
      */
     protected $_tableIndex = null;
-
-    /**
-     * original tenhou game link, for access to replay
-     * @var string
-     */
-    protected $_origLink;
 
     /**
      * Timestamp
@@ -175,16 +167,20 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * Find sessions by replay hash list (indexed search)
+     * Find sessions by state (indexed search, paginated)
      *
      * @param IDb $db
-     * @param string[] $replayIds
+     * @param integer $eventId
+     * @param string $replayHash
      * @throws \Exception
      * @return SessionPrimitive[]
      */
-    public static function findByReplayHash(IDb $db, $replayIds)
+    public static function findByReplayHashAndEvent(IDb $db, $eventId, $replayHash)
     {
-        return self::_findBy($db, 'replay_hash', $replayIds);
+        return self::_findBySeveral(
+            $db,
+            ['event_id' => [$eventId], 'replay_hash' => [$replayHash]]
+        );
     }
 
     /**
@@ -234,7 +230,7 @@ class SessionPrimitive extends Primitive
         $orderBy = 'id',
         $order = 'desc'
     ) {
-    
+
         return self::_findBySeveral(
             $db,
             ['status' => (array)$state, 'event_id' => [$eventId]],
@@ -408,24 +404,6 @@ class SessionPrimitive extends Primitive
     }
 
     /**
-     * @param string $origLink
-     * @return $this
-     */
-    public function setOrigLink($origLink)
-    {
-        $this->_origLink = $origLink;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOrigLink()
-    {
-        return $this->_origLink;
-    }
-
-    /**
      * @param int $tableIndex
      * @return $this
      */
@@ -539,6 +517,14 @@ class SessionPrimitive extends Primitive
     }
 
     /**
+     * @return string
+     */
+    public function getReplayLink()
+    {
+        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->getReplayHash();
+    }
+
+    /**
      * Client-known hash to find games
      *
      * Warning! This will be empty for all new Sessions until they are saved!
@@ -616,6 +602,11 @@ class SessionPrimitive extends Primitive
                     $this->getCurrentState()->update($round);
                     $success = $this->save();
                 }
+
+                if ($this->getCurrentState()->isFinished()) {
+                    $success = $success && $this->finish();
+                }
+
                 break;
             case 'redZone':
                 $this->getCurrentState()->update($round);
@@ -631,14 +622,15 @@ class SessionPrimitive extends Primitive
                 if ($isInRedZone) {
                     $this->getCurrentState()->forceFinish();
                 }
+
+                if ($this->getCurrentState()->isFinished()) {
+                    $success = $success && $this->finish();
+                }
+
                 break;
             default: // no zones, just update
                 $this->getCurrentState()->update($round);
                 $success = $this->save();
-        }
-
-        if ($this->getCurrentState()->isFinished()) {
-            $success = $success && $this->finish();
         }
 
         return $success;

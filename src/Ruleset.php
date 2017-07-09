@@ -199,11 +199,6 @@ abstract class Ruleset
         return static::$_ruleset['withKiriageMangan'];
     }
 
-    public function autoRegisterUsers()
-    {
-        return static::$_ruleset['autoRegisterUsers'];
-    }
-
     public function gameExpirationTime()
     {
         return static::$_ruleset['gameExpirationTime'];

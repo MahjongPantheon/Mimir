@@ -541,6 +541,9 @@ class EventPrimitive extends Primitive
      */
     public function setType($type)
     {
+        if ($type == 'online') {
+            $this->setIsOnline(1);
+        }
         $this->_type = $type;
         return $this;
     }

@@ -296,7 +296,6 @@ class EventsController extends Controller
             'withKuitan'          => $rules->withKuitan(),
             'withButtobi'         => $rules->withButtobi(),
             'withMultiYakumans'   => $rules->withMultiYakumans(),
-            'autoRegisterUsers'   => $rules->autoRegisterUsers(),
             'gameExpirationTime'  => $rules->gameExpirationTime(),
             'minPenalty'          => $rules->minPenalty(),
             'maxPenalty'          => $rules->maxPenalty(),

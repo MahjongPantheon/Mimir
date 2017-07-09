@@ -81,7 +81,6 @@ class InteractiveSessionModel extends Model
             ->setPlayers($players)
             ->setStatus('inprogress')
             ->setReplayHash($replayHash)
-            ->setOrigLink($origLink)
             ->setTableIndex($tableIndex)
             ->save();
         if (!$success) {
