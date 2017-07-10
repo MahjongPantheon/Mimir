@@ -1,8 +1,10 @@
 SQLITE_FILE ?= data/db.sqlite
 
 hooks:
-	cp -pnrf bin/hooks/* .git/hooks
-	chmod a+x .git/hooks/*
+	if [ -d .git ]; then \
+		cp -prf bin/hooks/* .git/hooks; \
+		chmod a+x .git/hooks/*; \
+	fi
 
 deps: hooks
 	php bin/composer.phar install
