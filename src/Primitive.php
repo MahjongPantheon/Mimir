@@ -245,12 +245,16 @@ abstract class Primitive
                 continue;
             }
 
-            $instance->set(
-                $dst,
-                empty($fieldsTransform[$src]['serialize'])
-                    ? $this->$src
-                    : call_user_func($fieldsTransform[$src]['serialize'], $this->$src)
-            );
+            $val = empty($fieldsTransform[$src]['serialize'])
+                 ? $this->$src
+                 : call_user_func($fieldsTransform[$src]['serialize'], $this->$src);
+            
+            if ($dst === 'id' && empty($val)) {
+                // Do not set NULL id, postgres does not like it
+                continue;
+            }
+
+            $instance->set($dst, $val);
         }
 
         return $instance->save();
