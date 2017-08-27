@@ -38,6 +38,7 @@ class PlayerHistoryPrimitive extends Primitive
         'event_id'      => '_eventId',
         'rating'        => '_rating',
         'avg_place'     => '_avgPlace',
+        'avg_score'     => '_avgScore',
         'games_played'  => '_gamesPlayed'
     ];
 
@@ -47,6 +48,7 @@ class PlayerHistoryPrimitive extends Primitive
             '_id'           => $this->_integerTransform(true),
             '_rating'       => $this->_floatTransform(),
             '_avgPlace'     => $this->_floatTransform(),
+            '_avgScore'     => $this->_integerTransform(),
             '_gamesPlayed'  => $this->_integerTransform()
         ];
     }
@@ -88,6 +90,10 @@ class PlayerHistoryPrimitive extends Primitive
      * @var float
      */
     protected $_avgPlace;
+    /**
+     * @var int
+     */
+    protected $_avgScore;
     /**
      * @var float
      */
@@ -290,6 +296,19 @@ class PlayerHistoryPrimitive extends Primitive
      * For unit tests only! Use makeNewHistoryItem to create instances
      * with new/modified data
      *
+     * @param int $avg
+     * @return PlayerHistoryPrimitive
+     */
+    public function _setAvgScore($avg)
+    {
+        $this->_avgScore = $avg;
+        return $this;
+    }
+
+    /**
+     * For unit tests only! Use makeNewHistoryItem to create instances
+     * with new/modified data
+     *
      * @param int $cnt
      * @return PlayerHistoryPrimitive
      */
@@ -321,6 +340,7 @@ class PlayerHistoryPrimitive extends Primitive
                 ->setSession($session)
                 ->_setGamesPlayed(0)
                 ->_setAvgPlace(0)
+                ->_setAvgScore(0)
                 ->_setRating($session->getEvent()->getRuleset()->startRating()); // TODO: omg :(
             $previousItem->save();
         }
@@ -329,9 +349,10 @@ class PlayerHistoryPrimitive extends Primitive
             ->setPlayer($player)
             ->setSession($session)
             ->_setAvgPlace($previousItem->getAvgPlace())
+            ->_setAvgScore($previousItem->getAvgScore())
             ->_setGamesPlayed($previousItem->getGamesPlayed())
             ->_setRating($previousItem->getRating() + $ratingDelta)
-            ->_updateAvgPlaceAndGamesCount($place);
+            ->_updateAveragesAndGamesCount($place, $ratingDelta);
     }
 
     /**
@@ -344,14 +365,21 @@ class PlayerHistoryPrimitive extends Primitive
 
     /**
      * @param $place
+     * @param $ratingDelta
      * @return PlayerHistoryPrimitive
      */
-    protected function _updateAvgPlaceAndGamesCount($place)
+    protected function _updateAveragesAndGamesCount($place, $ratingDelta)
     {
         $placesSum = $this->_gamesPlayed * $this->_avgPlace;
         $placesSum += $place;
+
+        $scoreSum = $this->_gamesPlayed * $this->_avgScore;
+        $scoreSum += $ratingDelta;
+
         $this->_gamesPlayed ++;
         $this->_avgPlace = floatval($placesSum) / floatval($this->_gamesPlayed);
+        $this->_avgScore = floatval($scoreSum) / floatval($this->_gamesPlayed);
+
         return $this;
     }
 
@@ -361,6 +389,14 @@ class PlayerHistoryPrimitive extends Primitive
     public function getAvgPlace()
     {
         return $this->_avgPlace;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAvgScore()
+    {
+        return $this->_avgScore;
     }
 
     /**

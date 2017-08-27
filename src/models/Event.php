@@ -643,6 +643,7 @@ class EventModel extends Model
                         )
                 ),
                 'avg_place'     => round($el->getAvgPlace(), 4),
+                'avg_score'     => round($el->getAvgScore(), 4),
                 'games_played'  => (int)$el->getGamesPlayed()
             ];
         }, $playersHistoryItems);
@@ -714,6 +715,24 @@ class EventModel extends Model
                         return -1; // usort casts return result to int, so pass explicit int here.
                     } else {
                         return 1;
+                    }
+                });
+                break;
+            case 'avg_score':
+                usort($playersHistoryItems, function (
+                    PlayerHistoryPrimitive $el1,
+                    PlayerHistoryPrimitive $el2
+                ) {
+                    if ($el1->getAvgScore() - $el2->getAvgScore() > 0) { // higher avg score is better
+                        return -1; // usort casts return result to int, so pass explicit int here.
+                    } else if ($el1->getAvgScore() - $el2->getAvgScore() < 0) {
+                        return 1;
+                    } else { // equal scores -> use rating
+                        if ($el1->getRating() - $el2->getRating() < 0) { // higher rating is better
+                            return -1;  // usort casts return result to int, so pass explicit int here.
+                        } else {
+                            return 1;
+                        }
                     }
                 });
                 break;

@@ -344,7 +344,7 @@ class EventsController extends Controller
      * Get rating table for event
      *
      * @param integer $eventId
-     * @param string $orderBy either 'name', 'rating' or 'avg_place'
+     * @param string $orderBy either 'name', 'rating', 'avg_place' or 'avg_score'
      * @param string $order either 'asc' or 'desc'
      * @throws InvalidParametersException
      * @return array
