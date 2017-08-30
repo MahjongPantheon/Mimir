@@ -643,7 +643,7 @@ class EventModel extends Model
                         )
                 ),
                 'avg_place'     => round($el->getAvgPlace(), 4),
-                'avg_score'     => round($el->getAvgScore(), 4),
+                'avg_score'     => round(($el->getRating() - $event->getRuleset()->startRating()) / $el->getGamesPlayed(), 4),
                 'games_played'  => (int)$el->getGamesPlayed()
             ];
         }, $playersHistoryItems);
@@ -723,16 +723,17 @@ class EventModel extends Model
                     PlayerHistoryPrimitive $el1,
                     PlayerHistoryPrimitive $el2
                 ) {
-                    if ($el1->getAvgScore() - $el2->getAvgScore() > 0) { // higher avg score is better
-                        return -1; // usort casts return result to int, so pass explicit int here.
-                    } else if ($el1->getAvgScore() - $el2->getAvgScore() < 0) {
+                    if (abs(
+                        ($el1->getRating() / $el1->getGamesPlayed()) -
+                            ($el2->getRating() / $el2->getGamesPlayed())
+                    ) < 0.0001) {
+                        return $el2->getAvgPlace() - $el1->getAvgPlace(); // lower avg place is better, so invert
+                    }
+                    if (($el1->getRating() / $el1->getGamesPlayed()) -
+                        ($el2->getRating() / $el2->getGamesPlayed()) < 0) { // higher rating is better
+                        return -1;  // usort casts return result to int, so pass explicit int here.
+                    } else {
                         return 1;
-                    } else { // equal scores -> use rating
-                        if ($el1->getRating() - $el2->getRating() < 0) { // higher rating is better
-                            return -1;  // usort casts return result to int, so pass explicit int here.
-                        } else {
-                            return 1;
-                        }
                     }
                 });
                 break;
