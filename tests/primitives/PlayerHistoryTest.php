@@ -89,7 +89,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1);
 
         $this->assertEquals($this->_session->getId(), $item->getSessionId());
@@ -111,7 +110,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
@@ -120,7 +118,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[1])
             ->_setRating(1600)
             ->_setAvgPlace(2)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
@@ -129,7 +126,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1700)
             ->_setAvgPlace(1)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
@@ -153,7 +149,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
@@ -162,7 +157,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[1])
             ->_setRating(1600)
             ->_setAvgPlace(2)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
@@ -171,7 +165,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1700)
             ->_setAvgPlace(1)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
@@ -197,7 +190,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
@@ -206,7 +198,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[1])
             ->_setRating(1600)
             ->_setAvgPlace(2)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
@@ -215,7 +206,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1700)
             ->_setAvgPlace(1)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
@@ -244,7 +234,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item2 = new PlayerHistoryPrimitive($this->_db);
@@ -253,7 +242,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[1])
             ->_setRating(1600)
             ->_setAvgPlace(2)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
         $item3 = new PlayerHistoryPrimitive($this->_db);
@@ -262,7 +250,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1700)
             ->_setAvgPlace(1)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
@@ -286,7 +273,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
@@ -306,7 +292,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setSession($this->_session)
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
-            ->_setAvgScore(100500)
             ->_setAvgPlace(3)
             ->_setGamesPlayed(1)
             ->save();
@@ -326,7 +311,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
@@ -345,7 +329,6 @@ class PlayerHistoryPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setPlayer($this->_players[0])
             ->_setRating(1500)
             ->_setAvgPlace(3)
-            ->_setAvgScore(100500)
             ->_setGamesPlayed(1)
             ->save();
 
