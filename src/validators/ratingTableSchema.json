@@ -17,6 +17,9 @@
       "avg_place": {
         "type": "number"
       },
+      "avg_score": {
+        "type": "number"
+      },
       "games_played": {
         "type": "integer"
       },
