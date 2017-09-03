@@ -631,6 +631,12 @@ class SessionPrimitive extends Primitive
             default: // no zones, just update
                 $this->getCurrentState()->update($round);
                 $success = $this->save();
+
+                // We should finish game here for offline events, but online ones will be finished manually in model.
+                // Looks ugly :( But works as expected, so let it be until we find better solution.
+                if (!$this->getEvent()->getIsOnline() && $this->getCurrentState()->isFinished()) {
+                    $success = $success && $this->finish();
+                }
         }
 
         return $success;
