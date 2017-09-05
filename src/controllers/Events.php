@@ -301,6 +301,7 @@ class EventsController extends Controller
             'maxPenalty'          => $rules->maxPenalty(),
             'penaltyStep'         => $rules->penaltyStep(),
             'eventTitle'          => $event[0]->getTitle(),
+            'eventDescription'    => $event[0]->getDescription(),
             'eventStatHost'       => $event[0]->getStatHost(),
             'useTimer'            => (bool)$event[0]->getUseTimer(),
             'usePenalty'          => (bool)$event[0]->getUsePenalty(),
