@@ -521,7 +521,10 @@ class SessionPrimitive extends Primitive
      */
     public function getReplayLink()
     {
-        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->getReplayHash();
+        if (empty($this->_replayHash)) {
+            return '';
+        }
+        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->_replayHash;
     }
 
     /**
