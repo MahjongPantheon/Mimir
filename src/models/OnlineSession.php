@@ -43,6 +43,10 @@ class OnlineSessionModel extends Model
             throw new InvalidParametersException('Event id#' . $eventId . ' not found in DB');
         }
         $event = $event[0];
+        
+        if (!$event->getIsOnline()) {
+            throw new InvalidParametersException('Unable to add online game to event that is not online.');
+        }
 
         $downloader = new Downloader();
         $downloader->validateUrl($logUrl);

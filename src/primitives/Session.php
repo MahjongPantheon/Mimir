@@ -521,7 +521,10 @@ class SessionPrimitive extends Primitive
      */
     public function getReplayLink()
     {
-        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->getReplayHash();
+        if (empty($this->_replayHash)) {
+            return '';
+        }
+        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->_replayHash;
     }
 
     /**
@@ -631,6 +634,12 @@ class SessionPrimitive extends Primitive
             default: // no zones, just update
                 $this->getCurrentState()->update($round);
                 $success = $this->save();
+
+                // We should finish game here for offline events, but online ones will be finished manually in model.
+                // Looks ugly :( But works as expected, so let it be until we find better solution.
+                if (!$this->getEvent()->getIsOnline() && $this->getCurrentState()->isFinished()) {
+                    $success = $success && $this->finish();
+                }
         }
 
         return $success;
