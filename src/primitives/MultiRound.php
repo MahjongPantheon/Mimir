@@ -296,7 +296,10 @@ class MultiRoundPrimitive extends RoundPrimitive
 
     public function setSession(SessionPrimitive $session)
     {
-        throw new InvalidParametersException('MultiRound should not be treated as round');
+        foreach ($this->_rounds as $round) {
+            $round->setSession($session);
+        }
+        return $this;
     }
 
     public function getSession()

@@ -113,6 +113,7 @@ class PlayerPrimitive extends Primitive
 
     /**
      * Find players by tenhou ids (indexed search)
+     * Method should maintain sorting of items according to ids order.
      *
      * @param IDb $db
      * @param int[] $ids
@@ -121,7 +122,18 @@ class PlayerPrimitive extends Primitive
      */
     public static function findByTenhouId(IDb $db, $ids)
     {
-        return self::_findBy($db, 'tenhou_id', $ids);
+        /** @var PlayerPrimitive[] $players */
+        $players = self::_findBy($db, 'tenhou_id', $ids);
+        $playersMap = array_combine(
+            array_map(function (PlayerPrimitive $player) {
+                return $player->getTenhouId();
+            }, $players),
+            $players
+        );
+
+        return array_filter(array_map(function ($id) use ($playersMap) {
+            return empty($playersMap[$id]) ? null : $playersMap[$id];
+        }, $ids));
     }
 
     protected function _create()
