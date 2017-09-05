@@ -88,7 +88,7 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
         // we had to generate name of the game from current date and time
         // to be able pass game expiration logic
         $this->_gameId = date("YmdH") . 'gm-00a9-0000-40a46a1c';
-        $this->_gameLink = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->_gameId;
+        $this->_gameLink = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '0/?log=' . $this->_gameId;
     }
 
     private function playersRegistration($tenhouNicknames = [])
@@ -194,7 +194,7 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
     public function testAddExpiredGame()
     {
         $this->_gameId = date("YmdH", strtotime("-10 days")) . 'gm-00a9-0000-40a46a1c';
-        $this->_gameLink = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->_gameId;
+        $this->_gameLink = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '0/?log=' . $this->_gameId;
 
         $this->playersRegistration();
 
@@ -225,10 +225,10 @@ class OnlineSessionModelTest extends \PHPUnit_Framework_TestCase
     {
         $downloader = new Downloader();
 
-        $validDomain = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=1';
+        $validDomain = base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '0/?log=1';
         $this->assertTrue($downloader->validateUrl($validDomain));
 
-        $invalidDomain = 'http://localhost?log=1';
+        $invalidDomain = 'http://localhost/0/?log=1';
         $this->assertFalse($downloader->validateUrl($invalidDomain));
     }
 

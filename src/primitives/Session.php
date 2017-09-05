@@ -524,7 +524,7 @@ class SessionPrimitive extends Primitive
         if (empty($this->_replayHash)) {
             return '';
         }
-        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '?log=' . $this->_replayHash;
+        return base64_decode('aHR0cDovL3RlbmhvdS5uZXQv') . '0/?log=' . $this->_replayHash;
     }
 
     /**
