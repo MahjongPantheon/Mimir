@@ -89,7 +89,7 @@ class TournamentStagingSeeder extends AbstractSeed
     {
         $cfg = new \Riichi\Config([
             'db' => [
-                'connection_string' => 'pgsql:host=localhost;dbname=' . $_SERVER['PHINX_DB_NAME'],
+                'connection_string' => 'mysql:host=localhost;dbname=' . $_SERVER['PHINX_DB_NAME'],
                 'credentials' => [
                     'username' => $_SERVER['PHINX_DB_USER'],
                     'password' => $_SERVER['PHINX_DB_PASS']
