@@ -50,6 +50,8 @@ class SessionResultsPrimitive extends Primitive
             '_eventId'      => $this->_integerTransform(),
             '_sessionId'    => $this->_integerTransform(),
             '_playerId'     => $this->_integerTransform(),
+            '_score'        => $this->_integerTransform(),
+            '_ratingDelta'  => $this->_floatTransform(),
             '_id'           => $this->_integerTransform(true)
         ];
     }
@@ -96,7 +98,7 @@ class SessionResultsPrimitive extends Primitive
     /**
      * @var float
      */
-    protected $_ratingDelta;
+    protected $_ratingDelta = 0;
 
     /**
      * @var int

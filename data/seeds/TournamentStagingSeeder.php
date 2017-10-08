@@ -16,19 +16,7 @@ class TournamentStagingSeeder extends AbstractSeed
     {
         // Non-phinx-based seeder to avoid rewriting seeds for every schema change
 
-        $tables = [
-            'round',
-            'player_history',
-            'session_player',
-            'session_results',
-            'session',
-            'event_enrolled_players',
-            'event_registered_players',
-            'event',
-            'formation_player',
-            'formation',
-            'player',
-        ];
+        $tables = file(__DIR__ . '/../tablelist.txt');
 
         // cleanup. Don't use truncate() - it won't work with FKs
         foreach ($tables as $t) {

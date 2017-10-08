@@ -18,10 +18,11 @@
 
 return [
     'db' => [
-        'connection_string' => 'sqlite:' . __DIR__ . '/../data/db.sqlite',
+        'connection_string' => 'pgsql:host=localhost;port=' . getenv('PHINX_DB_PORT')
+            . ';dbname=' . getenv('PHINX_DB_NAME_UNIT'),
         'credentials' => [
-            'username' => '',
-            'password' => ''
+            'username' => getenv('PHINX_DB_USER'),
+            'password' => getenv('PHINX_DB_PASS')
         ]
     ],
     'admin'     => [

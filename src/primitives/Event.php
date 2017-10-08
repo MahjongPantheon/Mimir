@@ -68,7 +68,7 @@ class EventPrimitive extends Primitive
             '_gameDuration'       => $this->_integerTransform(true),
             '_lastTimer'          => $this->_integerTransform(true),
             '_id'                 => $this->_integerTransform(true),
-            '_lobbyId'            => $this->_stringTransform(true),
+            '_lobbyId'            => $this->_integerTransform(true),
             '_type'               => $this->_stringTransform(), // DEPRECATED: to be removed in 2.x
             '_isOnline'           => $this->_integerTransform(),
             '_isTextlog'          => $this->_integerTransform(),
@@ -211,7 +211,7 @@ class EventPrimitive extends Primitive
     protected $_isTextlog;
     /**
      * Tenhou lobby id (for online events)
-     * @var string
+     * @var int
      */
     protected $_lobbyId;
     /**
@@ -411,7 +411,7 @@ class EventPrimitive extends Primitive
     }
 
     /**
-     * @param string $lobbyId
+     * @param int $lobbyId
      * @return EventPrimitive
      */
     public function setLobbyId($lobbyId)
@@ -421,7 +421,7 @@ class EventPrimitive extends Primitive
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getLobbyId()
     {

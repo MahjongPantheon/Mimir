@@ -87,7 +87,7 @@ class EventPrimitiveTest extends \PHPUnit_Framework_TestCase
             ->setTimezone('UTC')
             ->setType('online')
             ->setRuleset(Ruleset::instance('jpmlA'))
-            ->setLobbyId('some_lobby')
+            ->setLobbyId(123)
             ->save();
 
         $eventCopy = EventPrimitive::findByLobby($this->_db, [$newEvent->getLobbyId()]);

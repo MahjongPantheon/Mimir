@@ -138,12 +138,7 @@ class Db implements IDb
     static protected $__testingInstance = null;
     public static function __getCleanTestingInstance()
     {
-        $db = __DIR__ . '/../tests/data/db.sqlite';
-
-        if (!is_dir(dirname($db))) {
-            mkdir(dirname($db));
-        }
-        shell_exec('cd ' . __DIR__ . '/../ && SQLITE_FILE=' . $db . ' make init_test_sqlite');
+        shell_exec('cd ' . __DIR__ . '/../ && make init_test_db && make clean_test_db');
 
         if (self::$__testingInstance === null) {
             $cfg = new Config(__DIR__ . '/../tests/util/config.php');
