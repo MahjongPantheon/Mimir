@@ -57,10 +57,6 @@ class Db implements IDb
         if (!empty($credentials)) {
             ORM::configure($credentials); // should pass username and password
         }
-
-        if (strpos($this->_connString, 'mysql') === 0) { // force encoding for mysql
-            ORM::configure('driver_options', array(\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-        }
     }
 
     /**
@@ -85,26 +81,8 @@ class Db implements IDb
 
     public function lastInsertId()
     {
-        switch (true) {
-            case strpos($this->_connString, 'mysql') === 0:
-                ORM::rawExecute('SELECT LAST_INSERT_ID()');
-                return ORM::getLastStatement()->fetchColumn();
-                break;
-            case strpos($this->_connString, 'pgsql') === 0:
-                ORM::rawExecute('SELECT LASTVAL()');
-                return ORM::getLastStatement()->fetchColumn();
-                break;
-            case strpos($this->_connString, 'sqlite') === 0:
-                ORM::rawExecute('SELECT last_insert_rowid()');
-                return ORM::getLastStatement()->fetchColumn();
-                break;
-            default:
-                throw new \Exception(
-                    'Sorry, your DBMS is not supported. You may want to try implementing ' .
-                    'last_insert_id function for your DB in place where this exception thrown from. ' .
-                    'Check it out, this might be enough to make it work!'
-                );
-        }
+        ORM::rawExecute('SELECT LASTVAL()');
+        return ORM::getLastStatement()->fetchColumn();
     }
 
     /**
@@ -133,72 +111,25 @@ class Db implements IDb
             return $dataset;
         }, $data);
 
-        switch (true) {
-            case strpos($this->_connString, 'mysql') === 0:
-                $fields = array_map(function ($field) {
-                    return '`' . $field . '`';
-                }, array_keys(reset($data)));
+        $fields = array_map(function ($field) {
+            return '"' . $field . '"';
+        }, array_keys(reset($data)));
 
-                $values = '(' . implode('), (', array_map(function ($dataset) {
-                    return implode(', ', array_values($dataset));
-                }, $data)) . ')';
+        $values = '(' . implode('), (', array_map(function ($dataset) {
+            return implode(', ', array_values($dataset));
+        }, $data)) . ')';
 
-                $assignments = implode(', ', array_map(function ($field) {
-                    return $field . '=VALUES(' . $field . ')';
-                }, $fields));
+        $assignments = implode(', ', array_map(function ($field) {
+            return $field . '= excluded.' . $field;
+        }, $fields));
 
-                $fields = implode(', ', $fields);
+        $fields = implode(', ', $fields);
 
-                return ORM::rawExecute("
-                    INSERT INTO {$table} ({$fields}) VALUES {$values}
-                    ON DUPLICATE KEY UPDATE {$assignments}
-                ");
-                break;
-            case strpos($this->_connString, 'pgsql') === 0:
-                $fields = array_map(function ($field) {
-                    return '"' . $field . '"';
-                }, array_keys(reset($data)));
-
-                $values = '(' . implode('), (', array_map(function ($dataset) {
-                    return implode(', ', array_values($dataset));
-                }, $data)) . ')';
-
-                $assignments = implode(', ', array_map(function ($field) {
-                    return $field . '= excluded.' . $field;
-                }, $fields));
-
-                $fields = implode(', ', $fields);
-
-                // Postgresql >= 9.5
-                return ORM::rawExecute("
-                    INSERT INTO {$table} ({$fields}) VALUES {$values}
-                    ON CONFLICT ({$table}_uniq) DO UPDATE SET {$assignments}
-                ");
-                break;
-            case strpos($this->_connString, 'sqlite') === 0:
-                // sqlite does not support multi-row upsert :( loop manually here
-
-                $fields = implode(', ', array_map(function ($field) {
-                    return '"' . $field . '"';
-                }, array_keys(reset($data))));
-
-                $values = array_map(function ($dataset) {
-                    return implode(', ', array_values($dataset));
-                }, $data);
-
-                return array_reduce($values, function ($acc, $dataset) use ($table, $fields) {
-                    return $acc && ORM::rawExecute("
-                        REPLACE INTO {$table} ({$fields}) VALUES ({$dataset});
-                    ");
-                }, true);
-                break;
-            default:
-                throw new \Exception(
-                    'Sorry, your DBMS is not supported. You may want to try implementing ' .
-                    'last_insert_id function for your DB in place where this exception thrown from. ' .
-                    'Check it out, this might be enough to make it work!'
-                );
-        }
+        // Postgresql >= 9.5
+        return ORM::rawExecute("
+            INSERT INTO {$table} ({$fields}) VALUES {$values}
+            ON CONFLICT ({$table}_uniq) DO UPDATE SET {$assignments}
+        ");
     }
 
     // For testing purposes

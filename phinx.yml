@@ -6,47 +6,39 @@ environments:
     default_migration_table: phinxlog
     default_database: development
     production:
-        adapter: mysql
+        adapter: pgsql
         host: localhost
         name: %%PHINX_DBPROD_NAME%%
         user: %%PHINX_DBPROD_USER%%
         pass: %%PHINX_DBPROD_PASS%%
-        port: 3306
+        port: 5432
         charset: utf8
 
     staging:
-        adapter: mysql
+        adapter: pgsql
         host: localhost
         name: %%PHINX_DB_NAME%%
         user: %%PHINX_DB_USER%%
         pass: %%PHINX_DB_PASS%%
-        port: 3306
+        port: 5432
         charset: utf8
 
     development:
-        adapter: sqlite
-        name: ./data/db.sqlite
-
-    testing:
-        adapter: sqlite
-        name: ./tests/data/db.sqlite
-
-    travis_mysql:
-        adapter: mysql
-        host: localhost
-        name: api_test
-        user: root
-        pass: ''
-        port: 3306
-        charset: utf8
-
-    travis_pgsql:
         adapter: pgsql
         host: localhost
-        name: api_test
-        user: postgres
-        pass: ''
-        port: 5432
+        name: %%PHINX_DB_NAME%%
+        user: %%PHINX_DB_USER%%
+        pass: %%PHINX_DB_PASS%%
+        port: %%PHINX_DB_PORT%%
+        charset: utf8
+
+    testing:
+        adapter: pgsql
+        host: localhost
+        name: %%PHINX_DB_NAME%%
+        user: %%PHINX_DB_USER%%
+        pass: %%PHINX_DB_PASS%%
+        port: %%PHINX_DB_PORT%%
         charset: utf8
 
     docker:
