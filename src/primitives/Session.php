@@ -33,6 +33,7 @@ class SessionPrimitive extends Primitive
 {
     protected static $_table = 'session';
     const REL_USER = 'session_player';
+    const REL_USER_UNIQUE_COLUMNS = ['session_id', 'player_id'];
 
     protected static $_fieldsMapping = [
         'id'                    => '_id',
@@ -51,7 +52,12 @@ class SessionPrimitive extends Primitive
     {
         return [
             '_id'           => $this->_integerTransform(true),
-            '_playersIds'   => $this->_externalManyToManyTransform(self::REL_USER, 'session_id', 'player_id'),
+            '_playersIds'   => $this->_externalManyToManyTransform(
+                self::REL_USER,
+                'session_id',
+                'player_id',
+                self::REL_USER_UNIQUE_COLUMNS
+            ),
             '_eventId'      => $this->_integerTransform(),
             '_representationalHash' => $this->_stringTransform(true),
             '_replayHash'   => $this->_stringTransform(true),

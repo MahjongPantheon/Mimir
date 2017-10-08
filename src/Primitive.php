@@ -78,9 +78,10 @@ abstract class Primitive
      * @param $connectorTable
      * @param $currentEntityField
      * @param $foreignEntityField
+     * @param $indexFields
      * @return bool
      */
-    protected function _serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField)
+    protected function _serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField, $indexFields)
     {
         $result = [];
         $i = 1;
@@ -98,7 +99,7 @@ abstract class Primitive
 
         // TODO: what if we need to delete some relations?
 
-        return $this->_db->upsertQuery($connectorTable, $result);
+        return $this->_db->upsertQuery($connectorTable, $result, $indexFields);
     }
 
     /**
@@ -129,13 +130,14 @@ abstract class Primitive
      * @param $connectorTable
      * @param $currentEntityField
      * @param $foreignEntityField
+     * @param $indexFields
      * @return array
      */
-    protected function _externalManyToManyTransform($connectorTable, $currentEntityField, $foreignEntityField)
+    protected function _externalManyToManyTransform($connectorTable, $currentEntityField, $foreignEntityField, $indexFields)
     {
         return [
-            'serialize' => function ($obj) use ($connectorTable, $currentEntityField, $foreignEntityField) {
-                return $this->_serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField);
+            'serialize' => function ($obj) use ($connectorTable, $currentEntityField, $foreignEntityField, $indexFields) {
+                return $this->_serializeManyToMany($obj, $connectorTable, $currentEntityField, $foreignEntityField, $indexFields);
             },
             'deserialize' => function () use ($connectorTable, $currentEntityField, $foreignEntityField) {
                 return $this->_deserializeManyToMany($connectorTable, $currentEntityField, $foreignEntityField);

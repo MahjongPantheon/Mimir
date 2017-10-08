@@ -41,6 +41,10 @@ class TournamentStagingSeeder extends AbstractSeed
         $event = $this->_seedEvent($db);
         $this->_seedPlayers($db, $event);
         $this->_seedGames($db, $config, $event);
+
+        echo '-----------------------------------------------------------------' . PHP_EOL;
+        echo "New seeded event link: http://localhost:4002/eid{$event->getId()}" . PHP_EOL;
+        echo '-----------------------------------------------------------------' . PHP_EOL;
     }
 
     protected function _seedEvent(\Riichi\Db $db)

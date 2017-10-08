@@ -99,10 +99,11 @@ class Db implements IDb
      *
      * @param $table
      * @param $data [ [ field => value, field2 => value2 ], [ ... ] ] - nested arrays should be monomorphic
+     * @param $tableUniqueFields string[] List of columns with unique constraint to check
      * @throws \Exception
      * @return boolean
      */
-    public function upsertQuery($table, $data)
+    public function upsertQuery($table, $data, $tableUniqueFields)
     {
         $data = array_map(function ($dataset) {
             foreach ($dataset as $k => $v) {
@@ -124,11 +125,12 @@ class Db implements IDb
         }, $fields));
 
         $fields = implode(', ', $fields);
+        $tableUniqueFields = implode(',', $tableUniqueFields);
 
         // Postgresql >= 9.5
         return ORM::rawExecute("
-            INSERT INTO {$table} ({$fields}) VALUES {$values}
-            ON CONFLICT ({$table}_uniq) DO UPDATE SET {$assignments}
+            INSERT INTO {$table} ({$fields}) VALUES {$values} 
+            ON CONFLICT ({$tableUniqueFields}) DO UPDATE SET {$assignments}
         ");
     }
 
